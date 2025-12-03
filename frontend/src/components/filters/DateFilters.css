@@ -1,29 +1,6 @@
-.reports-page {
-  flex: 1;
-  padding: 32px;
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-}
+/* DateFilters Component Styles */
+/* Using existing styles from GSMReports.css */
 
-.content-header {
-  margin-bottom: 32px;
-}
-
-.content-header h2 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 8px;
-}
-
-.content-subtitle {
-  color: #64748b;
-  font-size: 1rem;
-  margin-bottom: 20px;
-}
-
-/* Date Filters Styles */
 .date-range-picker {
   display: flex;
   align-items: flex-end;
@@ -139,41 +116,4 @@
 
 .refresh-btn:active {
   transform: translateY(0);
-}
-
-/* Charts Grid Styles */
-.charts-section {
-  margin-top: 24px;
-}
-
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-/* Error Message */
-.error-message {
-  padding: 20px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 12px;
-  color: #dc2626;
-  text-align: center;
-  margin-top: 20px;
-}
-
-.error-message p {
-  font-size: 1rem;
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  .reports-page {
-    padding: 20px;
-  }
-
-  .charts-grid {
-    grid-template-columns: 1fr;
-  }
 }
