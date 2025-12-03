@@ -8,6 +8,7 @@ A full-stack web application for managing and visualizing KPI (Key Performance I
 kpi_reports_app/
 ├── frontend/          # React application with charts
 ├── backend/           # Node.js/Express API server
+├── sample-data.csv    # Sample CSV file for testing
 └── README.md          # This file
 ```
 
@@ -102,6 +103,8 @@ February,300,139
 March,200,980
 ```
 
+A sample CSV file (`sample-data.csv`) is included in the root directory for testing.
+
 ## Development
 
 ### Backend Development
@@ -114,6 +117,14 @@ npm run dev  # Runs with nodemon for auto-reload
 ```bash
 cd frontend
 npm start  # Runs with hot reload
+```
+
+### Testing CSV Upload
+
+You can test the CSV upload functionality using curl:
+```bash
+curl -X POST http://localhost:5000/api/csv/upload \
+  -F "file=@sample-data.csv"
 ```
 
 ## Documentation
