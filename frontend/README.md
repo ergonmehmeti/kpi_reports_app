@@ -78,7 +78,7 @@ March,200,980
 
 ## Technologies
 
-- React 18
+- React 19
 - Recharts for data visualization
 - Axios for HTTP requests
 - CSS3 for styling
