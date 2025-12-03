@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pkg from 'pg';
-const { Pool } = pkg;
+import pool from './db/pool.js';
 import csvRoutes from './routes/csv.js';
+import gsmRoutes from './routes/gsm.js';
 
 dotenv.config();
 
@@ -14,22 +14,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// PostgreSQL connection pool
-const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'kpi_reports',
-  password: process.env.DB_PASSWORD || 'postgres',
-  port: process.env.DB_PORT || 5432,
-});
-
-// Test database connection
-pool.connect((err, client, release) => {
+// Test database connection on startup
+pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.error('Error connecting to the database:', err.stack);
+    console.error('❌ Database connection failed:', err.stack);
   } else {
-    console.log('Database connected successfully');
-    release();
+    console.log('✅ Database connected successfully');
   }
 });
 
@@ -42,8 +32,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// CSV Upload routes
+// CSV Upload routes (generic)
 app.use('/api/csv', csvRoutes);
+
+// GSM KPI routes
+app.use('/api/gsm', gsmRoutes);
 
 // Start server
 app.listen(PORT, () => {
