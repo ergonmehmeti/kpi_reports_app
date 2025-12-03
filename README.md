@@ -144,3 +144,5 @@ Ergon Mehmeti
 ## Support
 
 For issues and questions, please contact the development team.
+
+## First Commit from pc
