@@ -7,6 +7,7 @@ Backend API for the KPI Reports application built with Node.js, Express.js, and 
 - RESTful API built with Express.js
 - PostgreSQL database integration
 - CSV/Excel file upload and parsing using SheetJS (xlsx)
+- Rate limiting on file uploads (10 requests per 15 minutes per IP)
 - CORS enabled for frontend integration
 - Environment-based configuration
 
@@ -75,6 +76,8 @@ curl -X POST http://localhost:5000/api/csv/upload \
 
 Supported file formats: `.csv`, `.xlsx`, `.xls`
 
+**Rate Limiting:** The upload endpoint is rate-limited to 10 requests per 15 minutes per IP address to prevent abuse.
+
 ## Dependencies
 
 - **express** - Web framework
@@ -83,4 +86,5 @@ Supported file formats: `.csv`, `.xlsx`, `.xls`
 - **dotenv** - Environment variables management
 - **xlsx** - SheetJS library for CSV/Excel parsing
 - **multer** - File upload middleware
+- **express-rate-limit** - Rate limiting middleware
 - **nodemon** - Development auto-reload (dev dependency)

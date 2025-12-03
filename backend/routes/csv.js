@@ -3,8 +3,16 @@ import multer from 'multer';
 import XLSX from 'xlsx';
 import path from 'path';
 import fs from 'fs';
+import rateLimit from 'express-rate-limit';
 
 const router = express.Router();
+
+// Rate limiting for file uploads - prevents abuse
+const uploadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 requests per windowMs
+  message: 'Too many upload requests from this IP, please try again later.'
+});
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -35,7 +43,7 @@ const upload = multer({
 });
 
 // Upload and parse CSV/Excel file
-router.post('/upload', upload.single('file'), async (req, res) => {
+router.post('/upload', uploadLimiter, upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
