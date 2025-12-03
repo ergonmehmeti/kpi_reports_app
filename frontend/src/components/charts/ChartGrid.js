@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import ChartCard from '../charts/ChartCard';
 import KPILineChart from '../charts/KPILineChart';
 import KPIBarChart from '../charts/KPIBarChart';
@@ -6,8 +6,9 @@ import KPIBarChart from '../charts/KPIBarChart';
 /**
  * ChartGrid Component
  * Renders a grid of charts based on configuration
+ * Memoized to prevent unnecessary re-renders
  */
-const ChartGrid = ({ chartConfigs }) => {
+const ChartGrid = memo(({ chartConfigs }) => {
   return (
     <section className="charts-section">
       <div className="charts-grid">
@@ -31,6 +32,8 @@ const ChartGrid = ({ chartConfigs }) => {
       </div>
     </section>
   );
-};
+});
+
+ChartGrid.displayName = 'ChartGrid';
 
 export default ChartGrid;

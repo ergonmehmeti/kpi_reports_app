@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPIBarChart = ({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
+const KPIBarChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
   const colors = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -50,6 +50,8 @@ const KPIBarChart = ({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
       </BarChart>
     </ResponsiveContainer>
   );
-};
+});
+
+KPIBarChart.displayName = 'KPIBarChart';
 
 export default KPIBarChart;

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 
 /**
  * DateFilters Component
  * Provides week selector and custom date range picker
+ * Memoized to prevent unnecessary re-renders
  */
-const DateFilters = ({ 
+const DateFilters = memo(({ 
   showWeekSelector,
   availableWeeks,
   selectedWeek,
@@ -16,10 +17,18 @@ const DateFilters = ({
   onToggleMode,
   onRefresh
 }) => {
-  const handleWeekSelectChange = (e) => {
+  const handleWeekSelectChange = useCallback((e) => {
     const weekId = parseInt(e.target.value);
     onWeekChange(weekId);
-  };
+  }, [onWeekChange]);
+
+  const handleStartDateChange = useCallback((e) => {
+    onStartDateChange(e.target.value);
+  }, [onStartDateChange]);
+
+  const handleEndDateChange = useCallback((e) => {
+    onEndDateChange(e.target.value);
+  }, [onEndDateChange]);
 
   return (
     <div className="date-range-picker">
@@ -52,7 +61,7 @@ const DateFilters = ({
               type="date" 
               id="start-date"
               value={startDate}
-              onChange={(e) => onStartDateChange(e.target.value)}
+              onChange={handleStartDateChange}
               max={endDate}
             />
           </div>
@@ -62,7 +71,7 @@ const DateFilters = ({
               type="date" 
               id="end-date"
               value={endDate}
-              onChange={(e) => onEndDateChange(e.target.value)}
+              onChange={handleEndDateChange}
               min={startDate}
             />
           </div>
@@ -76,6 +85,8 @@ const DateFilters = ({
       </button>
     </div>
   );
-};
+});
+
+DateFilters.displayName = 'DateFilters';
 
 export default DateFilters;

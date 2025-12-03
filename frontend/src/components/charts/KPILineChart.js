@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPILineChart = ({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
+const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
   const colors = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -52,6 +52,8 @@ const KPILineChart = ({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
       </LineChart>
     </ResponsiveContainer>
   );
-};
+});
+
+KPILineChart.displayName = 'KPILineChart';
 
 export default KPILineChart;

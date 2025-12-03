@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { memo } from 'react';
 import './ChartCard.css';
 
-const ChartCard = ({ title, badge, children }) => {
+const ChartCard = memo(({ title, badge, children }) => {
   return (
     <div className="chart-card">
       <div className="chart-header">
@@ -11,6 +11,8 @@ const ChartCard = ({ title, badge, children }) => {
       {children}
     </div>
   );
-};
+});
+
+ChartCard.displayName = 'ChartCard';
 
 export default ChartCard;

@@ -3,17 +3,23 @@
  */
 
 /**
- * Format hourly data for a specific KPI
+ * Format hourly data for a specific KPI (memoization-friendly)
  * @param {Array} data - Raw API data
  * @param {string} columnName - Database column name
  * @param {string} displayName - Display name for the chart
  * @returns {Array} Formatted data for charts
  */
 const formatHourlyKPI = (data, columnName, displayName) => {
-  return data.map(item => ({
-    name: `${new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${item.hour}:00`,
-    [displayName]: parseFloat(item[columnName] || 0).toFixed(2),
-  }));
+  return data.map(item => {
+    const date = new Date(item.date);
+    const name = `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} ${item.hour}:00`;
+    const value = parseFloat(item[columnName] || 0).toFixed(2);
+    
+    return {
+      name,
+      [displayName]: value,
+    };
+  });
 };
 
 /**
