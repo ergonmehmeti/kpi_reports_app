@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 
 /**
  * DateFilters Component
- * Provides week selector and custom date range picker
+ * Provides week selector, custom date range picker, and comparison mode
  * Memoized to prevent unnecessary re-renders
  */
 const DateFilters = memo(({ 
@@ -15,12 +15,22 @@ const DateFilters = memo(({
   onStartDateChange,
   onEndDateChange,
   onToggleMode,
-  onRefresh
+  onRefresh,
+  // Comparison mode props
+  comparisonMode = false,
+  onToggleComparison,
+  selectedWeek2,
+  onWeek2Change,
 }) => {
   const handleWeekSelectChange = useCallback((e) => {
     const weekId = parseInt(e.target.value);
     onWeekChange(weekId);
   }, [onWeekChange]);
+
+  const handleWeek2SelectChange = useCallback((e) => {
+    const weekId = parseInt(e.target.value);
+    if (onWeek2Change) onWeek2Change(weekId);
+  }, [onWeek2Change]);
 
   const handleStartDateChange = useCallback((e) => {
     onStartDateChange(e.target.value);
@@ -29,6 +39,58 @@ const DateFilters = memo(({
   const handleEndDateChange = useCallback((e) => {
     onEndDateChange(e.target.value);
   }, [onEndDateChange]);
+
+  // Comparison Mode UI
+  if (comparisonMode) {
+    return (
+      <div className="date-range-picker comparison-mode">
+        <div className="comparison-selectors">
+          <div className="date-input-group">
+            <label htmlFor="week1-select">
+              <span className="week-indicator week1-indicator">●</span> Week 1 (Blue):
+            </label>
+            <select 
+              id="week1-select"
+              value={selectedWeek?.id || 0}
+              onChange={handleWeekSelectChange}
+              className="week-dropdown"
+            >
+              {availableWeeks.map(week => (
+                <option key={week.id} value={week.id}>
+                  {week.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="date-input-group">
+            <label htmlFor="week2-select">
+              <span className="week-indicator week2-indicator">●</span> Week 2 (Green):
+            </label>
+            <select 
+              id="week2-select"
+              value={selectedWeek2?.id || 0}
+              onChange={handleWeek2SelectChange}
+              className="week-dropdown"
+            >
+              {availableWeeks.map(week => (
+                <option key={week.id} value={week.id}>
+                  {week.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div className="filter-buttons">
+          <button className="toggle-mode-btn comparison-active" onClick={onToggleComparison}>
+            Exit Compare
+          </button>
+          <button className="refresh-btn" onClick={onRefresh}>
+            Compare
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="date-range-picker">
@@ -51,6 +113,9 @@ const DateFilters = memo(({
           </div>
           <button className="toggle-mode-btn" onClick={onToggleMode}>
             Custom Dates
+          </button>
+          <button className="toggle-mode-btn compare-btn" onClick={onToggleComparison}>
+            Compare Weeks
           </button>
         </div>
       ) : (

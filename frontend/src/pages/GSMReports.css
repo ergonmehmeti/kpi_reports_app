@@ -141,6 +141,68 @@
   transform: translateY(0);
 }
 
+/* Compare Weeks Button */
+.compare-btn {
+  background: #f0fdf4;
+  color: #16a34a;
+  border-color: #22c55e;
+}
+
+.compare-btn:hover {
+  background: #dcfce7;
+}
+
+/* Comparison Mode Styles */
+.comparison-mode {
+  border: 2px solid #22c55e;
+  background: linear-gradient(135deg, #f0fdf4 0%, #fff 100%);
+}
+
+.comparison-selectors {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.comparison-active {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #ef4444;
+}
+
+.comparison-active:hover {
+  background: #fee2e2;
+}
+
+.week-indicator {
+  font-size: 1.2em;
+  margin-right: 4px;
+}
+
+.week1-indicator {
+  color: #3b82f6;
+}
+
+.week2-indicator {
+  color: #22c55e;
+}
+
+/* Comparison Chart Container */
+.comparison-chart-container {
+  max-width: 100%;
+}
+
+.comparison-chart-container .chart-card {
+  border: 2px solid #22c55e;
+}
+
 /* Charts Grid Styles */
 .charts-section {
   margin-top: 24px;
@@ -175,5 +237,19 @@
 
   .charts-grid {
     grid-template-columns: 1fr;
+  }
+
+  .comparison-selectors {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .filter-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .filter-buttons button {
+    width: 100%;
   }
 }
