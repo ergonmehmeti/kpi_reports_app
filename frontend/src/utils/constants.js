@@ -1,5 +1,6 @@
-// API Base URL
-export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// API Base URL - empty for production (uses relative URLs through Nginx proxy)
+// For local development, set REACT_APP_API_URL=http://localhost:5000
+export const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 // API Endpoints
 export const API_ENDPOINTS = {
