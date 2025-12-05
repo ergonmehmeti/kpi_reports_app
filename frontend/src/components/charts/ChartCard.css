@@ -11,6 +11,19 @@
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
 }
 
+.chart-card-clickable {
+  cursor: pointer;
+}
+
+.chart-card-clickable:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.chart-card-clickable:active {
+  transform: translateY(-2px);
+}
+
 .chart-header {
   display: flex;
   justify-content: space-between;
@@ -24,6 +37,12 @@
   color: #1e293b;
 }
 
+.chart-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .chart-badge {
   padding: 4px 12px;
   background: #f1f5f9;
@@ -31,4 +50,14 @@
   font-size: 0.75rem;
   font-weight: 500;
   border-radius: 20px;
+}
+
+.chart-expand-hint {
+  opacity: 0;
+  transition: opacity 0.2s;
+  font-size: 1rem;
+}
+
+.chart-card-clickable:hover .chart-expand-hint {
+  opacity: 1;
 }
