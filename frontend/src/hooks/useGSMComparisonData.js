@@ -2,6 +2,70 @@ import { useState, useCallback } from 'react';
 import { getKPIData } from '../services/api';
 
 /**
+ * Format hourly data for comparison with normalized day labels
+ * @param {Array} data - Raw API data
+ * @param {string} columnName - Database column name
+ * @param {string} dataKeyName - Name for the data key in chart
+ * @returns {Array} Formatted data with normalized day labels
+ */
+const formatComparisonKPI = (data, columnName, dataKeyName) => {
+  const sortedData = [...data].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    if (dateA.getTime() !== dateB.getTime()) {
+      return dateA - dateB;
+    }
+    return a.hour - b.hour;
+  });
+
+  const firstDate = sortedData.length > 0 ? new Date(sortedData[0].date) : null;
+  
+  return sortedData.map(item => {
+    const itemDate = new Date(item.date);
+    const dayDiff = Math.floor((itemDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
+    const dayNames = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayName = dayNames[dayDiff] || `Day${dayDiff}`;
+    
+    return {
+      name: `${dayName} ${item.hour}:00`,
+      dayIndex: dayDiff,
+      hour: item.hour,
+      [dataKeyName]: parseFloat(item[columnName] || 0).toFixed(2),
+    };
+  });
+};
+
+/**
+ * Merge two weeks' data into a single dataset for the chart
+ */
+const mergeWeeksData = (week1Data, week2Data, week1Key, week2Key) => {
+  const merged = [];
+  const maxLength = Math.max(week1Data.length, week2Data.length);
+
+  for (let i = 0; i < maxLength; i++) {
+    const w1 = week1Data[i] || {};
+    const w2 = week2Data[i] || {};
+    
+    merged.push({
+      name: w1.name || w2.name || `Point ${i}`,
+      [week1Key]: w1[week1Key] || null,
+      [week2Key]: w2[week2Key] || null,
+    });
+  }
+
+  return merged;
+};
+
+/**
+ * Format and merge a specific KPI for both weeks
+ */
+const formatAndMergeKPI = (week1Data, week2Data, columnName, week1Label, week2Label) => {
+  const week1Formatted = formatComparisonKPI(week1Data, columnName, week1Label);
+  const week2Formatted = formatComparisonKPI(week2Data, columnName, week2Label);
+  return mergeWeeksData(week1Formatted, week2Formatted, week1Label, week2Label);
+};
+
+/**
  * Custom hook for fetching and comparing GSM KPI data between two weeks
  * @returns {Object} Comparison data state, loading state, error state, and fetch function
  */
@@ -24,77 +88,6 @@ export const useGSMComparisonData = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /**
-   * Format hourly data for comparison with normalized day labels
-   * @param {Array} data - Raw API data
-   * @param {string} columnName - Database column name
-   * @param {string} dataKeyName - Name for the data key in chart
-   * @returns {Array} Formatted data with normalized day labels
-   */
-  const formatComparisonKPI = (data, columnName, dataKeyName) => {
-    // Sort by date and hour to ensure correct order
-    const sortedData = [...data].sort((a, b) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      if (dateA.getTime() !== dateB.getTime()) {
-        return dateA - dateB;
-      }
-      return a.hour - b.hour;
-    });
-
-    // Get the first date to calculate day numbers
-    const firstDate = sortedData.length > 0 ? new Date(sortedData[0].date) : null;
-    
-    return sortedData.map(item => {
-      const itemDate = new Date(item.date);
-      const dayDiff = Math.floor((itemDate - firstDate) / (1000 * 60 * 60 * 24)) + 1;
-      const dayNames = ['', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const dayName = dayNames[dayDiff] || `Day${dayDiff}`;
-      
-      return {
-        name: `${dayName} ${item.hour}:00`,
-        dayIndex: dayDiff,
-        hour: item.hour,
-        [dataKeyName]: parseFloat(item[columnName] || 0).toFixed(2),
-      };
-    });
-  };
-
-  /**
-   * Merge two weeks' data into a single dataset for the chart
-   * @param {Array} week1Data - Formatted data from week 1
-   * @param {Array} week2Data - Formatted data from week 2
-   * @param {string} week1Key - Data key name for week 1
-   * @param {string} week2Key - Data key name for week 2
-   * @returns {Array} Merged data for dual-line chart
-   */
-  const mergeWeeksData = (week1Data, week2Data, week1Key, week2Key) => {
-    const merged = [];
-    const maxLength = Math.max(week1Data.length, week2Data.length);
-
-    for (let i = 0; i < maxLength; i++) {
-      const w1 = week1Data[i] || {};
-      const w2 = week2Data[i] || {};
-      
-      merged.push({
-        name: w1.name || w2.name || `Point ${i}`,
-        [week1Key]: w1[week1Key] || null,
-        [week2Key]: w2[week2Key] || null,
-      });
-    }
-
-    return merged;
-  };
-
-  /**
-   * Format and merge a specific KPI for both weeks
-   */
-  const formatAndMergeKPI = (week1Data, week2Data, columnName, week1Label, week2Label) => {
-    const week1Formatted = formatComparisonKPI(week1Data, columnName, week1Label);
-    const week2Formatted = formatComparisonKPI(week2Data, columnName, week2Label);
-    return mergeWeeksData(week1Formatted, week2Formatted, week1Label, week2Label);
-  };
-
   const fetchComparisonData = useCallback(async (week1, week2) => {
     try {
       setLoading(true);
@@ -111,8 +104,20 @@ export const useGSMComparisonData = () => {
         getKPIData('gsm', { startDate: week2Start, endDate: week2End }),
       ]);
 
-      if (!week1Response.data?.length || !week2Response.data?.length) {
-        setError('No data available for one or both weeks. Please ensure data is imported.');
+      // Check which week(s) have no data
+      const week1HasData = week1Response.data?.length > 0;
+      const week2HasData = week2Response.data?.length > 0;
+
+      if (!week1HasData && !week2HasData) {
+        setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear} dhe Javën ${week2.weekOfYear}. Zgjedhni javë tjetër për krahasim.`);
+        return;
+      }
+      if (!week1HasData) {
+        setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
+        return;
+      }
+      if (!week2HasData) {
+        setError(`Nuk ka të dhëna për Javën ${week2.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
         return;
       }
 

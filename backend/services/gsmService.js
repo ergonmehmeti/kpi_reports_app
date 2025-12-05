@@ -62,7 +62,16 @@ export async function upsertKpiRecord(client, data) {
  * @returns {Promise<Array>}
  */
 export async function getKpiData({ startDate, endDate } = {}) {
-  let query = 'SELECT * FROM gsm_kpi';
+  // Select only needed columns (not id, imported_at) for better performance
+  let query = `
+    SELECT 
+      date, hour,
+      cell_availability, sdcch_congestion, sdcch_drop_rate,
+      tch_traffic_volume, tch_assignment_success_rate, subscriber_tch_congestion,
+      call_drop_rate, call_minutes_per_drop,
+      handover_success_rate, handover_drop_rate, good_voice_qual_ratio_ul
+    FROM gsm_kpi
+  `;
   const params = [];
   
   if (startDate && endDate) {
@@ -77,6 +86,9 @@ export async function getKpiData({ startDate, endDate } = {}) {
   }
   
   query += ' ORDER BY date, hour';
+  
+  // Safety limit - 1 week = 168 hours max, allow 4 weeks
+  query += ' LIMIT 700';
   
   const result = await pool.query(query, params);
   return result.rows;
