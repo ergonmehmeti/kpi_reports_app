@@ -3,7 +3,11 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const { Pool } = pg;
+const { Pool, types } = pg;
+
+// Fix timezone issue: Return DATE as string instead of JavaScript Date
+// Type OID 1082 is DATE in PostgreSQL
+types.setTypeParser(1082, (val) => val); // Return date as YYYY-MM-DD string
 
 // Single database connection pool for the entire app
 const pool = new Pool({
