@@ -3,24 +3,36 @@
  */
 
 /**
- * Convert Excel serial date to JS Date
+ * Convert Excel serial date to date string and hour
  * Excel serial dates are days since 1900-01-01 (with a bug for 1900 leap year)
+ * Uses UTC to avoid timezone issues
  */
 export function excelSerialToDate(serial) {
-  // Excel epoch is January 1, 1900 (but Excel incorrectly considers 1900 a leap year)
-  const excelEpoch = new Date(1899, 11, 30); // Dec 30, 1899
-  const msPerDay = 24 * 60 * 60 * 1000;
-  
   const days = Math.floor(serial);
   const timeFraction = serial - days;
   
-  const date = new Date(excelEpoch.getTime() + days * msPerDay);
+  // Excel epoch: Jan 1, 1900 = day 1
+  // But Excel has a bug treating 1900 as leap year, so we subtract 2
+  // Calculate directly without using Date object to avoid timezone issues
+  const baseDate = Date.UTC(1899, 11, 30); // Dec 30, 1899 in UTC
+  const msPerDay = 24 * 60 * 60 * 1000;
+  
+  const dateMs = baseDate + days * msPerDay;
+  const d = new Date(dateMs);
+  
+  // Extract UTC components to avoid timezone shift
+  const year = d.getUTCFullYear();
+  const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
   
   // Calculate hours from the fractional part
   const totalMinutes = Math.round(timeFraction * 24 * 60);
   const hours = Math.floor(totalMinutes / 60);
   
-  return { date, hours };
+  return { 
+    dateString: `${year}-${month}-${day}`,
+    hours 
+  };
 }
 
 /**
@@ -35,14 +47,10 @@ export function excelSerialToDate(serial) {
 export function parseDatetime(datetimeValue, rowIndex) {
   // Check if it's a number (Excel serial date)
   if (typeof datetimeValue === 'number') {
-    const { date, hours } = excelSerialToDate(datetimeValue);
-    
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const { dateString, hours } = excelSerialToDate(datetimeValue);
     
     return {
-      date: `${year}-${month}-${day}`,
+      date: dateString,
       hour: hours
     };
   }
