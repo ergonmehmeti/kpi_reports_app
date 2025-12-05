@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { uploadCSV } from '../services/api';
 
 /**
@@ -33,10 +33,10 @@ export const useFileUpload = () => {
     }
   };
 
-  const resetUpload = () => {
+  const resetUpload = useCallback(() => {
     setUploadStatus('');
     setLoading(false);
-  };
+  }, []);
 
   return {
     uploadStatus,

@@ -1,11 +1,41 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import StatusMessage from '../common/StatusMessage';
 import { useFileUpload } from '../../hooks/useFileUpload';
 import './SideNav.css';
 
 const SideNav = ({ isOpen, onClose }) => {
-  const { uploadStatus, loading, handleUpload } = useFileUpload();
+  const { uploadStatus, loading, handleUpload, resetUpload } = useFileUpload();
   const fileInputRef = useRef(null);
+  
+  // Collapsible section states
+  const [expandedSections, setExpandedSections] = useState({
+    gsm: false,
+    lte: false,
+    nr: false
+  });
+
+  // Reset state when sidebar closes
+  useEffect(() => {
+    if (!isOpen) {
+      // Small delay to allow close animation to complete
+      const timer = setTimeout(() => {
+        setExpandedSections({
+          gsm: false,
+          lte: false,
+          nr: false
+        });
+        resetUpload();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, resetUpload]);
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
 
   const handleImportClick = async (type) => {
     // Trigger file picker
@@ -60,33 +90,86 @@ const SideNav = ({ isOpen, onClose }) => {
             style={{ display: 'none' }}
           />
 
-          <div className="import-buttons">
-            <button 
-              className="import-btn gsm"
-              onClick={() => handleImportClick('gsm')}
-              disabled={loading}
-            >
-              <span className="btn-icon">📊</span>
-              <span className="btn-text">Import GSM CSV</span>
-            </button>
-            
-            <button 
-              className="import-btn lte"
-              disabled={true}
-              title="Coming soon - KPIs being defined by team"
-            >
-              <span className="btn-icon">📈</span>
-              <span className="btn-text">Import LTE CSV (Coming Soon)</span>
-            </button>
-            
-            <button 
-              className="import-btn nr"
-              disabled={true}
-              title="Coming soon - KPIs being defined by team"
-            >
-              <span className="btn-icon">📉</span>
-              <span className="btn-text">Import NR CSV (Coming Soon)</span>
-            </button>
+          <div className="import-sections">
+            {/* GSM Section */}
+            <div className="import-section">
+              <button 
+                className="section-header gsm"
+                onClick={() => toggleSection('gsm')}
+              >
+                <span className="section-icon">📊</span>
+                <span className="section-title">GSM</span>
+                <span className={`section-arrow ${expandedSections.gsm ? 'expanded' : ''}`}>▼</span>
+              </button>
+              
+              <div className={`section-items ${expandedSections.gsm ? 'expanded' : ''}`}>
+                <button 
+                  className="sub-item active"
+                  onClick={() => handleImportClick('gsm')}
+                  disabled={loading}
+                >
+                  <span className="sub-icon">📁</span>
+                  <span className="sub-text">Import GSM KPI CSV</span>
+                </button>
+              </div>
+            </div>
+
+            {/* LTE Section */}
+            <div className="import-section">
+              <button 
+                className="section-header lte"
+                onClick={() => toggleSection('lte')}
+              >
+                <span className="section-icon">📈</span>
+                <span className="section-title">LTE</span>
+                <span className={`section-arrow ${expandedSections.lte ? 'expanded' : ''}`}>▼</span>
+              </button>
+              
+              <div className={`section-items ${expandedSections.lte ? 'expanded' : ''}`}>
+                <button 
+                  className="sub-item disabled"
+                  disabled={true}
+                  title="Coming soon"
+                >
+                  <span className="sub-icon">📁</span>
+                  <span className="sub-text">Import LTE KPI CSV</span>
+                  <span className="coming-soon-badge">Coming Soon</span>
+                </button>
+                <button 
+                  className="sub-item disabled"
+                  disabled={true}
+                  title="Coming soon"
+                >
+                  <span className="sub-icon">📁</span>
+                  <span className="sub-text">Import LTE Site Data CSV</span>
+                  <span className="coming-soon-badge">Coming Soon</span>
+                </button>
+              </div>
+            </div>
+
+            {/* NR Section */}
+            <div className="import-section">
+              <button 
+                className="section-header nr"
+                onClick={() => toggleSection('nr')}
+              >
+                <span className="section-icon">📉</span>
+                <span className="section-title">NR (5G)</span>
+                <span className={`section-arrow ${expandedSections.nr ? 'expanded' : ''}`}>▼</span>
+              </button>
+              
+              <div className={`section-items ${expandedSections.nr ? 'expanded' : ''}`}>
+                <button 
+                  className="sub-item disabled"
+                  disabled={true}
+                  title="Coming soon"
+                >
+                  <span className="sub-icon">📁</span>
+                  <span className="sub-text">Import NR KPI CSV</span>
+                  <span className="coming-soon-badge">Coming Soon</span>
+                </button>
+              </div>
+            </div>
           </div>
 
           <StatusMessage message={uploadStatus} type={getStatusType()} />
