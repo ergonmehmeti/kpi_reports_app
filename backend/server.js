@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import pool from './db/pool.js';
 import csvRoutes from './routes/csv.js';
 import gsmRoutes from './routes/gsm.js';
+import lteRoutes from './routes/lte.js';
 
 dotenv.config();
 
@@ -37,6 +38,9 @@ app.use('/api/csv', csvRoutes);
 
 // GSM KPI routes
 app.use('/api/gsm', gsmRoutes);
+
+// LTE traffic routes
+app.use('/api/lte', lteRoutes);
 
 // Start server
 app.listen(PORT, () => {

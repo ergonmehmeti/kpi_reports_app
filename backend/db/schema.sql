@@ -44,9 +44,33 @@ CREATE INDEX IF NOT EXISTS idx_gsm_kpi_date ON gsm_kpi(date);
 CREATE INDEX IF NOT EXISTS idx_gsm_kpi_date_hour ON gsm_kpi(date, hour);
 
 -- =====================================================
+-- LTE DAILY SITE TRAFFIC TABLE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS lte_daily_site_traffic (
+    id SERIAL PRIMARY KEY,
+    date DATE NOT NULL,
+    site_name VARCHAR(100) NOT NULL,
+    total_traffic_gb NUMERIC(10,2),
+    ul_traffic_gb NUMERIC(10,2),
+    dl_traffic_gb NUMERIC(10,2),
+    imported_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(date, site_name)
+);
+
+-- Indexes
+CREATE INDEX IF NOT EXISTS idx_lte_traffic_date ON lte_daily_site_traffic(date);
+CREATE INDEX IF NOT EXISTS idx_lte_traffic_site ON lte_daily_site_traffic(site_name);
+CREATE INDEX IF NOT EXISTS idx_lte_traffic_date_site ON lte_daily_site_traffic(date, site_name);
+
+-- =====================================================
 -- FUTURE: LTE KPI TABLE (placeholder)
 -- =====================================================
--- Will be added when KPIs are defined
+-- Will be added when hourly KPIs are defined
+
+-- =====================================================
+-- FUTURE: LTE FREQUENCY DATA TABLE (placeholder)
+-- =====================================================
+-- Will be added when frequency data structure is defined
 
 -- =====================================================
 -- FUTURE: NR (5G) KPI TABLE (placeholder)
