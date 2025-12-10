@@ -6,6 +6,7 @@ import csvRoutes from './routes/csv.js';
 import gsmRoutes from './routes/gsm.js';
 import lteRoutes from './routes/lte.js';
 import lteFrequencyRoutes from './routes/lteFrequency.js';
+import lteKpiRoutes from './routes/lteKpi.js';
 
 dotenv.config();
 
@@ -45,6 +46,9 @@ app.use('/api/lte', lteRoutes);
 
 // LTE frequency data routes
 app.use('/api/lte-frequency', lteFrequencyRoutes);
+
+// LTE KPI routes
+app.use('/api/lte-kpi', lteKpiRoutes);
 
 // Start server
 app.listen(PORT, () => {
