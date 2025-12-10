@@ -12,6 +12,7 @@ export const uploadCSV = async (type, file) => {
   formData.append('file', file);
 
   const endpoint = API_ENDPOINTS[type]?.upload;
+  console.log('🔴 API uploadCSV called - type:', type, 'endpoint:', endpoint);
   if (!endpoint) {
     throw new Error(`Invalid network type: ${type}`);
   }
@@ -21,6 +22,7 @@ export const uploadCSV = async (type, file) => {
       'Content-Type': 'multipart/form-data',
     },
   });
+  console.log('🟣 API response:', response.data);
 
   return response.data;
 };

@@ -13,6 +13,16 @@ export const API_ENDPOINTS = {
   lte: {
     upload: `${API_BASE_URL}/api/lte/upload`,
     data: `${API_BASE_URL}/api/lte/data`,
+    dateRange: `${API_BASE_URL}/api/lte/date-range`,
+    sites: `${API_BASE_URL}/api/lte/sites`,
+    aggregatedStats: `${API_BASE_URL}/api/lte/aggregated-stats`,
+  },
+  lteFrequency: {
+    upload: `${API_BASE_URL}/api/lte-frequency/upload`,
+    data: `${API_BASE_URL}/api/lte-frequency/data`,
+    dateRange: `${API_BASE_URL}/api/lte-frequency/date-range`,
+    frequencies: `${API_BASE_URL}/api/lte-frequency/frequencies`,
+    aggregatedStats: `${API_BASE_URL}/api/lte-frequency/aggregated-stats`,
   },
   nr: {
     upload: `${API_BASE_URL}/api/nr/upload`,
@@ -39,5 +49,6 @@ export const FILE_UPLOAD = {
 export const NETWORK_TYPES = {
   GSM: 'gsm',
   LTE: 'lte',
+  LTE_FREQUENCY: 'lteFrequency',
   NR: 'nr',
 };

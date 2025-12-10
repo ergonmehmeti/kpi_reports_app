@@ -19,6 +19,8 @@ export const useFileUpload = () => {
 
     try {
       const response = await uploadCSV(type, file);
+      console.log('📊 Full response stats:', JSON.stringify(response.stats, null, 2));
+      console.log('❌ Errors:', response.errors);
       setUploadStatus(
         `Success! ${response.stats?.inserted || 0} inserted, ${response.stats?.updated || 0} updated`
       );
