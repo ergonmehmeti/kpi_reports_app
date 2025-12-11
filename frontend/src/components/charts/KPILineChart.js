@@ -2,11 +2,35 @@ import React, { memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) => {
-  const colors = [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
+const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors }) => {
+  const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
+
+  // Calculate dynamic Y-axis domain based on data
+  const calculateYDomain = () => {
+    if (!data || data.length === 0) return [0, 100];
+    
+    let min = Infinity;
+    dataKeys.forEach(key => {
+      data.forEach(item => {
+        const value = parseFloat(item[key]);
+        if (!isNaN(value)) {
+          min = Math.min(min, value);
+        }
+      });
+    });
+    
+    // Floor the minimum value
+    const flooredMin = Math.floor(min);
+    return [flooredMin, 100];
+  };
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
+      // Sort payload to match dataKeys order
+      const sortedPayload = [...payload].sort((a, b) => {
+        return dataKeys.indexOf(a.dataKey) - dataKeys.indexOf(b.dataKey);
+      });
+      
       return (
         <div style={{
           backgroundColor: '#fff',
@@ -16,7 +40,7 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) =>
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}>
           <p style={{ margin: '0 0 5px 0', fontWeight: 'bold' }}>{label}</p>
-          {payload.map((entry, index) => (
+          {sortedPayload.map((entry, index) => (
             <p key={index} style={{ margin: '0', color: entry.color }}>
               {entry.name}: {entry.value}{yAxisLabel || ''}
             </p>
@@ -28,17 +52,19 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) =>
   };
 
   return (
+    <>
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-        <XAxis dataKey="name" stroke="#666" />
+        <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 10 }} />
         <YAxis 
           stroke="#666" 
           width={80}
+          domain={calculateYDomain()}
           label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } } : undefined}
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend />
+        <Legend content={() => null} />
         {dataKeys.map((key, index) => (
           <Line 
             key={key}
@@ -46,11 +72,30 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel }) =>
             dataKey={key} 
             stroke={colors[index % colors.length]} 
             strokeWidth={2} 
-            dot={{ fill: colors[index % colors.length] }} 
+            dot={{ fill: colors[index % colors.length] }}
           />
         ))}
       </LineChart>
     </ResponsiveContainer>
+    {/* Custom Legend */}
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      flexWrap: 'wrap', 
+      marginTop: '10px',
+      gap: '20px'
+    }}>
+      {dataKeys.map((key, index) => (
+        <div key={key} style={{ display: 'flex', alignItems: 'center' }}>
+          <svg width="14" height="14" style={{ marginRight: '4px' }}>
+            <line x1="0" y1="7" x2="14" y2="7" stroke={colors[index % colors.length]} strokeWidth="2" />
+            <circle cx="7" cy="7" r="3" fill={colors[index % colors.length]} />
+          </svg>
+          <span style={{ fontSize: '14px', color: '#666' }}>{key}</span>
+        </div>
+      ))}
+    </div>
+    </>
   );
 });
 
