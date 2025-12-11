@@ -1,6 +1,35 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from '../utils/constants';
 
+const API_BASE_URL = 'http://localhost:5000/api';
+
+/**
+ * Login user
+ * @param {string} username - Username
+ * @param {string} password - Password
+ * @returns {Promise} Login response with token and user
+ */
+export const login = async (username, password) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+      username,
+      password
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Login failed');
+  }
+};
+
+/**
+ * Get auth header with token
+ * @returns {object} Headers with Authorization
+ */
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 /**
  * Upload CSV file for specific network type
  * @param {string} type - Network type (gsm, lte, nr)
@@ -19,6 +48,7 @@ export const uploadCSV = async (type, file) => {
   const response = await axios.post(endpoint, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
+      ...getAuthHeaders(),
     },
   });
 
