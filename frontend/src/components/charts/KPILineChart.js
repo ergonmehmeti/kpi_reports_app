@@ -10,18 +10,21 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
     if (!data || data.length === 0) return [0, 100];
     
     let min = Infinity;
+    let max = -Infinity;
     dataKeys.forEach(key => {
       data.forEach(item => {
         const value = parseFloat(item[key]);
         if (!isNaN(value)) {
           min = Math.min(min, value);
+          max = Math.max(max, value);
         }
       });
     });
     
-    // Floor the minimum value
+    // Floor the minimum value and ceil the maximum value
     const flooredMin = Math.floor(min);
-    return [flooredMin, 100];
+    const ceiledMax = Math.ceil(max);
+    return [flooredMin, ceiledMax];
   };
 
   const CustomTooltip = ({ active, payload, label }) => {

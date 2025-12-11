@@ -144,6 +144,34 @@ const LTEReports = () => {
     }));
   };
 
+  // Prepare chart data for Retainability KPIs - Drop Ratios (%)
+  const prepareRetainabilityDropRatioData = () => {
+    return kpiData.map(record => ({
+      name: new Date(record.datetime).toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit' 
+      }),
+      'E-RAB Drop Ratio-Overall (%)': parseFloat(record.erab_drop_ratio_overall_pct || 0).toFixed(2),
+      'E-RAB Drop due to MME (%)': parseFloat(record.erab_drop_mme_pct || 0).toFixed(2),
+      'E-RAB Drop due to eNB (%)': parseFloat(record.erab_drop_enb_pct || 0).toFixed(2)
+    }));
+  };
+
+  // Prepare chart data for Retainability KPIs - Drops per Hour
+  const prepareRetainabilityDropsPerHourData = () => {
+    return kpiData.map(record => ({
+      name: new Date(record.datetime).toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit' 
+      }),
+      'E-RAB Drops per Hour (Overall)': parseFloat(record.erab_drops_per_hour_overall || 0).toFixed(2),
+      'E-RAB Drops per Hour due to MME': parseFloat(record.erab_drops_per_hour_mme || 0).toFixed(2),
+      'E-RAB Drops per Hour due to eNB': parseFloat(record.erab_drops_per_hour_enb || 0).toFixed(2)
+    }));
+  };
+
   // Get chart configurations
   const chartConfigs = getLTEChartConfigs();
 
@@ -234,6 +262,57 @@ const LTEReports = () => {
                 ]}
                 colors={['#3b82f6', '#f97316', '#10b981', '#ec4899']}
                 yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+        </div>
+      )}
+
+      {/* Retainability KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Retainability KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              The ability of service, once obtained, to continued to be provided for a requested duration
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Proportions of Abnormal E-RAB Releases over Total E-RAB Releases">
+              <KPILineChart
+                data={prepareRetainabilityDropRatioData()}
+                dataKeys={[
+                  'E-RAB Drop Ratio-Overall (%)',
+                  'E-RAB Drop due to MME (%)',
+                  'E-RAB Drop due to eNB (%)'
+                ]}
+                colors={['#3b82f6', '#f97316', '#10b981']}
+                yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Rate of E-RABs Abnormally Released over Duration of Active Session Time for All UEs">
+              <KPILineChart
+                data={prepareRetainabilityDropsPerHourData()}
+                dataKeys={[
+                  'E-RAB Drops per Hour (Overall)',
+                  'E-RAB Drops per Hour due to MME',
+                  'E-RAB Drops per Hour due to eNB'
+                ]}
+                colors={['#3b82f6', '#f97316', '#10b981']}
+                yAxisLabel="drops/hour"
               />
             </ChartCard>
           </div>
