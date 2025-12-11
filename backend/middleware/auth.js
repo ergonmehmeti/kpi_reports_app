@@ -25,13 +25,14 @@ export const verifyToken = (req, res, next) => {
   }
 };
 
-// Middleware to check if user is admin
+// Middleware to check if user is admin or adminDeveloper
 export const requireAdmin = (req, res, next) => {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
   }
   
-  if (req.user.role !== 'admin') {
+  // Both 'admin' and 'adminDeveloper' roles have admin access
+  if (req.user.role !== 'admin' && req.user.role !== 'adminDeveloper') {
     return res.status(403).json({ error: 'Admin access required' });
   }
   

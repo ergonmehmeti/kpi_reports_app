@@ -6,6 +6,7 @@ import csvRoutes from './routes/csv.js';
 import gsmRoutes from './routes/gsm.js';
 import lteRoutes from './routes/lte.js';
 import authRoutes from './routes/auth.js';
+import usersRoutes from './routes/users.js';
 import lteFrequencyRoutes from './routes/lteFrequency.js';
 import lteKpiRoutes from './routes/lteKpi.js';
 
@@ -41,6 +42,9 @@ app.use('/api/csv', csvRoutes);
 
 // Auth routes
 app.use('/api/auth', authRoutes);
+
+// Users management routes
+app.use('/api/users', usersRoutes);
 
 // GSM KPI routes
 app.use('/api/gsm', gsmRoutes);

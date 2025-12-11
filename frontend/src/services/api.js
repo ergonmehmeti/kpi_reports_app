@@ -91,3 +91,85 @@ export const getGSMDailyStats = async (params = {}) => {
   const response = await axios.get(API_ENDPOINTS.gsm.dailyStats, { params });
   return response.data;
 };
+
+// ==================== User Management API ====================
+
+/**
+ * Get all users (admin only)
+ * @returns {Promise} List of users
+ */
+export const getUsers = async () => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to fetch users');
+  }
+};
+
+/**
+ * Get user by ID (admin only)
+ * @param {number} id - User ID
+ * @returns {Promise} User data
+ */
+export const getUserById = async (id) => {
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/${id}`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to fetch user');
+  }
+};
+
+/**
+ * Create new user (admin only)
+ * @param {object} userData - { username, password, role }
+ * @returns {Promise} Created user
+ */
+export const createUser = async (userData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users`, userData, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to create user');
+  }
+};
+
+/**
+ * Update user (admin only)
+ * @param {number} id - User ID
+ * @param {object} userData - { username, password, role }
+ * @returns {Promise} Updated user
+ */
+export const updateUser = async (id, userData) => {
+  try {
+    const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to update user');
+  }
+};
+
+/**
+ * Delete user (admin only)
+ * @param {number} id - User ID
+ * @returns {Promise} Deletion result
+ */
+export const deleteUser = async (id) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/users/${id}`, {
+      headers: getAuthHeaders()
+    });
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.error || 'Failed to delete user');
+  }
+};
