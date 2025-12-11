@@ -38,6 +38,7 @@ const SideNav = ({ isOpen, onClose }) => {
   };
 
   const handleImportClick = async (type) => {
+    console.log('🔵 Import clicked, type:', type);
     // Trigger file picker
     fileInputRef.current.click();
     fileInputRef.current.setAttribute('data-type', type);
@@ -48,8 +49,10 @@ const SideNav = ({ isOpen, onClose }) => {
     if (!file) return;
 
     const type = event.target.getAttribute('data-type') || 'gsm';
+    console.log('🟢 File selected:', file.name, 'type:', type);
     
     const result = await handleUpload(type, file);
+    console.log('🟡 Upload result:', result);
     if (result.success) {
       // Reset file input
       event.target.value = '';
@@ -136,13 +139,20 @@ const SideNav = ({ isOpen, onClose }) => {
                   <span className="coming-soon-badge">Coming Soon</span>
                 </button>
                 <button 
-                  className="sub-item disabled"
-                  disabled={true}
-                  title="Coming soon"
+                  className="sub-item active"
+                  onClick={() => handleImportClick('lte')}
+                  disabled={loading}
                 >
                   <span className="sub-icon">📁</span>
                   <span className="sub-text">Import LTE Site Data CSV</span>
-                  <span className="coming-soon-badge">Coming Soon</span>
+                </button>
+                <button 
+                  className="sub-item active"
+                  onClick={() => handleImportClick('lteFrequency')}
+                  disabled={loading}
+                >
+                  <span className="sub-icon">📁</span>
+                  <span className="sub-text">Import LTE Frequency Data CSV</span>
                 </button>
               </div>
             </div>
