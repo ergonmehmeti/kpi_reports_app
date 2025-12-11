@@ -24,6 +24,10 @@ export const API_ENDPOINTS = {
     frequencies: `${API_BASE_URL}/api/lte-frequency/frequencies`,
     aggregatedStats: `${API_BASE_URL}/api/lte-frequency/aggregated-stats`,
   },
+  lteKpi: {
+    upload: `${API_BASE_URL}/api/lte-kpi/upload`,
+    data: `${API_BASE_URL}/api/lte-kpi/data`,
+  },
   nr: {
     upload: `${API_BASE_URL}/api/nr/upload`,
     data: `${API_BASE_URL}/api/nr/data`,

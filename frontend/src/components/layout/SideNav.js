@@ -130,13 +130,12 @@ const SideNav = ({ isOpen, onClose }) => {
               
               <div className={`section-items ${expandedSections.lte ? 'expanded' : ''}`}>
                 <button 
-                  className="sub-item disabled"
-                  disabled={true}
-                  title="Coming soon"
+                  className="sub-item active"
+                  onClick={() => handleImportClick('lteKpi')}
+                  disabled={loading}
                 >
                   <span className="sub-icon">📁</span>
                   <span className="sub-text">Import LTE KPI CSV</span>
-                  <span className="coming-soon-badge">Coming Soon</span>
                 </button>
                 <button 
                   className="sub-item active"
