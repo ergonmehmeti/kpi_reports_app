@@ -1,7 +1,5 @@
 import axios from 'axios';
-import { API_ENDPOINTS } from '../utils/constants';
-
-const API_BASE_URL = 'http://localhost:5000/api';
+import { API_ENDPOINTS, API_BASE_URL } from '../utils/constants';
 
 /**
  * Login user
@@ -11,7 +9,7 @@ const API_BASE_URL = 'http://localhost:5000/api';
  */
 export const login = async (username, password) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+    const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
       username,
       password
     });
@@ -100,7 +98,7 @@ export const getGSMDailyStats = async (params = {}) => {
  */
 export const getUsers = async () => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users`, {
+    const response = await axios.get(`${API_BASE_URL}/api/users`, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -116,7 +114,7 @@ export const getUsers = async () => {
  */
 export const getUserById = async (id) => {
   try {
-    const response = await axios.get(`${API_BASE_URL}/users/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/api/users/${id}`, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -132,7 +130,7 @@ export const getUserById = async (id) => {
  */
 export const createUser = async (userData) => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/users`, userData, {
+    const response = await axios.post(`${API_BASE_URL}/api/users`, userData, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -149,7 +147,7 @@ export const createUser = async (userData) => {
  */
 export const updateUser = async (id, userData) => {
   try {
-    const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData, {
+    const response = await axios.put(`${API_BASE_URL}/api/users/${id}`, userData, {
       headers: getAuthHeaders()
     });
     return response.data;
@@ -165,7 +163,7 @@ export const updateUser = async (id, userData) => {
  */
 export const deleteUser = async (id) => {
   try {
-    const response = await axios.delete(`${API_BASE_URL}/users/${id}`, {
+    const response = await axios.delete(`${API_BASE_URL}/api/users/${id}`, {
       headers: getAuthHeaders()
     });
     return response.data;

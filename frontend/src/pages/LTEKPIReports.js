@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import KPILineChart from '../components/charts/KPILineChart';
 import { useWeekSelector } from '../hooks/useWeekSelector';
+import { API_ENDPOINTS } from '../utils/constants';
 import './GSMReports.css';
 
 const LTEKPIReports = () => {
@@ -43,19 +45,14 @@ const LTEKPIReports = () => {
     setDataError(null);
     
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/lte-kpi/data?startDate=${startDate}&endDate=${endDate}`
-      );
+      const params = { startDate, endDate };
+      const response = await axios.get(API_ENDPOINTS.lteKpi.data, { params });
       
-      if (!response.ok) {
-        throw new Error('Failed to fetch KPI data');
-      }
-      
-      const result = await response.json();
-      setKpiData(result.data || []);
+      setKpiData(response.data.data || []);
     } catch (err) {
-      setDataError(err.message);
-      console.error('Error fetching KPI data:', err);
+      const errorMsg = err.response?.data?.error || err.message;
+      setDataError(errorMsg);
+      console.error('Error fetching KPI data:', errorMsg);
     } finally {
       setLoading(false);
     }
@@ -84,23 +81,23 @@ const LTEKPIReports = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/lte-kpi/upload', {
-        method: 'POST',
-        body: formData,
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      
+      const response = await axios.post(API_ENDPOINTS.lteKpi.upload, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          ...headers,
+        },
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setUploadResult(data);
-        setFile(null);
-        // Reset file input
-        document.getElementById('file-input').value = '';
-      } else {
-        setError(data.error || 'Upload failed');
-      }
+      setUploadResult(response.data);
+      setFile(null);
+      // Reset file input
+      document.getElementById('file-input').value = '';
     } catch (err) {
-      setError('Failed to upload file: ' + err.message);
+      const errorMsg = err.response?.data?.error || err.message;
+      setError('Failed to upload file: ' + errorMsg);
     } finally {
       setUploading(false);
     }
