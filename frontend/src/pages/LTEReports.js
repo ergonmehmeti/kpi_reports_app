@@ -3,9 +3,11 @@ import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import HorizontalStackedBarChart from '../components/charts/HorizontalStackedBarChart';
 import FrequencyStackedAreaChart from '../components/charts/FrequencyStackedAreaChart';
+import DualAxisLineChart from '../components/charts/DualAxisLineChart';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useLTEData } from '../hooks/useLTEData';
 import { useLTEFrequencyData } from '../hooks/useLTEFrequencyData';
+import { useLTEKPIData } from '../hooks/useLTEKPIData';
 import { getLTEChartConfigs } from '../utils/lteChartConfig';
 import './GSMReports.css';
 
@@ -25,6 +27,12 @@ const LTEReports = () => {
     error: frequencyError, 
     fetchData: fetchFrequencyData 
   } = useLTEFrequencyData();
+  const { 
+    data: kpiData, 
+    loading: kpiLoading, 
+    error: kpiError, 
+    fetchData: fetchKPIData 
+  } = useLTEKPIData();
   
   // Local state for date range and mode
   const [startDate, setStartDate] = useState('');
@@ -55,8 +63,9 @@ const LTEReports = () => {
       const rawData = await fetchData(startDate, endDate);
       calculateTopAndBottomSites(rawData?.data || []);
       
-      // Also fetch frequency data
+      // Also fetch frequency data and KPI data
       await fetchFrequencyData(startDate, endDate);
+      await fetchKPIData(startDate, endDate);
     } catch (err) {
       console.error('Error loading LTE data:', err);
     }
@@ -105,6 +114,20 @@ const LTEReports = () => {
     setEndDate(end);
   };
 
+  // Prepare chart data for Availability KPIs
+  const prepareAvailabilityData = () => {
+    return kpiData.map(record => ({
+      name: new Date(record.datetime).toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit' 
+      }),
+      'Cell Availability (%)': parseFloat(record.cell_availability_pct || 0).toFixed(2),
+      'Cell UnAvailability - Fault (%)': parseFloat(record.cell_unavailability_fault_pct || 0).toFixed(2),
+      'Cell UnAvailability - Operation (%)': parseFloat(record.cell_unavailability_operation_pct || 0).toFixed(2)
+    }));
+  };
+
   // Get chart configurations
   const chartConfigs = getLTEChartConfigs();
 
@@ -127,6 +150,42 @@ const LTEReports = () => {
 
       {loading && <div className="loading">Loading LTE traffic data...</div>}
       {error && <div className="error">Error: {error}</div>}
+
+      {/* Cell Availability KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Cell Availability KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              Hourly cell availability and unavailability metrics
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Availability Metrics">
+              <DualAxisLineChart
+                data={prepareAvailabilityData()}
+                leftAxisKey="Cell Availability (%)"
+                rightAxisKeys={[
+                  'Cell UnAvailability - Fault (%)',
+                  'Cell UnAvailability - Operation (%)'
+                ]}
+                leftAxisLabel="Availability (%)"
+                rightAxisLabel="Unavailability (%)"
+              />
+            </ChartCard>
+          </div>
+        </div>
+      )}
 
       {!loading && !error && (top20Sites.length > 0 || bottom20Sites.length > 0) && (
         <div style={{ 

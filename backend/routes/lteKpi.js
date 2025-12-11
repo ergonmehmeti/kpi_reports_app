@@ -6,15 +6,16 @@
 import express from 'express';
 import { upload, uploadLimiter } from '../utils/fileUpload.js';
 import lteKpiController from '../controllers/lteKpiController.js';
+import { adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * @route   POST /api/lte-kpi/upload
  * @desc    Upload and import LTE KPI data CSV file
- * @access  Public (with rate limiting)
+ * @access  Admin only (with authentication)
  */
-router.post('/upload', uploadLimiter, upload.single('file'), lteKpiController.uploadKpiData);
+router.post('/upload', adminOnly, uploadLimiter, upload.single('file'), lteKpiController.uploadKpiData);
 
 /**
  * @route   GET /api/lte-kpi/data
