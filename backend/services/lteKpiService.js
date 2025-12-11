@@ -151,7 +151,7 @@ export const getKpiData = async (startDate, endDate) => {
   const query = `
     SELECT *
     FROM lte_kpi_data
-    WHERE datetime >= $1 AND datetime < $2 + INTERVAL '1 day'
+    WHERE datetime >= $1::timestamp AND datetime < ($2::timestamp + INTERVAL '1 day')
     ORDER BY datetime ASC
   `;
   

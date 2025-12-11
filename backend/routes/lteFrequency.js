@@ -6,15 +6,16 @@
 import express from 'express';
 import { upload, uploadLimiter } from '../utils/fileUpload.js';
 import lteFrequencyController from '../controllers/lteFrequencyController.js';
+import { adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * @route   POST /api/lte-frequency/upload
  * @desc    Upload and import LTE frequency data CSV file
- * @access  Public (with rate limiting)
+ * @access  Admin only (with authentication)
  */
-router.post('/upload', uploadLimiter, upload.single('file'), lteFrequencyController.uploadCSV);
+router.post('/upload', adminOnly, uploadLimiter, upload.single('file'), lteFrequencyController.uploadCSV);
 
 /**
  * @route   GET /api/lte-frequency/data

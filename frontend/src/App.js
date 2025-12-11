@@ -4,7 +4,6 @@ import SideNav from './components/layout/SideNav';
 import Footer from './components/layout/Footer';
 import GSMReports from './pages/GSMReports';
 import LTEReports from './pages/LTEReports';
-import LTEKPIReports from './pages/LTEKPIReports';
 import NRReports from './pages/NRReports';
 import './App.css';
 
@@ -18,8 +17,6 @@ function App() {
         return <GSMReports />;
       case 'lte':
         return <LTEReports />;
-      case 'lte-kpi':
-        return <LTEKPIReports />;
       case 'nr':
         return <NRReports />;
       default:

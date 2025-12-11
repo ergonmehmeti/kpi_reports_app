@@ -1,10 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import DateFilters from '../components/filters/DateFilters';
+import ChartCard from '../components/charts/ChartCard';
+import KPILineChart from '../components/charts/KPILineChart';
+import { useWeekSelector } from '../hooks/useWeekSelector';
+import './GSMReports.css';
 
 const LTEKPIReports = () => {
+  // Week selector hook
+  const { availableWeeks, selectedWeek, handleWeekChange, resetToLastFullWeek } = useWeekSelector();
+  
+  // Local state
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [error, setError] = useState(null);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [showWeekSelector, setShowWeekSelector] = useState(true);
+  const [kpiData, setKpiData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dataError, setDataError] = useState(null);
+
+  // Initialize dates from selected week
+  useEffect(() => {
+    if (selectedWeek) {
+      setStartDate(selectedWeek.monday.toISOString().split('T')[0]);
+      setEndDate(selectedWeek.sunday.toISOString().split('T')[0]);
+    }
+  }, [selectedWeek]);
+
+  // Fetch data when dates change
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchKPIData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate]);
+
+  // Fetch KPI data from API
+  const fetchKPIData = async () => {
+    setLoading(true);
+    setDataError(null);
+    
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/lte-kpi/data?startDate=${startDate}&endDate=${endDate}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch KPI data');
+      }
+      
+      const result = await response.json();
+      setKpiData(result.data || []);
+    } catch (err) {
+      setDataError(err.message);
+      console.error('Error fetching KPI data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -51,22 +106,86 @@ const LTEKPIReports = () => {
     }
   };
 
+  // Prepare chart data for Availability KPIs
+  const prepareAvailabilityData = () => {
+    return kpiData.map(record => ({
+      name: new Date(record.datetime).toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        hour: '2-digit' 
+      }),
+      'Cell Availability (%)': parseFloat(record.cell_availability_pct || 0).toFixed(2),
+      'Cell UnAvailability - Fault (%)': parseFloat(record.cell_unavailability_fault_pct || 0).toFixed(2),
+      'Cell UnAvailability - Operation (%)': parseFloat(record.cell_unavailability_operation_pct || 0).toFixed(2)
+    }));
+  };
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <div className="page-container">
       {/* Page Header */}
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ 
-          fontSize: '2rem', 
-          fontWeight: '700', 
-          color: '#1f2937',
-          marginBottom: '0.5rem'
-        }}>
-          LTE KPI Reports
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1rem' }}>
+      <div className="page-header">
+        <h1 className="page-title">LTE KPI Reports</h1>
+        <p className="page-description">
           Import and analyze LTE network KPI metrics (33 performance indicators)
         </p>
       </div>
+
+      {/* Date Filters */}
+      <DateFilters
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={setStartDate}
+        onEndDateChange={setEndDate}
+        showWeekSelector={showWeekSelector}
+        onToggleWeekSelector={() => setShowWeekSelector(!showWeekSelector)}
+        selectedWeek={selectedWeek}
+        availableWeeks={availableWeeks}
+        onWeekChange={handleWeekChange}
+        onResetToLastWeek={resetToLastFullWeek}
+      />
+
+      {/* Loading State */}
+      {loading && (
+        <div className="loading-container">
+          <p>Loading KPI data...</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {dataError && (
+        <div className="error-container">
+          <p>❌ Error loading data: {dataError}</p>
+        </div>
+      )}
+
+      {/* Availability KPIs Chart */}
+      {!loading && !dataError && kpiData.length > 0 && (
+        <div className="charts-section" style={{ marginBottom: '2rem' }}>
+          <ChartCard title="Cell Availability KPIs" subtitle="Hourly cell availability and unavailability metrics">
+            <KPILineChart
+              data={prepareAvailabilityData()}
+              dataKeys={[
+                'Cell Availability (%)',
+                'Cell UnAvailability - Fault (%)',
+                'Cell UnAvailability - Operation (%)'
+              ]}
+              yAxisLabel="%"
+            />
+          </ChartCard>
+        </div>
+      )}
+
+      {/* No Data State */}
+      {!loading && !dataError && kpiData.length === 0 && (
+        <div className="charts-section" style={{ marginBottom: '2rem' }}>
+          <div className="empty-state">
+            <p>📊 No KPI data available for the selected date range</p>
+            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: '#6b7280' }}>
+              Upload data using the import section below
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Import Section */}
       <div style={{
@@ -172,34 +291,48 @@ const LTEKPIReports = () => {
         )}
       </div>
 
-      {/* KPI Visualization Section - Placeholder */}
-      <div style={{
-        backgroundColor: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        padding: '2rem'
-      }}>
-        <h2 style={{ 
-          fontSize: '1.25rem', 
-          fontWeight: '600', 
-          color: '#374151',
-          marginBottom: '1rem'
-        }}>
-          KPI Visualizations
-        </h2>
-        
-        <div style={{
-          textAlign: 'center',
-          padding: '3rem',
-          color: '#9ca3af',
-          fontSize: '1rem'
-        }}>
-          <p>📊 KPI charts and visualizations will be displayed here</p>
-          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}>
-            Upload data to view performance metrics
-          </p>
+      {/* Loading State */}
+      {loading && (
+        <div className="loading-container">
+          <p>Loading KPI data...</p>
         </div>
-      </div>
+      )}
+
+      {/* Error State */}
+      {dataError && (
+        <div className="error-container">
+          <p>❌ Error loading data: {dataError}</p>
+        </div>
+      )}
+
+      {/* Availability KPIs Chart */}
+      {!loading && !dataError && kpiData.length > 0 && (
+        <div className="charts-section" style={{ marginTop: '2rem' }}>
+          <ChartCard title="Cell Availability KPIs" subtitle="Hourly cell availability and unavailability metrics">
+            <KPILineChart
+              data={prepareAvailabilityData()}
+              dataKeys={[
+                'Cell Availability (%)',
+                'Cell UnAvailability - Fault (%)',
+                'Cell UnAvailability - Operation (%)'
+              ]}
+              yAxisLabel="%"
+            />
+          </ChartCard>
+        </div>
+      )}
+
+      {/* No Data State */}
+      {!loading && !dataError && kpiData.length === 0 && (
+        <div className="charts-section" style={{ marginTop: '2rem' }}>
+          <div className="empty-state">
+            <p>📊 No KPI data available for the selected date range</p>
+            <p style={{ fontSize: '0.875rem', marginTop: '0.5rem', color: '#6b7280' }}>
+              Upload data using the import section above
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
