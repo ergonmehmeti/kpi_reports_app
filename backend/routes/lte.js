@@ -6,6 +6,7 @@
 import express from 'express';
 import { upload, uploadLimiter } from '../utils/fileUpload.js';
 import lteController from '../controllers/lteController.js';
+import { adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -14,9 +15,9 @@ console.log('✅ LTE routes loaded, controller methods:', Object.keys(lteControl
 /**
  * @route   POST /api/lte/upload
  * @desc    Upload and import LTE daily site traffic CSV file
- * @access  Public (with rate limiting)
+ * @access  Admin only
  */
-router.post('/upload', uploadLimiter, upload.single('file'), (req, res, next) => {
+router.post('/upload', adminOnly, uploadLimiter, upload.single('file'), (req, res, next) => {
   console.log('🔵 LTE upload route hit, file:', req.file?.originalname);
   lteController.uploadCSV(req, res, next);
 });

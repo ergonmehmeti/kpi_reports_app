@@ -6,15 +6,16 @@
 import express from 'express';
 import { upload, uploadLimiter } from '../utils/fileUpload.js';
 import gsmController from '../controllers/gsmController.js';
+import { adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * @route   POST /api/gsm/upload
  * @desc    Upload and import GSM KPI CSV file
- * @access  Public (with rate limiting)
+ * @access  Admin only
  */
-router.post('/upload', uploadLimiter, upload.single('file'), gsmController.uploadCSV);
+router.post('/upload', adminOnly, uploadLimiter, upload.single('file'), gsmController.uploadCSV);
 
 /**
  * @route   GET /api/gsm/data

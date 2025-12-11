@@ -1,15 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import LoginModal from '../auth/LoginModal';
 import './TopNav.css';
 
 const TopNav = ({ activeTab, onTabChange, onMenuClick }) => {
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [user, setUser] = useState(null);
+
+  // Check for existing login on mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        localStorage.removeItem('user');
+        localStorage.removeItem('token');
+      }
+    }
+  }, []);
+
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  const isAdmin = user?.role === 'admin';
+
   return (
     <header className="top-nav">
       <div className="nav-left">
-        <button className="hamburger-btn" onClick={onMenuClick}>
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+        {isAdmin && (
+          <button className="hamburger-btn" onClick={onMenuClick}>
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        )}
         <div className="logo">
           <h1>KPI Reports</h1>
           <span className="subtitle">Kosovo Telecom</span>
@@ -41,8 +72,25 @@ const TopNav = ({ activeTab, onTabChange, onMenuClick }) => {
       </nav>
 
       <div className="nav-right">
-        {/* Placeholder for future user menu */}
+        {user ? (
+          <div className="user-menu">
+            <span className="user-name">{user.username}</span>
+            <button className="logout-btn" onClick={handleLogout}>
+              Logout
+            </button>
+          </div>
+        ) : (
+          <button className="login-btn" onClick={() => setIsLoginModalOpen(true)}>
+            Login
+          </button>
+        )}
       </div>
+
+      <LoginModal 
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
     </header>
   );
 };

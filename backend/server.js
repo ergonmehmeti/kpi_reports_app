@@ -5,6 +5,7 @@ import pool from './db/pool.js';
 import csvRoutes from './routes/csv.js';
 import gsmRoutes from './routes/gsm.js';
 import lteRoutes from './routes/lte.js';
+import authRoutes from './routes/auth.js';
 import lteFrequencyRoutes from './routes/lteFrequency.js';
 
 dotenv.config();
@@ -36,6 +37,9 @@ app.get('/api/health', (req, res) => {
 
 // CSV Upload routes (generic)
 app.use('/api/csv', csvRoutes);
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // GSM KPI routes
 app.use('/api/gsm', gsmRoutes);
