@@ -1,23 +1,27 @@
 import bcrypt from 'bcryptjs';
 import pool from './db/pool.js';
 
-const newPassword = 'Raportet2233';
-const hash = bcrypt.hashSync(newPassword, 10);
+// Change these values as needed
+const username = 'developer';
+const password = 'Raportet2233';
+const role = 'adminDeveloper';
 
-console.log('Generated hash:', hash);
+const hash = bcrypt.hashSync(password, 10);
+
+console.log('Creating user:', username);
+console.log('Role:', role);
 
 pool.query(
-  'UPDATE users SET password_hash = $1 WHERE username = $2',
-  [hash, 'admin']
+  'INSERT INTO users (username, password_hash, role) VALUES ($1, $2, $3) ON CONFLICT (username) DO UPDATE SET password_hash = $2, role = $3',
+  [username, hash, role]
 )
   .then((result) => {
-    console.log('✅ Password updated successfully!');
-    console.log('Rows affected:', result.rowCount);
+    console.log('✅ User created/updated successfully!');
     pool.end();
     process.exit(0);
   })
   .catch((error) => {
-    console.error('❌ Error updating password:', error.message);
+    console.error('❌ Error:', error.message);
     pool.end();
     process.exit(1);
   });

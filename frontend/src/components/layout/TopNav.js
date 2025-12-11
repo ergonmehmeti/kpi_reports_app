@@ -29,12 +29,16 @@ const TopNav = ({ activeTab, onTabChange, onMenuClick }) => {
     setUser(null);
   };
 
+  // Determine roles
   const isAdmin = user?.role === 'admin';
+  const isAdminDeveloper = user?.role === 'adminDeveloper';
+  const canImportData = isAdmin || isAdminDeveloper; // Can see hamburger menu
+  const canManageUsers = isAdminDeveloper; // Only adminDeveloper
 
   return (
     <header className="top-nav">
       <div className="nav-left">
-        {isAdmin && (
+        {canImportData && (
           <button className="hamburger-btn" onClick={onMenuClick}>
             <span></span>
             <span></span>
@@ -69,6 +73,15 @@ const TopNav = ({ activeTab, onTabChange, onMenuClick }) => {
           <span className="tab-icon">🔮</span>
           NR Reports
         </button>
+        {canManageUsers && (
+          <button 
+            className={`nav-tab ${activeTab === 'users' ? 'active' : ''}`}
+            onClick={() => onTabChange('users')}
+          >
+            <span className="tab-icon">👥</span>
+            Menaxhimi i shfrytëzuesëve
+          </button>
+        )}
       </nav>
 
       <div className="nav-right">

@@ -44,8 +44,8 @@ const LoginModal = ({ isOpen, onClose, onLoginSuccess }) => {
   return (
     <div className="login-modal-overlay" onClick={handleOverlayClick}>
       <div className="login-modal">
-        <h2>Admin Login</h2>
-        <p className="subtitle">Sign in to access data import features</p>
+        <h2>Kyçja</h2>
+        <p className="subtitle">Kyçu për të pas të drejta shtesë</p>
         
         <form className="login-form" onSubmit={handleSubmit}>
           <div className="form-group">

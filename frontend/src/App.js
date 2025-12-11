@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer';
 import GSMReports from './pages/GSMReports';
 import LTEReports from './pages/LTEReports';
 import NRReports from './pages/NRReports';
+import UserManagement from './pages/UserManagement';
 import './App.css';
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
         return <LTEReports />;
       case 'nr':
         return <NRReports />;
+      case 'users':
+        return <UserManagement />;
       default:
         return <GSMReports />;
     }
