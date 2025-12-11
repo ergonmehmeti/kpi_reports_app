@@ -1,4 +1,6 @@
 import { useState, useCallback } from 'react';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../utils/constants';
 
 /**
  * Custom hook for fetching LTE KPI data
@@ -17,20 +19,15 @@ export const useLTEKPIData = () => {
     setError(null);
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/lte-kpi/data?startDate=${startDate}&endDate=${endDate}`
-      );
+      const params = { startDate, endDate };
+      const response = await axios.get(API_ENDPOINTS.lteKpi.data, { params });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch KPI data');
-      }
-
-      const result = await response.json();
-      setData(result.data || []);
-      return result;
+      setData(response.data.data || []);
+      return response.data;
     } catch (err) {
-      setError(err.message);
-      console.error('Error fetching LTE KPI data:', err);
+      const errorMsg = err.response?.data?.error || err.message;
+      setError(errorMsg);
+      console.error('Error fetching LTE KPI data:', errorMsg);
       throw err;
     } finally {
       setLoading(false);
