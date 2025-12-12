@@ -371,7 +371,9 @@ const LTEReports = () => {
                 leftAxisLabel="DL Throughput (Mbps)"
                 rightAxisLabel="UL Throughput (Mbps)"
                 colors={['#3b82f6', '#f97316']}
-                leftAxisDomain={[0, 100]}
+                leftAxisDomain={[0, 'autoRound10']}
+                leftAxisUnit="Mbps"
+                rightAxisUnit="Mbps"
               />
             </ChartCard>
           </div>
@@ -419,6 +421,10 @@ const LTEReports = () => {
                 leftAxisLabel="Latency (ms)"
                 rightAxisLabel="Packet Loss (%)"
                 colors={['#3b82f6', '#f97316']}
+                leftAxisDomain={[0, 'autoRound10']}
+                rightAxisDomain={[0, 'autoRound0.2']}
+                leftAxisUnit="ms"
+                rightAxisUnit="%"
               />
             </ChartCard>
           </div>
