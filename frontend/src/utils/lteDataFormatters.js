@@ -86,3 +86,68 @@ export const prepareRetainabilityDropsPerHourData = (kpiData) => {
     'E-RAB Drops per Hour due to eNB': parseFloat(record.erab_drops_per_hour_enb || 0).toFixed(2)
   }));
 };
+
+/**
+ * Prepare Integrity KPI data (DL PDCP Throughput)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for integrity throughput chart
+ */
+export const prepareIntegrityThroughputData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    'Average DL PDCP UE Throughput with CA (Mbps)': parseFloat(record.avg_dl_pdcp_ue_throughput_ca_mbps || 0).toFixed(2),
+    'Average DL PDCP UE Throughput Overall (Mbps)': parseFloat(record.avg_dl_pdcp_ue_throughput_overall_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Utilization KPI data (DL Traffic Volume)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for utilization stacked bar chart
+ */
+export const prepareUtilizationVolumeData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G DL PDCP Traffic Volume with CA (GB)': parseFloat(record.dl_pdcp_traffic_volume_ca_gb || 0).toFixed(2),
+    '4G DL PDCP Traffic Volume without CA (GB)': parseFloat(record.dl_pdcp_traffic_volume_without_ca_gb || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Traffic & Throughput Combined data (Dual-axis chart)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for combined traffic and throughput chart
+ */
+export const prepareTrafficThroughputCombinedData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G DL PDCP Traffic Volume with CA (GB)': parseFloat(record.dl_pdcp_traffic_volume_ca_gb || 0).toFixed(2),
+    'Average DL PDCP UE Throughput with CA (Mbps)': parseFloat(record.avg_dl_pdcp_ue_throughput_ca_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Traffic & Throughput Overall data (Dual-axis chart)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for overall traffic and throughput chart
+ */
+export const prepareTrafficThroughputOverallData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G DL PDCP Traffic Volume Overall (GB)': parseFloat(record.dl_pdcp_traffic_volume_overall_gb || 0).toFixed(2),
+    'Average DL PDCP UE Throughput Overall (Mbps)': parseFloat(record.avg_dl_pdcp_ue_throughput_overall_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare UL Utilization KPI data (UL Traffic Volume)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for UL utilization stacked bar chart
+ */
+export const prepareULUtilizationVolumeData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G UL PDCP Traffic Volume with CA (GB)': parseFloat(record.ul_pdcp_traffic_volume_ca_gb || 0).toFixed(2),
+    '4G UL PDCP Traffic Volume Overall (GB)': parseFloat(record.ul_pdcp_traffic_volume_overall_gb || 0).toFixed(2)
+  }));
+};

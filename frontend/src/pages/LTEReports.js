@@ -5,6 +5,8 @@ import HorizontalStackedBarChart from '../components/charts/HorizontalStackedBar
 import FrequencyStackedAreaChart from '../components/charts/FrequencyStackedAreaChart';
 import DualAxisLineChart from '../components/charts/DualAxisLineChart';
 import KPILineChart from '../components/charts/KPILineChart';
+import StackedBarChart from '../components/charts/StackedBarChart';
+import ComboBarLineChart from '../components/charts/ComboBarLineChart';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useLTEData } from '../hooks/useLTEData';
 import { useLTEFrequencyData } from '../hooks/useLTEFrequencyData';
@@ -15,7 +17,12 @@ import {
   prepareAccessibilityData,
   prepareMobilityData,
   prepareRetainabilityDropRatioData,
-  prepareRetainabilityDropsPerHourData
+  prepareRetainabilityDropsPerHourData,
+  prepareIntegrityThroughputData,
+  prepareUtilizationVolumeData,
+  prepareTrafficThroughputCombinedData,
+  prepareTrafficThroughputOverallData,
+  prepareULUtilizationVolumeData
 } from '../utils/lteDataFormatters';
 import './GSMReports.css';
 
@@ -218,6 +225,107 @@ const LTEReports = () => {
         </div>
       )}
 
+      {/* Traffic & Throughput KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Traffic & Throughput KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              Data traffic volume and user throughput performance metrics
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - The speed at which packets can be transferred once the first packet has been scheduled on the air interface">
+              <KPILineChart
+                data={prepareIntegrityThroughputData(kpiData)}
+                dataKeys={[
+                  'Average DL PDCP UE Throughput with CA (Mbps)',
+                  'Average DL PDCP UE Throughput Overall (Mbps)'
+                ]}
+                colors={['#3b82f6', '#60a5fa']}
+                yAxisLabel="Mbps"
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Utilization - LTE Data Traffic Volume transferred on DL direction with and without using Carrier Aggregation">
+              <StackedBarChart
+                data={prepareUtilizationVolumeData(kpiData)}
+                dataKeys={[
+                  '4G DL PDCP Traffic Volume without CA (GB)',
+                  '4G DL PDCP Traffic Volume with CA (GB)'
+                ]}
+                colors={['#fbbf24', '#f97316']}
+                yAxisLabel="GB"
+                barSize={40}
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Traffic and Throughput for UEs using LTE Carrier Aggregation on DL direction - UE DL Throughput is reduced with increase of traffic load on network">
+              <ComboBarLineChart
+                data={prepareTrafficThroughputCombinedData(kpiData)}
+                barKey="4G DL PDCP Traffic Volume with CA (GB)"
+                lineKey="Average DL PDCP UE Throughput with CA (Mbps)"
+                barLabel="4G DL PDCP Traffic Volume with CA (GB)"
+                lineLabel="Average DL PDCP UE Throughput with CA (Mbps)"
+                leftAxisLabel="Traffic Volume (GB)"
+                rightAxisLabel="Throughput (Mbps)"
+                barColor="#f97316"
+                lineColor="#3b82f6"
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Traffic and Throughput for UEs with and without using LTE Carrier Aggregation on DL direction - UE DL Throughput is reduced with increase of traffic load on network">
+              <ComboBarLineChart
+                data={prepareTrafficThroughputOverallData(kpiData)}
+                barKey="4G DL PDCP Traffic Volume Overall (GB)"
+                lineKey="Average DL PDCP UE Throughput Overall (Mbps)"
+                barLabel="4G DL PDCP Traffic Volume Overall (GB)"
+                lineLabel="Average DL PDCP UE Throughput Overall (Mbps)"
+                leftAxisLabel="Traffic Volume (GB)"
+                rightAxisLabel="Throughput (Mbps)"
+                barColor="#f97316"
+                lineColor="#60a5fa"
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Utilization - LTE Data Traffic Volume transferred on UL direction used for UL PDCP UE throughput calculation - Overall traffic volume and amount of traffic using Carrier Aggregation (CA) on UL">
+              <StackedBarChart
+                data={prepareULUtilizationVolumeData(kpiData)}
+                dataKeys={[
+                  '4G UL PDCP Traffic Volume with CA (GB)',
+                  '4G UL PDCP Traffic Volume Overall (GB)'
+                ]}
+                colors={['#60a5fa', '#f97316']}
+                yAxisLabel="GB"
+                barSize={40}
+                height={400}
+              />
+            </ChartCard>
+          </div>
+        </div>
+      )}
+
       {/* Mobility KPIs Section */}
       {!kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
@@ -324,30 +432,30 @@ const LTEReports = () => {
           </div>
           
           <div className="lte-charts-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
-          {top20Sites.length > 0 && (
-            <ChartCard title={chartConfigs[0].title}>
-              <HorizontalStackedBarChart
-                data={top20Sites}
-                dataKeys={chartConfigs[0].dataKeys}
-                colors={chartConfigs[0].colors}
-                labels={chartConfigs[0].labels}
-                format={chartConfigs[0].format}
-              />
-            </ChartCard>
-          )}
+            {top20Sites.length > 0 && (
+              <ChartCard title={chartConfigs[0].title}>
+                <HorizontalStackedBarChart
+                  data={top20Sites}
+                  dataKeys={chartConfigs[0].dataKeys}
+                  colors={chartConfigs[0].colors}
+                  labels={chartConfigs[0].labels}
+                  format={chartConfigs[0].format}
+                />
+              </ChartCard>
+            )}
 
-          {bottom20Sites.length > 0 && (
-            <ChartCard title={chartConfigs[1].title}>
-              <HorizontalStackedBarChart
-                data={bottom20Sites}
-                dataKeys={chartConfigs[1].dataKeys}
-                colors={chartConfigs[1].colors}
-                labels={chartConfigs[1].labels}
-                format={chartConfigs[1].format}
-              />
-            </ChartCard>
-          )}
-        </div>
+            {bottom20Sites.length > 0 && (
+              <ChartCard title={chartConfigs[1].title}>
+                <HorizontalStackedBarChart
+                  data={bottom20Sites}
+                  dataKeys={chartConfigs[1].dataKeys}
+                  colors={chartConfigs[1].colors}
+                  labels={chartConfigs[1].labels}
+                  format={chartConfigs[1].format}
+                />
+              </ChartCard>
+            )}
+          </div>
         </div>
       )}
 
@@ -359,7 +467,7 @@ const LTEReports = () => {
       )}
 
       {/* LTE Frequency (Carrier) Data Section */}
-      <div style={{ 
+      <div style={{
         backgroundColor: '#ffffff', 
         borderRadius: '12px', 
         padding: '2rem', 
