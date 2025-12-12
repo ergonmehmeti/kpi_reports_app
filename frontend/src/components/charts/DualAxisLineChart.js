@@ -15,7 +15,9 @@ const DualAxisLineChart = memo(({
   rightAxisLabel,
   colors: customColors,
   leftAxisDomain,
-  rightAxisDomain
+  rightAxisDomain,
+  leftAxisUnit = '%',
+  rightAxisUnit = '%'
 }) => {
   const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.danger, CHART_COLORS.warning];
 
@@ -27,6 +29,19 @@ const DualAxisLineChart = memo(({
     if (values.length === 0) return [99, 100];
     
     const min = Math.min(...values);
+    const max = Math.max(...values);
+    
+    // Handle custom domain with 'auto' or 'autoRound10' for min or max
+    if (leftAxisDomain) {
+      const calculatedMin = Math.floor(min);
+      const calculatedMax = Math.ceil(max);
+      const roundedMax10 = Math.ceil(max / 10) * 10; // Round up to nearest 10
+      return [
+        leftAxisDomain[0] === 'auto' ? calculatedMin : leftAxisDomain[0],
+        leftAxisDomain[1] === 'auto' ? calculatedMax : 
+        leftAxisDomain[1] === 'autoRound10' ? roundedMax10 : leftAxisDomain[1]
+      ];
+    }
     
     // Round down to nearest integer, ensure max is 100
     const domainMin = Math.floor(min);
@@ -51,6 +66,17 @@ const DualAxisLineChart = memo(({
     
     const max = Math.max(...values);
     
+    // Handle custom domain with 'auto' or 'autoRound0.2' for max
+    if (rightAxisDomain) {
+      const calculatedMax = Math.ceil(max);
+      const roundedMax02 = Math.ceil(max / 0.2) * 0.2; // Round up to nearest 0.2
+      return [
+        rightAxisDomain[0] === 'auto' ? 0 : rightAxisDomain[0],
+        rightAxisDomain[1] === 'auto' ? calculatedMax : 
+        rightAxisDomain[1] === 'autoRound0.2' ? roundedMax02 : rightAxisDomain[1]
+      ];
+    }
+    
     // Round up to nearest integer, ensure min is 0
     const domainMin = 0;
     const domainMax = Math.ceil(max);
@@ -58,8 +84,8 @@ const DualAxisLineChart = memo(({
     return [domainMin, domainMax];
   };
 
-  const leftDomain = leftAxisDomain || calculateLeftDomain();
-  const rightDomain = rightAxisDomain || calculateRightDomain();
+  const leftDomain = calculateLeftDomain();
+  const rightDomain = calculateRightDomain();
 
   // Generate ticks for left axis
   const generateLeftTicks = () => {
@@ -68,12 +94,22 @@ const DualAxisLineChart = memo(({
     if (range <= 5) {
       // For small ranges (e.g., 99-100), use 0.2 increments
       return [min, min + 0.2, min + 0.4, min + 0.6, min + 0.8, max];
-    } else {
-      // For larger ranges, use 1 unit increments
+    } else if (range <= 10) {
+      // For ranges up to 10, use 2 unit increments
       const ticks = [];
-      for (let i = min; i <= max; i++) {
+      for (let i = min; i <= max; i += 2) {
         ticks.push(i);
       }
+      if (ticks[ticks.length - 1] !== max) ticks.push(max);
+      return ticks;
+    } else {
+      // For larger ranges, use 5 or 10 unit increments
+      const ticks = [];
+      const step = range <= 50 ? 5 : 10;
+      for (let i = min; i <= max; i += step) {
+        ticks.push(i);
+      }
+      if (ticks[ticks.length - 1] !== max) ticks.push(max);
       return ticks;
     }
   };
@@ -106,11 +142,14 @@ const DualAxisLineChart = memo(({
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
         }}>
           <p style={{ margin: '0 0 5px 0', fontWeight: 'bold', fontSize: '0.875rem' }}>{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ margin: '2px 0', color: entry.color, fontSize: '0.875rem' }}>
-              {entry.name}: {parseFloat(entry.value).toFixed(2)}%
-            </p>
-          ))}
+          {payload.map((entry, index) => {
+            const unit = entry.dataKey === leftAxisKey ? leftAxisUnit : rightAxisUnit;
+            return (
+              <p key={index} style={{ margin: '2px 0', color: entry.color, fontSize: '0.875rem' }}>
+                {entry.name}: {parseFloat(entry.value).toFixed(2)} {unit}
+              </p>
+            );
+          })}
         </div>
       );
     }
