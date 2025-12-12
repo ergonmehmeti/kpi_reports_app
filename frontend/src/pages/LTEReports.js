@@ -22,7 +22,14 @@ import {
   prepareUtilizationVolumeData,
   prepareTrafficThroughputCombinedData,
   prepareTrafficThroughputOverallData,
-  prepareULUtilizationVolumeData
+  prepareULUtilizationVolumeData,
+  prepareULIntegrityThroughputData,
+  prepareConnectedUsersData,
+  prepareMACThroughputData,
+  prepareMACTrafficThroughputDLData,
+  prepareMACTrafficThroughputULData,
+  prepareLatencyPacketLossData,
+  prepareTotalTrafficVolumeData
 } from '../utils/lteDataFormatters';
 import './GSMReports.css';
 
@@ -254,6 +261,7 @@ const LTEReports = () => {
                 ]}
                 colors={['#3b82f6', '#60a5fa']}
                 yAxisLabel="Mbps"
+                yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
           </div>
@@ -317,6 +325,113 @@ const LTEReports = () => {
                   '4G UL PDCP Traffic Volume Overall (GB)'
                 ]}
                 colors={['#60a5fa', '#f97316']}
+                yAxisLabel="GB"
+                barSize={40}
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - The speed at which packets can be transferred once the first packet has been scheduled on the air interface (UL direction)">
+              <KPILineChart
+                data={prepareULIntegrityThroughputData(kpiData)}
+                dataKeys={[
+                  'Average UL PDCP UE Throughput with CA (Mbps)',
+                  'Average UL PDCP UE Throughput Overall (Mbps)'
+                ]}
+                colors={['#60a5fa', '#f97316']}
+                yAxisLabel="Mbps"
+                yAxisDomain={[0, 'auto']}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Utilization KPIs - Number of LTE UEs on 'Connected State' - Connected means there is signaling connection between UE and Network. Signaling Connection is made up of 2 parts: RRC Connection (UE<->eNB) and S1_MME (eNB<->MME) Connection">
+              <KPILineChart
+                data={prepareConnectedUsersData(kpiData)}
+                dataKeys={[
+                  'Connected LTE Users (Avg)',
+                  'Connected LTE User (Max)'
+                ]}
+                colors={['#f97316', '#3b82f6']}
+                yAxisLabel="Users"
+                yAxisDomain={[0, 'auto']}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - Downlink and Uplink Throughput for Cell Level measured at MAC layer">
+              <DualAxisLineChart
+                data={prepareMACThroughputData(kpiData)}
+                leftAxisKey="Average DL MAC Cell Throughput (Mbps)"
+                rightAxisKeys={['Average UL MAC Cell Throughput (Mbps)']}
+                leftAxisLabel="DL Throughput (Mbps)"
+                rightAxisLabel="UL Throughput (Mbps)"
+                colors={['#3b82f6', '#f97316']}
+                leftAxisDomain={[0, 100]}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - Throughput for cell and Traffic Volume measured at MAC layer on Downlink direction">
+              <ComboBarLineChart
+                data={prepareMACTrafficThroughputDLData(kpiData)}
+                barKey="4G DL MAC Traffic Volume (GB)"
+                lineKey="Average DL MAC Cell Throughput (Mbps)"
+                barLabel="4G DL MAC Traffic Volume (GB)"
+                lineLabel="Average DL MAC Cell Throughput (Mbps)"
+                leftAxisLabel="Traffic Volume (GB)"
+                rightAxisLabel="Throughput (Mbps)"
+                barColor="#f97316"
+                lineColor="#3b82f6"
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - Throughput for cell and Traffic Volume measured at MAC layer on Uplink direction">
+              <ComboBarLineChart
+                data={prepareMACTrafficThroughputULData(kpiData)}
+                barKey="4G UL MAC Traffic Volume (GB)"
+                lineKey="Average UL MAC Cell Throughput (Mbps)"
+                barLabel="4G UL MAC Traffic Volume (GB)"
+                lineLabel="Average UL MAC Cell Throughput (Mbps)"
+                leftAxisLabel="Traffic Volume (GB)"
+                rightAxisLabel="Throughput (Mbps)"
+                barColor="#f97316"
+                lineColor="#3b82f6"
+                height={400}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Integrity KPIs - DL Latency and UL Packet Loss - DL Latency indicates how long it takes to transmit the first packet on Air Interface from the time it was received on eNB. UL Packet Loss measures proportion of packets that have lost on Air interface in Uplink direction">
+              <DualAxisLineChart
+                data={prepareLatencyPacketLossData(kpiData)}
+                leftAxisKey="Downlink Latency (ms)"
+                rightAxisKeys={['Uplink Packet Loss (%)']}
+                leftAxisLabel="Latency (ms)"
+                rightAxisLabel="Packet Loss (%)"
+                colors={['#3b82f6', '#f97316']}
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Utilization - LTE Total Data Traffic Volume transferred on DL and UL direction - The metric shows the total volume of PDCP SDUs on Data Radio Bearers that have been transferred in DL and UL">
+              <StackedBarChart
+                data={prepareTotalTrafficVolumeData(kpiData)}
+                dataKeys={[
+                  '4G UL PDCP Total Traffic Volume (GB)',
+                  '4G DL PDCP Total Traffic Volume (GB)'
+                ]}
+                colors={['#3b82f6', '#f97316']}
                 yAxisLabel="GB"
                 barSize={40}
                 height={400}

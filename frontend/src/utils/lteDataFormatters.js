@@ -151,3 +151,94 @@ export const prepareULUtilizationVolumeData = (kpiData) => {
     '4G UL PDCP Traffic Volume Overall (GB)': parseFloat(record.ul_pdcp_traffic_volume_overall_gb || 0).toFixed(2)
   }));
 };
+
+/**
+ * Prepare UL Integrity KPI data (UL PDCP Throughput)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for UL integrity throughput chart
+ */
+export const prepareULIntegrityThroughputData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    'Average UL PDCP UE Throughput with CA (Mbps)': parseFloat(record.avg_ul_pdcp_ue_throughput_ca_mbps || 0).toFixed(2),
+    'Average UL PDCP UE Throughput Overall (Mbps)': parseFloat(record.avg_ul_pdcp_ue_throughput_overall_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Connected Users KPI data
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for connected users chart
+ */
+export const prepareConnectedUsersData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    'Connected LTE Users (Avg)': parseInt(record.connected_lte_users_avg || 0),
+    'Connected LTE User (Max)': parseInt(record.connected_lte_users_max || 0)
+  }));
+};
+
+/**
+ * Prepare MAC Layer Throughput KPI data (Cell Level)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for MAC layer throughput chart with dual axis
+ */
+export const prepareMACThroughputData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    'Average DL MAC Cell Throughput (Mbps)': parseFloat(record.avg_dl_mac_cell_throughput_mbps || 0).toFixed(2),
+    'Average UL MAC Cell Throughput (Mbps)': parseFloat(record.avg_ul_mac_cell_throughput_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare MAC Layer DL Traffic and Throughput data
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for DL MAC traffic volume and throughput chart
+ */
+export const prepareMACTrafficThroughputDLData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G DL MAC Traffic Volume (GB)': parseFloat(record.dl_mac_traffic_volume_gb || 0).toFixed(2),
+    'Average DL MAC Cell Throughput (Mbps)': parseFloat(record.avg_dl_mac_cell_throughput_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare MAC Layer UL Traffic and Throughput data
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for UL MAC traffic volume and throughput chart
+ */
+export const prepareMACTrafficThroughputULData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G UL MAC Traffic Volume (GB)': parseFloat(record.ul_mac_traffic_volume_gb || 0).toFixed(2),
+    'Average UL MAC Cell Throughput (Mbps)': parseFloat(record.avg_ul_mac_cell_throughput_mbps || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Latency and Packet Loss data
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for DL latency and UL packet loss chart
+ */
+export const prepareLatencyPacketLossData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    'Downlink Latency (ms)': parseFloat(record.downlink_latency_ms || 0).toFixed(2),
+    'Uplink Packet Loss (%)': parseFloat(record.uplink_packet_loss_pct || 0).toFixed(2)
+  }));
+};
+
+/**
+ * Prepare Total Traffic Volume data (DL and UL)
+ * @param {Array} kpiData - Raw KPI data from API
+ * @returns {Array} Formatted data for total traffic volume stacked bar chart
+ */
+export const prepareTotalTrafficVolumeData = (kpiData) => {
+  return kpiData.map(record => ({
+    name: formatDateTime(record.datetime),
+    '4G DL PDCP Total Traffic Volume (GB)': parseFloat(record.dl_pdcp_traffic_volume_overall_gb || 0).toFixed(2),
+    '4G UL PDCP Total Traffic Volume (GB)': parseFloat(record.ul_pdcp_traffic_volume_overall_gb || 0).toFixed(2)
+  }));
+};

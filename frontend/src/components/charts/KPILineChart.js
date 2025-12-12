@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors }) => {
+const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors, yAxisDomain }) => {
   const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
 
   // Calculate dynamic Y-axis domain based on data
@@ -20,6 +20,16 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
         }
       });
     });
+    
+    // Handle custom domain with 'auto' for min or max
+    if (yAxisDomain) {
+      const calculatedMin = Math.floor(min);
+      const calculatedMax = Math.ceil(max);
+      return [
+        yAxisDomain[0] === 'auto' ? calculatedMin : yAxisDomain[0],
+        yAxisDomain[1] === 'auto' ? calculatedMax : yAxisDomain[1]
+      ];
+    }
     
     // Floor the minimum value and ceil the maximum value
     const flooredMin = Math.floor(min);

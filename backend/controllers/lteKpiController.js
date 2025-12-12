@@ -139,6 +139,7 @@ export async function uploadKpiData(req, res) {
       '4g dl pdcp traffic volume without ca (gb)': 'dl_pdcp_traffic_volume_without_ca_gb',
       '4g dl pdcp traffic volume overall (gb)': 'dl_pdcp_traffic_volume_overall_gb',
       'average ul pdcp ue throughput overall (mbps)': 'avg_ul_pdcp_ue_throughput_overall_mbps',
+      'average ul pdcp ue throughput with ca (mbps)': 'avg_ul_pdcp_ue_throughput_ca_mbps',
       '4g ul pdcp traffic volume overall (gb)': 'ul_pdcp_traffic_volume_overall_gb',
       '4g ul pdcp traffic volume with ca (gb)': 'ul_pdcp_traffic_volume_ca_gb',
       'connected lte users (avg)': 'connected_lte_users_avg',
