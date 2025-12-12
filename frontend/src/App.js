@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import TopNav from './components/layout/TopNav';
 import SideNav from './components/layout/SideNav';
 import Footer from './components/layout/Footer';
@@ -12,7 +12,8 @@ function App() {
   const [sideNavOpen, setSideNavOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('gsm');
 
-  const renderPage = () => {
+  // Memoize page rendering to prevent re-render when only sideNavOpen changes
+  const currentPage = useMemo(() => {
     switch (activeTab) {
       case 'gsm':
         return <GSMReports />;
@@ -25,7 +26,7 @@ function App() {
       default:
         return <GSMReports />;
     }
-  };
+  }, [activeTab]);
 
   return (
     <div className="App">
@@ -41,7 +42,7 @@ function App() {
       />
 
       <main className="main-content">
-        {renderPage()}
+        {currentPage}
       </main>
 
       <Footer />

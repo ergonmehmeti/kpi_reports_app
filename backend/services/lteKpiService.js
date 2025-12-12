@@ -38,6 +38,7 @@ export const insertKpiData = async (records) => {
           dl_pdcp_traffic_volume_without_ca_gb,
           dl_pdcp_traffic_volume_overall_gb,
           avg_ul_pdcp_ue_throughput_overall_mbps,
+          avg_ul_pdcp_ue_throughput_ca_mbps,
           ul_pdcp_traffic_volume_overall_gb,
           ul_pdcp_traffic_volume_ca_gb,
           connected_lte_users_avg,
@@ -49,7 +50,7 @@ export const insertKpiData = async (records) => {
           downlink_latency_ms,
           uplink_packet_loss_pct
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34)
         ON CONFLICT (datetime) 
         DO UPDATE SET
           cell_availability_pct = EXCLUDED.cell_availability_pct,
@@ -74,6 +75,7 @@ export const insertKpiData = async (records) => {
           dl_pdcp_traffic_volume_without_ca_gb = EXCLUDED.dl_pdcp_traffic_volume_without_ca_gb,
           dl_pdcp_traffic_volume_overall_gb = EXCLUDED.dl_pdcp_traffic_volume_overall_gb,
           avg_ul_pdcp_ue_throughput_overall_mbps = EXCLUDED.avg_ul_pdcp_ue_throughput_overall_mbps,
+          avg_ul_pdcp_ue_throughput_ca_mbps = EXCLUDED.avg_ul_pdcp_ue_throughput_ca_mbps,
           ul_pdcp_traffic_volume_overall_gb = EXCLUDED.ul_pdcp_traffic_volume_overall_gb,
           ul_pdcp_traffic_volume_ca_gb = EXCLUDED.ul_pdcp_traffic_volume_ca_gb,
           connected_lte_users_avg = EXCLUDED.connected_lte_users_avg,
@@ -111,6 +113,7 @@ export const insertKpiData = async (records) => {
         record.dl_pdcp_traffic_volume_without_ca_gb,
         record.dl_pdcp_traffic_volume_overall_gb,
         record.avg_ul_pdcp_ue_throughput_overall_mbps,
+        record.avg_ul_pdcp_ue_throughput_ca_mbps,
         record.ul_pdcp_traffic_volume_overall_gb,
         record.ul_pdcp_traffic_volume_ca_gb,
         record.connected_lte_users_avg,

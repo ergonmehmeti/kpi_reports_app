@@ -12,9 +12,12 @@ const DualAxisLineChart = memo(({
   leftAxisKey,
   rightAxisKeys = [],
   leftAxisLabel,
-  rightAxisLabel
+  rightAxisLabel,
+  colors: customColors,
+  leftAxisDomain,
+  rightAxisDomain
 }) => {
-  const colors = [CHART_COLORS.primary, CHART_COLORS.danger, CHART_COLORS.warning];
+  const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.danger, CHART_COLORS.warning];
 
   // Calculate dynamic domain for left axis (Availability)
   const calculateLeftDomain = () => {
@@ -55,8 +58,8 @@ const DualAxisLineChart = memo(({
     return [domainMin, domainMax];
   };
 
-  const leftDomain = calculateLeftDomain();
-  const rightDomain = calculateRightDomain();
+  const leftDomain = leftAxisDomain || calculateLeftDomain();
+  const rightDomain = rightAxisDomain || calculateRightDomain();
 
   // Generate ticks for left axis
   const generateLeftTicks = () => {
