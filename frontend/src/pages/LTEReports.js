@@ -10,6 +10,13 @@ import { useLTEData } from '../hooks/useLTEData';
 import { useLTEFrequencyData } from '../hooks/useLTEFrequencyData';
 import { useLTEKPIData } from '../hooks/useLTEKPIData';
 import { getLTEChartConfigs } from '../utils/lteChartConfig';
+import {
+  prepareAvailabilityData,
+  prepareAccessibilityData,
+  prepareMobilityData,
+  prepareRetainabilityDropRatioData,
+  prepareRetainabilityDropsPerHourData
+} from '../utils/lteDataFormatters';
 import './GSMReports.css';
 
 /**
@@ -115,63 +122,6 @@ const LTEReports = () => {
     setEndDate(end);
   };
 
-  // Prepare chart data for Availability KPIs
-  const prepareAvailabilityData = () => {
-    return kpiData.map(record => ({
-      name: new Date(record.datetime).toLocaleString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit' 
-      }),
-      'Cell Availability (%)': parseFloat(record.cell_availability_pct || 0).toFixed(2),
-      'Cell UnAvailability - Fault (%)': parseFloat(record.cell_unavailability_fault_pct || 0).toFixed(2),
-      'Cell UnAvailability - Operation (%)': parseFloat(record.cell_unavailability_operation_pct || 0).toFixed(2)
-    }));
-  };
-
-  // Prepare chart data for Accessibility KPIs (Connection Success)
-  const prepareAccessibilityData = () => {
-    return kpiData.map(record => ({
-      name: new Date(record.datetime).toLocaleString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit' 
-      }),
-      'RRC Connection Establishment Success (%)': parseFloat(record.rrc_connection_success_pct || 0).toFixed(2),
-      'S1 Connection Establishment Success (%)': parseFloat(record.s1_connection_success_pct || 0).toFixed(2),
-      'E-RAB Only Establishment Success (%)': parseFloat(record.erab_only_establishment_success_pct || 0).toFixed(2),
-      'Initial E-RAB Establishment Success (%)': parseFloat(record.initial_erab_establishment_success_pct || 0).toFixed(2)
-    }));
-  };
-
-  // Prepare chart data for Retainability KPIs - Drop Ratios (%)
-  const prepareRetainabilityDropRatioData = () => {
-    return kpiData.map(record => ({
-      name: new Date(record.datetime).toLocaleString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit' 
-      }),
-      'E-RAB Drop Ratio-Overall (%)': parseFloat(record.erab_drop_ratio_overall_pct || 0).toFixed(2),
-      'E-RAB Drop due to MME (%)': parseFloat(record.erab_drop_mme_pct || 0).toFixed(2),
-      'E-RAB Drop due to eNB (%)': parseFloat(record.erab_drop_enb_pct || 0).toFixed(2)
-    }));
-  };
-
-  // Prepare chart data for Retainability KPIs - Drops per Hour
-  const prepareRetainabilityDropsPerHourData = () => {
-    return kpiData.map(record => ({
-      name: new Date(record.datetime).toLocaleString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit' 
-      }),
-      'E-RAB Drops per Hour (Overall)': parseFloat(record.erab_drops_per_hour_overall || 0).toFixed(2),
-      'E-RAB Drops per Hour due to MME': parseFloat(record.erab_drops_per_hour_mme || 0).toFixed(2),
-      'E-RAB Drops per Hour due to eNB': parseFloat(record.erab_drops_per_hour_enb || 0).toFixed(2)
-    }));
-  };
-
   // Get chart configurations
   const chartConfigs = getLTEChartConfigs();
 
@@ -217,7 +167,7 @@ const LTEReports = () => {
           <div style={{ marginTop: '1.5rem' }}>
             <ChartCard title="Availability Metrics">
               <DualAxisLineChart
-                data={prepareAvailabilityData()}
+                data={prepareAvailabilityData(kpiData)}
                 leftAxisKey="Cell Availability (%)"
                 rightAxisKeys={[
                   'Cell UnAvailability - Fault (%)',
@@ -253,7 +203,7 @@ const LTEReports = () => {
           <div style={{ marginTop: '1.5rem' }}>
             <ChartCard title="Connection Establishment Success Rates">
               <KPILineChart
-                data={prepareAccessibilityData()}
+                data={prepareAccessibilityData(kpiData)}
                 dataKeys={[
                   'RRC Connection Establishment Success (%)',
                   'S1 Connection Establishment Success (%)',
@@ -261,6 +211,42 @@ const LTEReports = () => {
                   'Initial E-RAB Establishment Success (%)'
                 ]}
                 colors={['#3b82f6', '#f97316', '#10b981', '#ec4899']}
+                yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+        </div>
+      )}
+
+      {/* Mobility KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Mobility KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              The ability to provide the requested service to the user with mobility. Success of HOs from preparation to execution phase.
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Handover Success Metrics">
+              <KPILineChart
+                data={prepareMobilityData(kpiData)}
+                dataKeys={[
+                  'Handover Success Ratio (%)',
+                  'Handover Execution Success (%)',
+                  'Handover Preparation Success (%)'
+                ]}
+                colors={['#10b981', '#f59e0b', '#3b82f6']}
                 yAxisLabel="%"
               />
             </ChartCard>
@@ -290,7 +276,7 @@ const LTEReports = () => {
           <div style={{ marginTop: '1.5rem' }}>
             <ChartCard title="Proportions of Abnormal E-RAB Releases over Total E-RAB Releases">
               <KPILineChart
-                data={prepareRetainabilityDropRatioData()}
+                data={prepareRetainabilityDropRatioData(kpiData)}
                 dataKeys={[
                   'E-RAB Drop Ratio-Overall (%)',
                   'E-RAB Drop due to MME (%)',
@@ -305,7 +291,7 @@ const LTEReports = () => {
           <div style={{ marginTop: '1.5rem' }}>
             <ChartCard title="Rate of E-RABs Abnormally Released over Duration of Active Session Time for All UEs">
               <KPILineChart
-                data={prepareRetainabilityDropsPerHourData()}
+                data={prepareRetainabilityDropsPerHourData(kpiData)}
                 dataKeys={[
                   'E-RAB Drops per Hour (Overall)',
                   'E-RAB Drops per Hour due to MME',
