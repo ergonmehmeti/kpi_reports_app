@@ -206,6 +206,16 @@ const LTEReports = () => {
     }
   }, [comparisonMode, selectedWeek, selectedWeek2, selectedKPIs, includeSiteTraffic, includeFrequencyBand, fetchComparisonData]);
 
+  // Auto-fetch comparison data when KPIs, weeks, or options change
+  useEffect(() => {
+    if (comparisonMode && selectedWeek && selectedWeek2) {
+      // Only fetch if at least one option is selected
+      if (selectedKPIs.length > 0 || includeSiteTraffic || includeFrequencyBand) {
+        fetchComparisonData(selectedWeek, selectedWeek2, selectedKPIs, includeSiteTraffic, includeFrequencyBand);
+      }
+    }
+  }, [comparisonMode, selectedWeek, selectedWeek2, selectedKPIs, includeSiteTraffic, includeFrequencyBand, fetchComparisonData]);
+
   // Get chart configurations
   const chartConfigs = getLTEChartConfigs();
 
@@ -243,6 +253,7 @@ const LTEReports = () => {
         onEndDateChange={setEndDate}
         onToggleMode={handleModeToggle}
         onRefresh={handleRefresh}
+        hideCustomDatesButton={true}
         comparisonMode={comparisonMode}
         onToggleComparison={handleToggleComparison}
         selectedWeek2={selectedWeek2}
@@ -254,8 +265,28 @@ const LTEReports = () => {
         <div className="kpi-selector-container">
           <h4>Zgjedh KPI-të për krahasim:</h4>
           
-          {/* Site Traffic Comparison Option */}
-          <div className="site-traffic-option">
+          <div className="kpi-categories">
+            {Object.entries(kpisByCategory).map(([category, kpis]) => (
+              <div key={category} className="kpi-category">
+                <h5>{String(category).replace('KPIs', "KPI's")}</h5>
+                <div className="kpi-checkboxes">
+                  {kpis.map(kpi => (
+                    <label key={kpi.id} className="kpi-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={selectedKPIs.includes(kpi.id)}
+                        onChange={() => handleKPIToggle(kpi.id)}
+                      />
+                      <span>{kpi.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Site Traffic & Frequency Band Options - At Bottom */}
+          <div className="site-traffic-option" style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
             <label className="kpi-checkbox site-traffic-checkbox">
               <input
                 type="checkbox"
@@ -274,29 +305,10 @@ const LTEReports = () => {
             </label>
           </div>
           
-          <div className="kpi-categories">
-            {Object.entries(kpisByCategory).map(([category, kpis]) => (
-              <div key={category} className="kpi-category">
-                <h5>{category}</h5>
-                <div className="kpi-checkboxes">
-                  {kpis.map(kpi => (
-                    <label key={kpi.id} className="kpi-checkbox">
-                      <input
-                        type="checkbox"
-                        checked={selectedKPIs.includes(kpi.id)}
-                        onChange={() => handleKPIToggle(kpi.id)}
-                      />
-                      <span>{kpi.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
           <p className="kpi-selection-hint">
-            {selectedKPIs.length === 0 && !includeSiteTraffic
+            {selectedKPIs.length === 0 && !includeSiteTraffic && !includeFrequencyBand
               ? '⚠️ Zgjedh të paktën një KPI ose Site Traffic për krahasim'
-              : `✓ ${selectedKPIs.length} KPI${includeSiteTraffic ? ' + Site Traffic' : ''} të zgjedhura`}
+              : `✓ ${selectedKPIs.length} ${selectedKPIs.length === 1 ? 'KPI' : "KPI's"}${includeSiteTraffic ? ' + Site Traffic' : ''}${includeFrequencyBand ? ' + Frequency Band' : ''} të zgjedhura`}
           </p>
         </div>
       )}
@@ -304,7 +316,36 @@ const LTEReports = () => {
       {isLoading && <div className="loading">Loading LTE data...</div>}
       {currentError && <div className="error-message"><p>⚠️ {currentError}</p></div>}
 
-      {/* Site Traffic Comparison Charts */}
+      {/* Comparison Charts - KPIs first */}
+      {comparisonMode && !comparisonLoading && !comparisonError && Object.keys(comparisonData).length > 0 && (
+        <section className="charts-section">
+          <div className="charts-grid">
+            {selectedKPIs.map(kpiId => {
+              const kpiConfig = LTE_KPI_OPTIONS.find(k => k.id === kpiId);
+              const chartData = comparisonData[kpiId];
+              
+              if (!chartData || !kpiConfig) return null;
+              
+              return (
+                <ChartCard 
+                  key={kpiId}
+                  title={kpiConfig.label} 
+                  badge="Weekly Comparison"
+                >
+                  <ComparisonLineChart
+                    data={chartData}
+                    week1Label={week1Label}
+                    week2Label={week2Label}
+                    yAxisLabel={kpiConfig.yAxisLabel}
+                  />
+                </ChartCard>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Site Traffic Comparison Charts - At bottom */}
       {comparisonMode && !comparisonLoading && !comparisonError && includeSiteTraffic && 
        (siteTrafficComparison.top20.length > 0 || siteTrafficComparison.bottom20.length > 0) && (
         <div style={{ 
@@ -414,7 +455,7 @@ const LTEReports = () => {
         </div>
       )}
 
-      {/* Frequency Band Comparison Charts - 4 separate charts, one per band */}
+      {/* Frequency Band Comparison Charts - 4 separate charts, one per band - At bottom */}
       {comparisonMode && !comparisonLoading && !comparisonError && includeFrequencyBand && 
        Object.keys(frequencyComparison).length > 0 && (
         <div style={{ 
@@ -430,19 +471,27 @@ const LTEReports = () => {
               LTE Data Traffic Volume by Frequency Band
             </h3>
             <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
-              Comparing traffic by frequency band: <span style={{color: '#3b82f6', fontWeight: 600}}>{week1Label}</span> vs <span style={{color: '#22c55e', fontWeight: 600}}>{week2Label}</span>
+              Comparing traffic by frequency band: <span style={{fontWeight: 600}}>{week1Label}</span> (light shade) vs <span style={{fontWeight: 600}}>{week2Label}</span> (dark shade)
             </p>
           </div>
           
-          {/* Legend */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '1rem', marginBottom: '1rem' }}>
+          {/* Legend - showing band colors */}
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span style={{ width: '12px', height: '12px', backgroundColor: '#3b82f6', borderRadius: '50%' }}></span>
-              <span style={{ color: '#475569', fontSize: '0.9rem' }}>{week1Label}</span>
+              <span style={{ color: '#475569', fontSize: '0.85rem' }}>LTE2100</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ width: '12px', height: '12px', backgroundColor: '#22c55e', borderRadius: '50%' }}></span>
-              <span style={{ color: '#475569', fontSize: '0.9rem' }}>{week2Label}</span>
+              <span style={{ width: '12px', height: '12px', backgroundColor: '#f97316', borderRadius: '50%' }}></span>
+              <span style={{ color: '#475569', fontSize: '0.85rem' }}>LTE1800</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '12px', height: '12px', backgroundColor: '#10b981', borderRadius: '50%' }}></span>
+              <span style={{ color: '#475569', fontSize: '0.85rem' }}>LTE900</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ width: '12px', height: '12px', backgroundColor: '#ec4899', borderRadius: '50%' }}></span>
+              <span style={{ color: '#475569', fontSize: '0.85rem' }}>LTE800</span>
             </div>
           </div>
           
@@ -450,12 +499,33 @@ const LTEReports = () => {
           <div className="frequency-comparison-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
             {['500 - LTE2100', '1799 - LTE1800', '3550 - LTE900', '6400 - LTE800'].map((bandName) => {
               const bandData = frequencyComparison[bandName] || [];
-              const bandColors = {
-                '500 - LTE2100': '#3b82f6',
-                '1799 - LTE1800': '#f97316',
-                '3550 - LTE900': '#22c55e',
-                '6400 - LTE800': '#ec4899'
+              
+              // Band-specific colors matching main view
+              // Week 1: lighter shade, Week 2: darker/stronger shade
+              const bandColorSchemes = {
+                '500 - LTE2100': { 
+                  week1: '#93c5fd', // Light blue
+                  week2: '#1d4ed8', // Strong blue
+                  base: '#3b82f6'   // Base blue
+                },
+                '1799 - LTE1800': { 
+                  week1: '#fdba74', // Light orange
+                  week2: '#c2410c', // Strong orange
+                  base: '#f97316'   // Base orange
+                },
+                '3550 - LTE900': { 
+                  week1: '#6ee7b7', // Light green
+                  week2: '#047857', // Strong green
+                  base: '#10b981'   // Base green
+                },
+                '6400 - LTE800': { 
+                  week1: '#f9a8d4', // Light pink
+                  week2: '#be185d', // Strong pink
+                  base: '#ec4899'   // Base pink
+                }
               };
+              
+              const colorScheme = bandColorSchemes[bandName];
               
               if (bandData.length === 0) return null;
               
@@ -479,6 +549,8 @@ const LTEReports = () => {
                       week1Key="week1"
                       week2Key="week2"
                       xAxisKey="time"
+                      week1Color={colorScheme.week1}
+                      week2Color={colorScheme.week2}
                     />
                   </div>
                   {/* Band Summary */}
@@ -492,11 +564,11 @@ const LTEReports = () => {
                     fontSize: '0.8rem'
                   }}>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ color: '#3b82f6', fontWeight: 600 }}>{week1Total.toFixed(1)} GB</div>
+                      <div style={{ color: colorScheme.week1, fontWeight: 600 }}>{week1Total.toFixed(1)} GB</div>
                       <div style={{ color: '#6b7280' }}>{week1Label}</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ color: '#22c55e', fontWeight: 600 }}>{week2Total.toFixed(1)} GB</div>
+                      <div style={{ color: colorScheme.week2, fontWeight: 600 }}>{week2Total.toFixed(1)} GB</div>
                       <div style={{ color: '#6b7280' }}>{week2Label}</div>
                     </div>
                     <div style={{ textAlign: 'center' }}>
@@ -514,35 +586,6 @@ const LTEReports = () => {
             })}
           </div>
         </div>
-      )}
-
-      {/* Comparison Charts */}
-      {comparisonMode && !comparisonLoading && !comparisonError && Object.keys(comparisonData).length > 0 && (
-        <section className="charts-section">
-          <div className="charts-grid">
-            {selectedKPIs.map(kpiId => {
-              const kpiConfig = LTE_KPI_OPTIONS.find(k => k.id === kpiId);
-              const chartData = comparisonData[kpiId];
-              
-              if (!chartData || !kpiConfig) return null;
-              
-              return (
-                <ChartCard 
-                  key={kpiId}
-                  title={kpiConfig.label} 
-                  badge="Weekly Comparison"
-                >
-                  <ComparisonLineChart
-                    data={chartData}
-                    week1Label={week1Label}
-                    week2Label={week2Label}
-                    yAxisLabel={kpiConfig.yAxisLabel}
-                  />
-                </ChartCard>
-              );
-            })}
-          </div>
-        </section>
       )}
 
       {/* Normal View - All existing sections */}

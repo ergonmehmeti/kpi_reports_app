@@ -4,218 +4,264 @@ import { API_ENDPOINTS } from '../utils/constants';
 
 /**
  * LTE KPI definitions with database column names and display labels
+ * Ordered to match main LTE view: Cell Availability, Accessibility, Traffic & Throughput, Mobility, Retainability
  */
 export const LTE_KPI_OPTIONS = [
-  // Availability KPIs
+  // 1. Cell Availability KPIs
   { 
     id: 'cell_availability', 
     label: 'Cell Availability (%)', 
     column: 'cell_availability_pct',
     yAxisLabel: '%',
-    category: 'Availability'
+    category: 'Cell Availability KPIs'
   },
   { 
     id: 'cell_unavailability_fault', 
     label: 'Cell UnAvailability - Fault (%)', 
     column: 'cell_unavailability_fault_pct',
     yAxisLabel: '%',
-    category: 'Availability'
+    category: 'Cell Availability KPIs'
   },
   { 
     id: 'cell_unavailability_operation', 
     label: 'Cell UnAvailability - Operation (%)', 
     column: 'cell_unavailability_operation_pct',
     yAxisLabel: '%',
-    category: 'Availability'
+    category: 'Cell Availability KPIs'
   },
   
-  // Accessibility KPIs
+  // 2. Accessibility KPIs
   { 
     id: 'rrc_connection_success', 
     label: 'RRC Connection Success (%)', 
     column: 'rrc_connection_success_pct',
     yAxisLabel: '%',
-    category: 'Accessibility'
+    category: 'Accessibility KPIs'
   },
   { 
     id: 's1_connection_success', 
     label: 'S1 Connection Success (%)', 
     column: 's1_connection_success_pct',
     yAxisLabel: '%',
-    category: 'Accessibility'
+    category: 'Accessibility KPIs'
   },
   { 
     id: 'erab_establishment_success', 
     label: 'E-RAB Establishment Success (%)', 
     column: 'erab_only_establishment_success_pct',
     yAxisLabel: '%',
-    category: 'Accessibility'
+    category: 'Accessibility KPIs'
   },
   { 
     id: 'initial_erab_success', 
     label: 'Initial E-RAB Success (%)', 
     column: 'initial_erab_establishment_success_pct',
     yAxisLabel: '%',
-    category: 'Accessibility'
+    category: 'Accessibility KPIs'
   },
   
-  // Retainability KPIs
-  { 
-    id: 'erab_drop_ratio', 
-    label: 'E-RAB Drop Ratio Overall (%)', 
-    column: 'erab_drop_ratio_overall_pct',
-    yAxisLabel: '%',
-    category: 'Retainability'
-  },
-  { 
-    id: 'erab_drop_mme', 
-    label: 'E-RAB Drop due to MME (%)', 
-    column: 'erab_drop_mme_pct',
-    yAxisLabel: '%',
-    category: 'Retainability'
-  },
-  { 
-    id: 'erab_drop_enb', 
-    label: 'E-RAB Drop due to eNB (%)', 
-    column: 'erab_drop_enb_pct',
-    yAxisLabel: '%',
-    category: 'Retainability'
-  },
-  { 
-    id: 'erab_drops_per_hour', 
-    label: 'E-RAB Drops per Hour (Overall)', 
-    column: 'erab_drops_per_hour_overall',
-    yAxisLabel: 'drops/hour',
-    category: 'Retainability'
-  },
-  
-  // Mobility KPIs
-  { 
-    id: 'handover_success', 
-    label: 'Handover Success Ratio (%)', 
-    column: 'handover_success_ratio_pct',
-    yAxisLabel: '%',
-    category: 'Mobility'
-  },
-  { 
-    id: 'handover_execution', 
-    label: 'Handover Execution Success (%)', 
-    column: 'handover_execution_success_pct',
-    yAxisLabel: '%',
-    category: 'Mobility'
-  },
-  { 
-    id: 'handover_preparation', 
-    label: 'Handover Preparation Success (%)', 
-    column: 'handover_preparation_success_pct',
-    yAxisLabel: '%',
-    category: 'Mobility'
-  },
-  
-  // Integrity KPIs - Throughput
+  // 3. Integrity KPIs - Throughput metrics
   { 
     id: 'dl_throughput_overall', 
     label: 'Avg DL PDCP UE Throughput Overall (Mbps)', 
     column: 'avg_dl_pdcp_ue_throughput_overall_mbps',
     yAxisLabel: 'Mbps',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
   },
   { 
     id: 'dl_throughput_ca', 
     label: 'Avg DL PDCP UE Throughput with CA (Mbps)', 
     column: 'avg_dl_pdcp_ue_throughput_ca_mbps',
     yAxisLabel: 'Mbps',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
   },
   { 
     id: 'ul_throughput_overall', 
     label: 'Avg UL PDCP UE Throughput Overall (Mbps)', 
     column: 'avg_ul_pdcp_ue_throughput_overall_mbps',
     yAxisLabel: 'Mbps',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
+  },
+  { 
+    id: 'ul_throughput_ca', 
+    label: 'Avg UL PDCP UE Throughput with CA (Mbps)', 
+    column: 'avg_ul_pdcp_ue_throughput_ca_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Integrity KPIs'
   },
   { 
     id: 'dl_mac_throughput', 
     label: 'Avg DL MAC Cell Throughput (Mbps)', 
     column: 'avg_dl_mac_cell_throughput_mbps',
     yAxisLabel: 'Mbps',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
   },
   { 
     id: 'ul_mac_throughput', 
     label: 'Avg UL MAC Cell Throughput (Mbps)', 
     column: 'avg_ul_mac_cell_throughput_mbps',
     yAxisLabel: 'Mbps',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
   },
-  
-  // Utilization KPIs - Volume
-  { 
-    id: 'dl_traffic_volume_ca', 
-    label: 'DL PDCP Traffic Volume with CA (GB)', 
-    column: 'dl_pdcp_traffic_volume_ca_gb',
-    yAxisLabel: 'GB',
-    category: 'Utilization'
-  },
-  { 
-    id: 'dl_traffic_volume_overall', 
-    label: 'DL PDCP Traffic Volume Overall (GB)', 
-    column: 'dl_pdcp_traffic_volume_overall_gb',
-    yAxisLabel: 'GB',
-    category: 'Utilization'
-  },
-  { 
-    id: 'ul_traffic_volume_overall', 
-    label: 'UL PDCP Traffic Volume Overall (GB)', 
-    column: 'ul_pdcp_traffic_volume_overall_gb',
-    yAxisLabel: 'GB',
-    category: 'Utilization'
-  },
-  { 
-    id: 'dl_mac_traffic_volume', 
-    label: 'DL MAC Traffic Volume (GB)', 
-    column: 'dl_mac_traffic_volume_gb',
-    yAxisLabel: 'GB',
-    category: 'Utilization'
-  },
-  { 
-    id: 'ul_mac_traffic_volume', 
-    label: 'UL MAC Traffic Volume (GB)', 
-    column: 'ul_mac_traffic_volume_gb',
-    yAxisLabel: 'GB',
-    category: 'Utilization'
-  },
-  
-  // Connected Users
-  { 
-    id: 'connected_users_avg', 
-    label: 'Connected LTE Users (Avg)', 
-    column: 'connected_lte_users_avg',
-    yAxisLabel: 'Users',
-    category: 'Utilization'
-  },
-  { 
-    id: 'connected_users_max', 
-    label: 'Connected LTE Users (Max)', 
-    column: 'connected_lte_users_max',
-    yAxisLabel: 'Users',
-    category: 'Utilization'
-  },
-  
-  // Latency and Loss
   { 
     id: 'downlink_latency', 
     label: 'Downlink Latency (ms)', 
     column: 'downlink_latency_ms',
     yAxisLabel: 'ms',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
   },
   { 
     id: 'uplink_packet_loss', 
     label: 'Uplink Packet Loss (%)', 
     column: 'uplink_packet_loss_pct',
     yAxisLabel: '%',
-    category: 'Integrity'
+    category: 'Integrity KPIs'
+  },
+  
+  // 4. Utilization KPIs - Volume and users
+  { 
+    id: 'dl_traffic_volume_ca', 
+    label: 'DL PDCP Traffic Volume with CA (GB)', 
+    column: 'dl_pdcp_traffic_volume_ca_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'dl_traffic_volume_without_ca', 
+    label: 'DL PDCP Traffic Volume without CA (GB)', 
+    column: 'dl_pdcp_traffic_volume_without_ca_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'dl_traffic_volume_overall', 
+    label: 'DL PDCP Traffic Volume Overall (GB)', 
+    column: 'dl_pdcp_traffic_volume_overall_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'ul_traffic_volume_overall', 
+    label: 'UL PDCP Traffic Volume Overall (GB)', 
+    column: 'ul_pdcp_traffic_volume_overall_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'ul_traffic_volume_ca', 
+    label: 'UL PDCP Traffic Volume with CA (GB)', 
+    column: 'ul_pdcp_traffic_volume_ca_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'dl_mac_traffic_volume', 
+    label: 'DL MAC Traffic Volume (GB)', 
+    column: 'dl_mac_traffic_volume_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'ul_mac_traffic_volume', 
+    label: 'UL MAC Traffic Volume (GB)', 
+    column: 'ul_mac_traffic_volume_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'dl_total_traffic_volume', 
+    label: 'DL PDCP Total Traffic Volume (GB)', 
+    column: 'dl_pdcp_total_traffic_volume_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'ul_total_traffic_volume', 
+    label: 'UL PDCP Total Traffic Volume (GB)', 
+    column: 'ul_pdcp_total_traffic_volume_gb',
+    yAxisLabel: 'GB',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'connected_users_avg', 
+    label: 'Connected LTE Users (Avg)', 
+    column: 'connected_lte_users_avg',
+    yAxisLabel: 'Users',
+    category: 'Utilization KPIs'
+  },
+  { 
+    id: 'connected_users_max', 
+    label: 'Connected LTE Users (Max)', 
+    column: 'connected_lte_users_max',
+    yAxisLabel: 'Users',
+    category: 'Utilization KPIs'
+  },
+  
+  // 5. Mobility KPIs
+  { 
+    id: 'handover_success', 
+    label: 'Handover Success Ratio (%)', 
+    column: 'handover_success_ratio_pct',
+    yAxisLabel: '%',
+    category: 'Mobility KPIs'
+  },
+  { 
+    id: 'handover_execution', 
+    label: 'Handover Execution Success (%)', 
+    column: 'handover_execution_success_pct',
+    yAxisLabel: '%',
+    category: 'Mobility KPIs'
+  },
+  { 
+    id: 'handover_preparation', 
+    label: 'Handover Preparation Success (%)', 
+    column: 'handover_preparation_success_pct',
+    yAxisLabel: '%',
+    category: 'Mobility KPIs'
+  },
+  
+  // 6. Retainability KPIs
+  { 
+    id: 'erab_drop_ratio', 
+    label: 'E-RAB Drop Ratio Overall (%)', 
+    column: 'erab_drop_ratio_overall_pct',
+    yAxisLabel: '%',
+    category: 'Retainability KPIs'
+  },
+  { 
+    id: 'erab_drop_mme', 
+    label: 'E-RAB Drop due to MME (%)', 
+    column: 'erab_drop_mme_pct',
+    yAxisLabel: '%',
+    category: 'Retainability KPIs'
+  },
+  { 
+    id: 'erab_drop_enb', 
+    label: 'E-RAB Drop due to eNB (%)', 
+    column: 'erab_drop_enb_pct',
+    yAxisLabel: '%',
+    category: 'Retainability KPIs'
+  },
+  { 
+    id: 'erab_drops_per_hour', 
+    label: 'E-RAB Drops per Hour (Overall)', 
+    column: 'erab_drops_per_hour_overall',
+    yAxisLabel: 'drops/hour',
+    category: 'Retainability KPIs'
+  },
+  { 
+    id: 'erab_drops_per_hour_mme', 
+    label: 'E-RAB Drops per Hour due to MME', 
+    column: 'erab_drops_per_hour_mme',
+    yAxisLabel: 'drops/hour',
+    category: 'Retainability KPIs'
+  },
+  { 
+    id: 'erab_drops_per_hour_enb', 
+    label: 'E-RAB Drops per Hour due to eNB', 
+    column: 'erab_drops_per_hour_enb',
+    yAxisLabel: 'drops/hour',
+    category: 'Retainability KPIs'
   },
 ];
 
