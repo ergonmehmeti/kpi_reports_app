@@ -16,6 +16,7 @@ const DateFilters = memo(({
   onEndDateChange,
   onToggleMode,
   onRefresh,
+  hideCustomDatesButton = false,
   // Comparison mode props
   comparisonMode = false,
   onToggleComparison,
@@ -111,9 +112,11 @@ const DateFilters = memo(({
               ))}
             </select>
           </div>
-          <button className="toggle-mode-btn" onClick={onToggleMode}>
-            Custom Dates
-          </button>
+          {!hideCustomDatesButton && (
+            <button className="toggle-mode-btn" onClick={onToggleMode}>
+              Custom Dates
+            </button>
+          )}
           <button className="toggle-mode-btn compare-btn" onClick={onToggleComparison}>
             Compare Weeks
           </button>

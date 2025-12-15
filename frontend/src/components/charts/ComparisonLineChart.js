@@ -4,12 +4,27 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 /**
  * ComparisonLineChart Component
  * Renders a dual-line chart for comparing two weeks of data
- * Blue line for Week 1, Green line for Week 2
+ * Supports custom colors for different use cases
  */
-const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) => {
-  // Fixed colors: Blue for week 1, Green for week 2
-  const WEEK1_COLOR = '#3b82f6'; // Blue
-  const WEEK2_COLOR = '#22c55e'; // Green
+const ComparisonLineChart = memo(({ 
+  data, 
+  week1Label, 
+  week2Label, 
+  yAxisLabel,
+  week1Key,
+  week2Key,
+  xAxisKey = 'name',
+  week1Color,
+  week2Color
+}) => {
+  // Default colors: Blue for week 1, Green for week 2
+  // Can be overridden with custom colors
+  const WEEK1_COLOR = week1Color || '#3b82f6'; // Blue
+  const WEEK2_COLOR = week2Color || '#22c55e'; // Green
+  
+  // Use custom keys if provided, otherwise use labels as keys
+  const dataKey1 = week1Key || week1Label;
+  const dataKey2 = week2Key || week2Label;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -70,13 +85,48 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
     );
   };
 
+  // Calculate Y-axis domain from data for better visualization
+  const calculateYDomain = () => {
+    if (!data || data.length === 0) return ['auto', 'auto'];
+    
+    let minVal = Infinity;
+    let maxVal = -Infinity;
+    
+    data.forEach(item => {
+      const val1 = item[dataKey1];
+      const val2 = item[dataKey2];
+      
+      if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+        minVal = Math.min(minVal, val1);
+        maxVal = Math.max(maxVal, val1);
+      }
+      if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+        minVal = Math.min(minVal, val2);
+        maxVal = Math.max(maxVal, val2);
+      }
+    });
+    
+    if (minVal === Infinity || maxVal === -Infinity) return ['auto', 'auto'];
+    
+    // Add padding (5% on each side)
+    const range = maxVal - minVal;
+    const padding = range * 0.05;
+    
+    return [
+      Math.floor((minVal - padding) * 100) / 100,
+      Math.ceil((maxVal + padding) * 100) / 100
+    ];
+  };
+
+  const yDomain = calculateYDomain();
+
   return (
     <div>
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis 
-            dataKey="name" 
+            dataKey={xAxisKey} 
             stroke="#666"
             tick={{ fontSize: 11 }}
             interval="preserveStartEnd"
@@ -84,6 +134,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
           <YAxis 
             stroke="#666" 
             width={80}
+            domain={yDomain}
             label={yAxisLabel ? { 
               value: yAxisLabel, 
               angle: -90, 
@@ -95,7 +146,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
           <Legend content={renderLegend} />
           <Line 
             type="monotone" 
-            dataKey={week1Label}
+            dataKey={dataKey1}
             name={week1Label}
             stroke={WEEK1_COLOR}
             strokeWidth={2} 
@@ -105,7 +156,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
           />
           <Line 
             type="monotone" 
-            dataKey={week2Label}
+            dataKey={dataKey2}
             name={week2Label}
             stroke={WEEK2_COLOR}
             strokeWidth={2} 
