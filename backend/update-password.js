@@ -2,8 +2,8 @@ import bcrypt from 'bcryptjs';
 import pool from './db/pool.js';
 
 // Change these values as needed
-const username = 'developer';
-const password = 'Raportet2233';
+const username = 'superadmin';
+const password = '@Vala900';
 const role = 'adminDeveloper';
 
 const hash = bcrypt.hashSync(password, 10);
