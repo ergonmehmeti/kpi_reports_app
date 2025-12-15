@@ -39,7 +39,24 @@ export const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Middleware to check if user is adminDeveloper (for user management)
+export const requireAdminDeveloper = (req, res, next) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  
+  // Only 'adminDeveloper' role can manage users
+  if (req.user.role !== 'adminDeveloper') {
+    return res.status(403).json({ error: 'Admin Developer access required' });
+  }
+  
+  next();
+};
+
 // Combined middleware: verify token and require admin
 export const adminOnly = [verifyToken, requireAdmin];
 
-export default { verifyToken, requireAdmin, adminOnly };
+// Combined middleware: verify token and require adminDeveloper
+export const adminDeveloperOnly = [verifyToken, requireAdminDeveloper];
+
+export default { verifyToken, requireAdmin, requireAdminDeveloper, adminOnly, adminDeveloperOnly };

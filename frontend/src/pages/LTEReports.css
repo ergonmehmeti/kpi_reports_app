@@ -1,0 +1,161 @@
+/* LTE Reports Comparison Styles */
+
+/* KPI Selector Container - Compact */
+.kpi-selector-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.kpi-selector-container h4 {
+  color: #1e293b;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+}
+
+/* Site Traffic Option - Highlighted */
+.site-traffic-option {
+  background: linear-gradient(135deg, #eff6ff 0%, #ecfdf5 100%);
+  border: 2px solid #60a5fa;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+}
+
+.site-traffic-checkbox {
+  font-weight: 600;
+}
+
+.site-traffic-checkbox span {
+  color: #1e40af !important;
+  font-size: 0.85rem !important;
+}
+
+.kpi-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.kpi-category {
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+.kpi-category h5 {
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.kpi-checkbox:hover {
+  background: #e2e8f0;
+}
+
+.kpi-checkbox input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin-top: 1px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
+
+.kpi-checkbox span {
+  color: #334155;
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+
+.kpi-selection-hint {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #f0f9ff;
+  border-radius: 6px;
+  color: #0369a1;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Comparison charts section */
+.charts-section {
+  margin-top: 24px;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Comparison Mode Active Indicator */
+.comparison-mode-active {
+  background: linear-gradient(135deg, #3b82f6 0%, #22c55e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+}
+
+/* Loading and Error States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 1rem;
+}
+
+.error-message {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.error-message p {
+  color: #dc2626;
+  margin: 0;
+  text-align: center;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+}
+
+.no-data p {
+  margin: 8px 0;
+}

@@ -6,10 +6,22 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
  * Renders a dual-line chart for comparing two weeks of data
  * Blue line for Week 1, Green line for Week 2
  */
-const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) => {
+const ComparisonLineChart = memo(({ 
+  data, 
+  week1Label, 
+  week2Label, 
+  yAxisLabel,
+  week1Key,
+  week2Key,
+  xAxisKey = 'name'
+}) => {
   // Fixed colors: Blue for week 1, Green for week 2
   const WEEK1_COLOR = '#3b82f6'; // Blue
   const WEEK2_COLOR = '#22c55e'; // Green
+  
+  // Use custom keys if provided, otherwise use labels as keys
+  const dataKey1 = week1Key || week1Label;
+  const dataKey2 = week2Key || week2Label;
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -76,7 +88,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
           <XAxis 
-            dataKey="name" 
+            dataKey={xAxisKey} 
             stroke="#666"
             tick={{ fontSize: 11 }}
             interval="preserveStartEnd"
@@ -95,7 +107,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
           <Legend content={renderLegend} />
           <Line 
             type="monotone" 
-            dataKey={week1Label}
+            dataKey={dataKey1}
             name={week1Label}
             stroke={WEEK1_COLOR}
             strokeWidth={2} 
@@ -105,7 +117,7 @@ const ComparisonLineChart = memo(({ data, week1Label, week2Label, yAxisLabel }) 
           />
           <Line 
             type="monotone" 
-            dataKey={week2Label}
+            dataKey={dataKey2}
             name={week2Label}
             stroke={WEEK2_COLOR}
             strokeWidth={2} 
