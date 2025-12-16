@@ -114,6 +114,12 @@ export async function uploadCSV(req, res) {
     const data = [];
     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
       const row = rawData[i];
+      
+      // Skip empty rows
+      if (row.every(cell => !cell || String(cell).trim() === '')) {
+        continue;
+      }
+      
       const obj = {};
       headerRow.forEach((header, index) => {
         if (header) {

@@ -68,17 +68,70 @@ export async function uploadCSV(req, res) {
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = XLSX.utils.sheet_to_json(worksheet);
+    
+    // Read with header:1 to get raw rows, then manually set headers
+    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
     // Delete file after reading
     deleteFile(req.file.path);
 
-    if (data.length === 0) {
+    if (rawData.length === 0) {
       return res.status(400).json({ error: 'File is empty' });
+    }
+
+    // Find the header row (first non-empty row with 'Date' or 'ERBS Name')
+    let headerRowIndex = -1;
+    let headerRow = null;
+    
+    for (let i = 0; i < rawData.length && i < 5; i++) { // Check first 5 rows
+      const row = rawData[i];
+      const hasDate = row.some(cell => 
+        cell && String(cell).toLowerCase() === 'date'
+      );
+      const hasERBS = row.some(cell => 
+        cell && String(cell).toLowerCase().includes('erbs')
+      );
+      if (hasDate || hasERBS) {
+        headerRowIndex = i;
+        headerRow = row;
+        break;
+      }
+    }
+
+    if (headerRowIndex === -1 || !headerRow) {
+      return res.status(400).json({ 
+        error: 'Could not find header row with required columns',
+        hint: 'CSV must have a header row with column names including "Date" and "ERBS Name"'
+      });
+    }
+
+    // Convert data rows to objects using the found header
+    const data = [];
+    for (let i = headerRowIndex + 1; i < rawData.length; i++) {
+      const row = rawData[i];
+      if (row.every(cell => !cell || String(cell).trim() === '')) {
+        continue; // Skip empty rows
+      }
+      
+      const rowObj = {};
+      headerRow.forEach((header, index) => {
+        if (header) {
+          rowObj[header] = row[index];
+        }
+      });
+      data.push(rowObj);
+    }
+
+    if (data.length === 0) {
+      return res.status(400).json({ error: 'No data rows found in file' });
     }
 
     // Validate CSV has required columns by checking first row
     const firstRow = data[0];
+    
+    // Debug: Log actual column names
+    console.log('🔍 Detected columns in CSV:', Object.keys(firstRow));
+    
     const requiredColumns = {
       date: ['Date', 'date'],
       siteName: ['ERBS Name', 'erbs name', 'site_name'],
