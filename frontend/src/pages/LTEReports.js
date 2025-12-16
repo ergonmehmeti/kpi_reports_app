@@ -19,7 +19,7 @@ import {
   prepareAccessibilityData,
   prepareMobilityData,
   prepareRetainabilityDropRatioData,
-  prepareRetainabilityDropsPerHourData,
+  // prepareRetainabilityDropsPerHourData, // Commented out - not needed for now
   prepareIntegrityThroughputData,
   prepareUtilizationVolumeData,
   prepareTrafficThroughputCombinedData,
@@ -102,7 +102,7 @@ const LTEReports = () => {
   }, [startDate, endDate]);
 
   // Load LTE data
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const rawData = await fetchData(startDate, endDate);
       calculateTopAndBottomSites(rawData?.data || []);
@@ -113,7 +113,8 @@ const LTEReports = () => {
     } catch (err) {
       console.error('Error loading LTE data:', err);
     }
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startDate, endDate, fetchData, fetchFrequencyData, fetchKPIData]);
 
   // Calculate top 20 and bottom 20 sites by total traffic
   const calculateTopAndBottomSites = (rawData) => {
@@ -151,12 +152,6 @@ const LTEReports = () => {
     if (showWeekSelector) {
       resetToLastFullWeek();
     }
-  };
-
-  // Handle custom date change
-  const handleCustomDateChange = (start, end) => {
-    setStartDate(start);
-    setEndDate(end);
   };
 
   // Initialize second week for comparison
@@ -204,7 +199,7 @@ const LTEReports = () => {
     } else {
       loadData();
     }
-  }, [comparisonMode, selectedWeek, selectedWeek2, selectedKPIs, includeSiteTraffic, includeFrequencyBand, fetchComparisonData]);
+  }, [comparisonMode, selectedWeek, selectedWeek2, selectedKPIs, includeSiteTraffic, includeFrequencyBand, fetchComparisonData, loadData]);
 
   // Auto-fetch comparison data when KPIs, weeks, or options change
   useEffect(() => {
@@ -667,6 +662,94 @@ const LTEReports = () => {
         </div>
       )}
 
+      {/* Mobility KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Mobility KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              The ability to provide the requested service to the user with mobility. Success of HOs from preparation to execution phase.
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Handover Success Metrics">
+              <KPILineChart
+                data={prepareMobilityData(kpiData)}
+                dataKeys={[
+                  'Handover Success Ratio (%)',
+                  'Handover Execution Success (%)',
+                  'Handover Preparation Success (%)'
+                ]}
+                colors={['#10b981', '#f59e0b', '#3b82f6']}
+                yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+        </div>
+      )}
+
+      {/* Retainability KPIs Section */}
+      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Retainability KPIs
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              The ability of service, once obtained, to continued to be provided for a requested duration
+            </p>
+          </div>
+          
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Proportions of Abnormal E-RAB Releases over Total E-RAB Releases">
+              <KPILineChart
+                data={prepareRetainabilityDropRatioData(kpiData)}
+                dataKeys={[
+                  'E-RAB Drop Ratio-Overall (%)',
+                  'E-RAB Drop due to MME (%)',
+                  'E-RAB Drop due to eNB (%)'
+                ]}
+                colors={['#3b82f6', '#f97316', '#10b981']}
+                yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+
+          {/* Commented out - not needed for now */}
+          {/* <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard title="Rate of E-RABs Abnormally Released over Duration of Active Session Time for All UEs">
+              <KPILineChart
+                data={prepareRetainabilityDropsPerHourData(kpiData)}
+                dataKeys={[
+                  'E-RAB Drops per Hour (Overall)',
+                  'E-RAB Drops per Hour due to MME',
+                  'E-RAB Drops per Hour due to eNB'
+                ]}
+                colors={['#3b82f6', '#f97316', '#10b981']}
+                yAxisLabel="drops/hour"
+              />
+            </ChartCard>
+          </div> */}
+        </div>
+      )}
+
       {/* Traffic & Throughput KPIs Section */}
       {!kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
@@ -696,7 +779,7 @@ const LTEReports = () => {
                 ]}
                 colors={['#3b82f6', '#60a5fa']}
                 yAxisLabel="Mbps"
-                yAxisDomain={[0, 'auto']}
+                yAxisDomain={[0, 100]}
               />
             </ChartCard>
           </div>
@@ -792,7 +875,7 @@ const LTEReports = () => {
                 ]}
                 colors={['#f97316', '#3b82f6']}
                 yAxisLabel="Users"
-                yAxisDomain={[0, 'auto']}
+                yAxisDomain={[0, 'autoRound30000']}
               />
             </ChartCard>
           </div>
@@ -876,93 +959,6 @@ const LTEReports = () => {
                 yAxisLabel="GB"
                 barSize={40}
                 height={400}
-              />
-            </ChartCard>
-          </div>
-        </div>
-      )}
-
-      {/* Mobility KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
-        <div style={{ 
-          backgroundColor: '#ffffff', 
-          borderRadius: '12px', 
-          padding: '2rem', 
-          marginTop: '2rem',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-          border: '1px solid #e5e7eb'
-        }}>
-          <div className="content-header" style={{ marginTop: '0' }}>
-            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
-              Mobility KPIs
-            </h3>
-            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
-              The ability to provide the requested service to the user with mobility. Success of HOs from preparation to execution phase.
-            </p>
-          </div>
-          
-          <div style={{ marginTop: '1.5rem' }}>
-            <ChartCard title="Handover Success Metrics">
-              <KPILineChart
-                data={prepareMobilityData(kpiData)}
-                dataKeys={[
-                  'Handover Success Ratio (%)',
-                  'Handover Execution Success (%)',
-                  'Handover Preparation Success (%)'
-                ]}
-                colors={['#10b981', '#f59e0b', '#3b82f6']}
-                yAxisLabel="%"
-              />
-            </ChartCard>
-          </div>
-        </div>
-      )}
-
-      {/* Retainability KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
-        <div style={{ 
-          backgroundColor: '#ffffff', 
-          borderRadius: '12px', 
-          padding: '2rem', 
-          marginTop: '2rem',
-          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-          border: '1px solid #e5e7eb'
-        }}>
-          <div className="content-header" style={{ marginTop: '0' }}>
-            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
-              Retainability KPIs
-            </h3>
-            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
-              The ability of service, once obtained, to continued to be provided for a requested duration
-            </p>
-          </div>
-          
-          <div style={{ marginTop: '1.5rem' }}>
-            <ChartCard title="Proportions of Abnormal E-RAB Releases over Total E-RAB Releases">
-              <KPILineChart
-                data={prepareRetainabilityDropRatioData(kpiData)}
-                dataKeys={[
-                  'E-RAB Drop Ratio-Overall (%)',
-                  'E-RAB Drop due to MME (%)',
-                  'E-RAB Drop due to eNB (%)'
-                ]}
-                colors={['#3b82f6', '#f97316', '#10b981']}
-                yAxisLabel="%"
-              />
-            </ChartCard>
-          </div>
-
-          <div style={{ marginTop: '1.5rem' }}>
-            <ChartCard title="Rate of E-RABs Abnormally Released over Duration of Active Session Time for All UEs">
-              <KPILineChart
-                data={prepareRetainabilityDropsPerHourData(kpiData)}
-                dataKeys={[
-                  'E-RAB Drops per Hour (Overall)',
-                  'E-RAB Drops per Hour due to MME',
-                  'E-RAB Drops per Hour due to eNB'
-                ]}
-                colors={['#3b82f6', '#f97316', '#10b981']}
-                yAxisLabel="drops/hour"
               />
             </ChartCard>
           </div>

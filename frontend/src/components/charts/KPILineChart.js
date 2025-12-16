@@ -21,13 +21,15 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
       });
     });
     
-    // Handle custom domain with 'auto' for min or max
+    // Handle custom domain with 'auto' or 'autoRound30000' for min or max
     if (yAxisDomain) {
       const calculatedMin = Math.floor(min);
       const calculatedMax = Math.ceil(max);
+      const roundedMax30000 = Math.ceil(max / 30000) * 30000; // Round up to nearest 30000
       return [
         yAxisDomain[0] === 'auto' ? calculatedMin : yAxisDomain[0],
-        yAxisDomain[1] === 'auto' ? calculatedMax : yAxisDomain[1]
+        yAxisDomain[1] === 'auto' ? calculatedMax : 
+        yAxisDomain[1] === 'autoRound30000' ? roundedMax30000 : yAxisDomain[1]
       ];
     }
     

@@ -92,15 +92,18 @@ const DualAxisLineChart = memo(({
     const [min, max] = leftDomain;
     const range = max - min;
     if (range <= 5) {
-      // For small ranges (e.g., 99-100), use 0.2 increments
-      return [min, min + 0.2, min + 0.4, min + 0.6, min + 0.8, max];
-    } else if (range <= 10) {
-      // For ranges up to 10, use 2 unit increments
+      // For small ranges (e.g., 97-100), use 0.5 increments
       const ticks = [];
-      for (let i = min; i <= max; i += 2) {
+      for (let i = min; i <= max; i += 0.5) {
         ticks.push(i);
       }
-      if (ticks[ticks.length - 1] !== max) ticks.push(max);
+      return ticks;
+    } else if (range <= 10) {
+      // For ranges up to 10, use 1 unit increments
+      const ticks = [];
+      for (let i = min; i <= max; i += 1) {
+        ticks.push(i);
+      }
       return ticks;
     } else {
       // For larger ranges, use 5 or 10 unit increments
@@ -118,9 +121,13 @@ const DualAxisLineChart = memo(({
   const generateRightTicks = () => {
     const [min, max] = rightDomain;
     const range = max - min;
-    if (range <= 2) {
-      // For small ranges (e.g., 0-1), use 0.2 increments
-      return [0, 0.2, 0.4, 0.6, 0.8, max];
+    if (range <= 5) {
+      // For small ranges (e.g., 0-2), use 0.5 increments
+      const ticks = [];
+      for (let i = min; i <= max; i += 0.5) {
+        ticks.push(i);
+      }
+      return ticks;
     } else {
       // For larger ranges, use 1 unit increments
       const ticks = [];
