@@ -48,7 +48,7 @@ const DateFilters = memo(({
         <div className="comparison-selectors">
           <div className="date-input-group">
             <label htmlFor="week1-select">
-              <span className="week-indicator week1-indicator">●</span> Week 1 (Blue):
+              <span className="week-indicator week1-indicator">●</span> Compare
             </label>
             <select 
               id="week1-select"
@@ -65,7 +65,7 @@ const DateFilters = memo(({
           </div>
           <div className="date-input-group">
             <label htmlFor="week2-select">
-              <span className="week-indicator week2-indicator">●</span> Week 2 (Green):
+              <span className="week-indicator week2-indicator">●</span> with
             </label>
             <select 
               id="week2-select"
