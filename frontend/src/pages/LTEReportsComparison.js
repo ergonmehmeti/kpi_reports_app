@@ -90,6 +90,104 @@ const LTEReportsComparison = ({
               const chartData = comparisonData[kpiId];
               
               if (!chartData || !kpiConfig) return null;
+
+              // Match main Availability chart behavior for Cell Availability (%):
+              // - Y max capped at 100
+              // - Y min starts at floored min value (e.g. 97.7 -> 97)
+              // - 0.5 tick steps up to 100 (97, 97.5, 98, ... , 100)
+              const isCellAvailabilityPct = kpiId === 'cell_availability';
+              const isCellUnavailabilityFaultPct = kpiId === 'cell_unavailability_fault';
+              const isCellUnavailabilityOperationPct = kpiId === 'cell_unavailability_operation';
+              let yAxisDomain;
+              let yAxisTicks;
+
+              const maxAcrossWeeks = chartData.reduce((maxVal, row) => {
+                const v1 = parseFloat(row?.[week1Label]);
+                const v2 = parseFloat(row?.[week2Label]);
+                const vals = [v1, v2].filter(v => Number.isFinite(v));
+                if (vals.length === 0) return maxVal;
+                return Math.max(maxVal, ...vals);
+              }, Number.NEGATIVE_INFINITY);
+
+              const roundUpTo = (value, step) => {
+                if (!Number.isFinite(value) || value <= 0) return step;
+                return Math.ceil(value / step) * step;
+              };
+
+              const safeMax = Number.isFinite(maxAcrossWeeks) ? Math.max(0, maxAcrossWeeks) : 0;
+
+              if (isCellAvailabilityPct) {
+                const minAcrossWeeks = chartData.reduce((minVal, row) => {
+                  const v1 = parseFloat(row?.[week1Label]);
+                  const v2 = parseFloat(row?.[week2Label]);
+                  const vals = [v1, v2].filter(v => Number.isFinite(v));
+                  if (vals.length === 0) return minVal;
+                  return Math.min(minVal, ...vals);
+                }, Number.POSITIVE_INFINITY);
+
+                const safeMin = Number.isFinite(minAcrossWeeks) ? Math.max(0, Math.min(100, minAcrossWeeks)) : 0;
+                const domainMin = Math.min(100, Math.floor(safeMin));
+                yAxisDomain = [domainMin, 100];
+
+                // Build ticks using integers to avoid floating-point drift
+                const ticks = [];
+                for (let i = domainMin * 2; i <= 200; i += 1) {
+                  ticks.push(i / 2);
+                }
+                yAxisTicks = ticks;
+              } else if (isCellUnavailabilityFaultPct || isCellUnavailabilityOperationPct) {
+                // Match main Availability chart RIGHT axis behavior for Unavailability (%):
+                // - Y min fixed at 0
+                // - Y max is rounded up to nearest integer (at least 1)
+                // - tick steps: 0.5 when range <= 5, otherwise 1
+                const domainMax = Math.max(1, Math.ceil(safeMax));
+                yAxisDomain = [0, domainMax];
+
+                if (domainMax <= 5) {
+                  const ticks = [];
+                  for (let i = 0; i <= domainMax * 2; i += 1) {
+                    ticks.push(i / 2);
+                  }
+                  yAxisTicks = ticks;
+                } else {
+                  const ticks = [];
+                  for (let i = 0; i <= domainMax; i += 1) {
+                    ticks.push(i);
+                  }
+                  yAxisTicks = ticks;
+                }
+              } else if (kpiId === 'downlink_latency') {
+                // Main page: DualAxisLineChart leftAxisDomain={[0, 'autoRound10']}
+                yAxisDomain = [0, roundUpTo(safeMax, 10)];
+              } else if (kpiId === 'uplink_packet_loss') {
+                // Main page: DualAxisLineChart rightAxisDomain={[0, 'autoRound0.2']}
+                yAxisDomain = [0, roundUpTo(safeMax, 0.2)];
+              } else if (kpiId === 'dl_throughput_overall' || kpiId === 'dl_throughput_ca') {
+                // Main page: KPILineChart yAxisDomain={[0, 100]} for DL PDCP throughput
+                yAxisDomain = [0, 100];
+              } else if (kpiId === 'ul_throughput_overall' || kpiId === 'ul_throughput_ca') {
+                // Main page: KPILineChart yAxisDomain={[0, 'auto']} for UL PDCP throughput
+                yAxisDomain = [0, Math.max(1, Math.ceil(safeMax))];
+              } else if (kpiId === 'dl_mac_throughput' || kpiId === 'ul_mac_throughput') {
+                // Main page: DualAxisLineChart leftAxisDomain={[0, 'autoRound10']} for MAC throughput
+                yAxisDomain = [0, roundUpTo(safeMax, 10)];
+              } else if (kpiId === 'connected_users_avg' || kpiId === 'connected_users_max') {
+                // Main page: KPILineChart yAxisDomain={[0, 'autoRound30000']} for connected users
+                yAxisDomain = [0, roundUpTo(safeMax, 30000)];
+              } else if (
+                kpiId === 'dl_traffic_volume_ca' ||
+                kpiId === 'dl_traffic_volume_without_ca' ||
+                kpiId === 'dl_traffic_volume_overall' ||
+                kpiId === 'ul_traffic_volume_overall' ||
+                kpiId === 'ul_traffic_volume_ca' ||
+                kpiId === 'dl_mac_traffic_volume' ||
+                kpiId === 'ul_mac_traffic_volume' ||
+                kpiId === 'dl_total_traffic_volume' ||
+                kpiId === 'ul_total_traffic_volume'
+              ) {
+                // Main page volume charts are effectively 0-based.
+                yAxisDomain = [0, Math.max(1, Math.ceil(safeMax))];
+              }
               
               return (
                 <ChartCard 
@@ -102,6 +200,8 @@ const LTEReportsComparison = ({
                     week1Label={week1Label}
                     week2Label={week2Label}
                     yAxisLabel={kpiConfig.yAxisLabel}
+                    yAxisDomain={yAxisDomain}
+                    yAxisTicks={yAxisTicks}
                   />
                 </ChartCard>
               );
