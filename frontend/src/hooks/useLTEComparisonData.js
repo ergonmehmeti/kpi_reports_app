@@ -449,12 +449,12 @@ export const useLTEComparisonData = () => {
           difference: (week2Sites[site]?.total_traffic_gb || 0) - (week1Sites[site]?.total_traffic_gb || 0),
         }));
 
-        // Sort by week2 traffic and get top/bottom 20
-        const sortedByWeek2 = [...siteComparison].sort((a, b) => b.week2_traffic - a.week2_traffic);
+        // Sort by week1 traffic and get top/bottom 20
+        const sortedByWeek1 = [...siteComparison].sort((a, b) => b.week1_traffic - a.week1_traffic);
         
         setSiteTrafficComparison({
-          top20: sortedByWeek2.slice(0, 20),
-          bottom20: sortedByWeek2.slice(-20).reverse(),
+          top20: sortedByWeek1.slice(0, 20),
+          bottom20: sortedByWeek1.slice(-20).reverse(),
         });
       }
 
