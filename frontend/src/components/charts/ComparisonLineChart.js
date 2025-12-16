@@ -15,7 +15,9 @@ const ComparisonLineChart = memo(({
   week2Key,
   xAxisKey = 'name',
   week1Color,
-  week2Color
+  week2Color,
+  yAxisDomain,
+  yAxisTicks
 }) => {
   // Default colors: Blue for week 1, Green for week 2
   // Can be overridden with custom colors
@@ -107,18 +109,81 @@ const ComparisonLineChart = memo(({
     });
     
     if (minVal === Infinity || maxVal === -Infinity) return ['auto', 'auto'];
-    
-    // Add padding (5% on each side)
-    const range = maxVal - minVal;
-    const padding = range * 0.05;
-    
-    return [
-      Math.floor((minVal - padding) * 100) / 100,
-      Math.ceil((maxVal + padding) * 100) / 100
-    ];
+
+    // Default behavior: match main KPI charts (no extra padding)
+    // - min floored, max ceiled
+    let domainMin = Math.floor(minVal);
+    let domainMax = Math.ceil(maxVal);
+
+    // Keep defaults consistent with main view unless explicitly overridden.
+    // Special KPI-specific caps (e.g. Availability max=100) are handled by callers via yAxisDomain.
+
+    // Ensure non-zero range so the chart renders nicely
+    if (domainMax === domainMin) {
+      domainMax = domainMin + 1;
+    }
+
+    return [domainMin, domainMax];
   };
 
-  const yDomain = calculateYDomain();
+  const yDomain = yAxisDomain || calculateYDomain();
+
+  const calculateTicks = () => {
+    if (yAxisTicks) return yAxisTicks;
+    if (!Array.isArray(yDomain) || yDomain.length !== 2) return undefined;
+    const [min, max] = yDomain;
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return undefined;
+
+    const range = max - min;
+    if (range <= 0) return undefined;
+
+    // For moderate ranges, enforce readable steps like the main LTE charts.
+    if (range <= 5) {
+      const ticks = [];
+      for (let i = Math.round(min * 2); i <= Math.round(max * 2); i += 1) {
+        ticks.push(i / 2);
+      }
+      return ticks;
+    }
+
+    if (range <= 10) {
+      const ticks = [];
+      for (let i = Math.ceil(min); i <= Math.floor(max); i += 1) {
+        ticks.push(i);
+      }
+      // Ensure endpoints are present
+      if (ticks[0] !== min) ticks.unshift(min);
+      if (ticks[ticks.length - 1] !== max) ticks.push(max);
+      return ticks;
+    }
+
+    if (range <= 50) {
+      const ticks = [];
+      const start = Math.ceil(min / 5) * 5;
+      for (let i = start; i <= max; i += 5) {
+        ticks.push(i);
+      }
+      if (ticks.length === 0 || ticks[0] !== min) ticks.unshift(min);
+      if (ticks[ticks.length - 1] !== max) ticks.push(max);
+      return ticks;
+    }
+
+    if (range <= 100) {
+      const ticks = [];
+      const start = Math.ceil(min / 10) * 10;
+      for (let i = start; i <= max; i += 10) {
+        ticks.push(i);
+      }
+      if (ticks.length === 0 || ticks[0] !== min) ticks.unshift(min);
+      if (ticks[ticks.length - 1] !== max) ticks.push(max);
+      return ticks;
+    }
+
+    // For larger ranges, let Recharts choose ticks automatically.
+    return undefined;
+  };
+
+  const yTicks = calculateTicks();
 
   return (
     <div>
@@ -135,6 +200,7 @@ const ComparisonLineChart = memo(({
             stroke="#666" 
             width={80}
             domain={yDomain}
+            ticks={yTicks}
             label={yAxisLabel ? { 
               value: yAxisLabel, 
               angle: -90, 
