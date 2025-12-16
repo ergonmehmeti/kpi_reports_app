@@ -171,14 +171,14 @@ export const LTE_KPI_OPTIONS = [
   { 
     id: 'dl_total_traffic_volume', 
     label: 'DL PDCP Total Traffic Volume (GB)', 
-    column: 'dl_pdcp_total_traffic_volume_gb',
+    column: 'dl_pdcp_traffic_volume_overall_gb',
     yAxisLabel: 'GB',
     category: 'Utilization KPIs'
   },
   { 
     id: 'ul_total_traffic_volume', 
     label: 'UL PDCP Total Traffic Volume (GB)', 
-    column: 'ul_pdcp_total_traffic_volume_gb',
+    column: 'ul_pdcp_traffic_volume_overall_gb',
     yAxisLabel: 'GB',
     category: 'Utilization KPIs'
   },
