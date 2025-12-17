@@ -60,16 +60,10 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
             tick={{ fontSize: 12 }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            wrapperStyle={{ paddingTop: '20px' }}
-            payload={[
-              { value: labels[0], type: 'rect', color: colors[0] },
-              { value: labels[1], type: 'rect', color: colors[1] }
-            ]}
-          />
+          <Legend wrapperStyle={{ paddingTop: '20px' }} />
           
           {/* DL Bar */}
-          <Bar dataKey={dataKeys[0]} stackId="a" fill={colors[0]}>
+          <Bar dataKey={dataKeys[0]} name={labels[0]} stackId="a" fill={colors[0]}>
             <LabelList 
               dataKey={dataKeys[0]} 
               position="inside" 
@@ -82,7 +76,7 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
           </Bar>
           
           {/* UL Bar */}
-          <Bar dataKey={dataKeys[1]} stackId="a" fill={colors[1]}>
+          <Bar dataKey={dataKeys[1]} name={labels[1]} stackId="a" fill={colors[1]}>
             <LabelList 
               dataKey={dataKeys[1]} 
               position="inside" 
