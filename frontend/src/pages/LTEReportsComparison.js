@@ -171,22 +171,15 @@ const LTEReportsComparison = ({
               } else if (kpiId === 'dl_mac_throughput' || kpiId === 'ul_mac_throughput') {
                 // Main page: DualAxisLineChart leftAxisDomain={[0, 'autoRound10']} for MAC throughput
                 yAxisDomain = [0, roundUpTo(safeMax, 10)];
-              } else if (kpiId === 'connected_users_avg' || kpiId === 'connected_users_max') {
-                // Main page: KPILineChart yAxisDomain={[0, 'autoRound30000']} for connected users
-                yAxisDomain = [0, roundUpTo(safeMax, 30000)];
-              } else if (
-                kpiId === 'dl_traffic_volume_ca' ||
-                kpiId === 'dl_traffic_volume_without_ca' ||
-                kpiId === 'dl_traffic_volume_overall' ||
-                kpiId === 'ul_traffic_volume_overall' ||
-                kpiId === 'ul_traffic_volume_ca' ||
-                kpiId === 'dl_mac_traffic_volume' ||
-                kpiId === 'ul_mac_traffic_volume' ||
-                kpiId === 'dl_total_traffic_volume' ||
-                kpiId === 'ul_total_traffic_volume'
-              ) {
-                // Main page volume charts are effectively 0-based.
-                yAxisDomain = [0, Math.max(1, Math.ceil(safeMax))];
+              } else if (kpiId === 'connected_users_avg') {
+                // Let Recharts auto-scale for average connected users
+                yAxisDomain = [0, 'auto'];
+              } else if (kpiId === 'connected_users_max') {
+                // Let Recharts auto-scale for max connected users
+                yAxisDomain = [0, 'auto'];
+              } else if (kpiId === 'dl_total_traffic_volume' || kpiId === 'ul_total_traffic_volume' || kpiId === 'dl_traffic_volume_ca' || kpiId === 'dl_traffic_volume_without_ca' || kpiId === 'dl_traffic_volume_overall' || kpiId === 'ul_traffic_volume_overall' || kpiId === 'ul_traffic_volume_ca' || kpiId === 'dl_mac_traffic_volume' || kpiId === 'ul_mac_traffic_volume') {
+                // Let Recharts auto-scale for all traffic volumes
+                yAxisDomain = [0, 'auto'];
               }
               
               return (

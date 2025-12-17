@@ -11,7 +11,7 @@ export const getLTEChartConfigs = () => {
       type: 'horizontal-stacked-bar',
       dataKeys: ['dl_traffic_gb', 'ul_traffic_gb'],
       colors: ['#60a5fa', '#fb923c'], // Blue for DL, Orange for UL
-      labels: ['Download (DL)', 'Upload (UL)'],
+      labels: ['Downlink', 'Uplink'],
       format: (value) => `${value?.toFixed(0) || 0}`,
       description: 'Top 20 sites by total traffic with DL/UL breakdown',
       layout: 'horizontal'
@@ -22,7 +22,7 @@ export const getLTEChartConfigs = () => {
       type: 'horizontal-stacked-bar',
       dataKeys: ['dl_traffic_gb', 'ul_traffic_gb'],
       colors: ['#60a5fa', '#fb923c'],
-      labels: ['Download (DL)', 'Upload (UL)'],
+      labels: ['Downlink', 'Uplink'],
       format: (value) => `${value?.toFixed(0) || 0}`,
       description: 'Bottom 20 sites by total traffic with DL/UL breakdown',
       layout: 'horizontal'
