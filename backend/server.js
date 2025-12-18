@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
 import lteFrequencyRoutes from './routes/lteFrequency.js';
 import lteKpiRoutes from './routes/lteKpi.js';
+import nrRoutes from './routes/nr.js';
 
 dotenv.config();
 
@@ -57,6 +58,9 @@ app.use('/api/lte-frequency', lteFrequencyRoutes);
 
 // LTE KPI routes
 app.use('/api/lte-kpi', lteKpiRoutes);
+
+// NR (5G) KPI routes
+app.use('/api/nr', nrRoutes);
 
 // Start server
 app.listen(PORT, () => {
