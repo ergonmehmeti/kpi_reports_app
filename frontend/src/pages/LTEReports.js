@@ -84,14 +84,35 @@ const LTEReports = () => {
   const [selectedKPIs, setSelectedKPIs] = useState([]);
   const [includeSiteTraffic, setIncludeSiteTraffic] = useState(false);
   const [includeFrequencyBand, setIncludeFrequencyBand] = useState(false);
+  
+  // Progressive rendering state - sections appear one by one
+  const [visibleSections, setVisibleSections] = useState(0);
 
   // Initialize dates from selected week
   useEffect(() => {
     if (selectedWeek) {
       setStartDate(selectedWeek.monday.toISOString().split('T')[0]);
       setEndDate(selectedWeek.sunday.toISOString().split('T')[0]);
+      // Reset visible sections when week changes
+      setVisibleSections(0);
     }
   }, [selectedWeek]);
+
+  // Progressive rendering - reveal sections one by one after data loads
+  useEffect(() => {
+    if (!kpiLoading && kpiData.length > 0 && !comparisonMode) {
+      // Reset and start progressive reveal
+      setVisibleSections(0);
+      const totalSections = 7; // 5 KPI sections + Site Traffic + Frequency
+      const delay = 150; // ms between each section
+      
+      for (let i = 1; i <= totalSections; i++) {
+        setTimeout(() => {
+          setVisibleSections(i);
+        }, i * delay);
+      }
+    }
+  }, [kpiLoading, kpiData.length, comparisonMode]);
 
   // Fetch data when dates change
   useEffect(() => {
@@ -285,7 +306,7 @@ const LTEReports = () => {
           {error && <div className="error">Error: {error}</div>}
 
       {/* Cell Availability KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {visibleSections >= 1 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -321,7 +342,7 @@ const LTEReports = () => {
       )}
 
       {/* Accessibility KPIs Section (Connection Success) */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {visibleSections >= 2 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -358,7 +379,7 @@ const LTEReports = () => {
       )}
 
       {/* Mobility KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {visibleSections >= 3 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -394,7 +415,7 @@ const LTEReports = () => {
       )}
 
       {/* Retainability KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {visibleSections >= 4 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -446,7 +467,7 @@ const LTEReports = () => {
       )}
 
       {/* Traffic & Throughput KPIs Section */}
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {visibleSections >= 5 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -660,7 +681,8 @@ const LTEReports = () => {
         </div>
       )}
 
-      {!loading && !error && (top20Sites.length > 0 || bottom20Sites.length > 0) && (
+      {/* Site Traffic Section */}
+      {visibleSections >= 6 && !loading && !error && (top20Sites.length > 0 || bottom20Sites.length > 0) && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -706,7 +728,8 @@ const LTEReports = () => {
         </div>
       )}
 
-      {!loading && !error && top20Sites.length === 0 && bottom20Sites.length === 0 && (
+      {/* No data message */}
+      {visibleSections >= 6 && !loading && !error && top20Sites.length === 0 && bottom20Sites.length === 0 && (
         <div className="no-data">
           <p>No LTE traffic data available for the selected period.</p>
           <p>Please import data using the Import CSV button in the sidebar.</p>
@@ -714,7 +737,7 @@ const LTEReports = () => {
       )}
 
       {/* LTE Frequency (Carrier) Data Section */}
-      <div style={{
+      {visibleSections >= 7 && <div style={{
         backgroundColor: '#ffffff', 
         borderRadius: '12px', 
         padding: '2rem', 
@@ -748,7 +771,7 @@ const LTEReports = () => {
             <p>Please import LTE Frequency CSV data using the sidebar.</p>
           </div>
         )}
-      </div>
+      </div>}
         </>
       )}
     </div>
