@@ -169,19 +169,59 @@ const SideNav = ({ isOpen, onClose }) => {
               
               <div className={`section-items ${expandedSections.nr ? 'expanded' : ''}`}>
                 <button 
-                  className="sub-item disabled"
-                  disabled={true}
-                  title="Coming soon"
+                  className="sub-item active"
+                  onClick={() => handleImportClick('nr')}
+                  disabled={loading}
                 >
                   <span className="sub-icon">📁</span>
-                  <span className="sub-text">Import NR KPI CSV</span>
-                  <span className="coming-soon-badge">Coming Soon</span>
+                  <span className="sub-text">Import NR Cell CU</span>
                 </button>
               </div>
             </div>
           </div>
 
           <StatusMessage message={uploadStatus} type={getStatusType()} />
+          
+          {/* Loading overlay for import in progress */}
+          {loading && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.3)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 10,
+              pointerEvents: 'all'
+            }}>
+              <div style={{
+                backgroundColor: 'white',
+                padding: '2rem',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                textAlign: 'center'
+              }}>
+                <div className="spinner" style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '4px solid #f3f3f3',
+                  borderTop: '4px solid #3b82f6',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite',
+                  margin: '0 auto 1rem'
+                }}></div>
+                <p style={{ margin: 0, color: '#374151', fontWeight: 500 }}>
+                  Import in progress...
+                </p>
+                <p style={{ margin: '0.5rem 0 0', color: '#6b7280', fontSize: '0.875rem' }}>
+                  Please wait, do not close this window
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
     </>

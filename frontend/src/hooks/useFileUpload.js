@@ -15,15 +15,29 @@ export const useFileUpload = () => {
     }
 
     setLoading(true);
-    setUploadStatus('Uploading...');
+    
+    // Show different messages for large NR imports
+    if (type === 'nr') {
+      setUploadStatus('📤 Uploading NR data... This may take 10-30 seconds for large files.');
+    } else {
+      setUploadStatus('Uploading...');
+    }
 
     try {
       const response = await uploadCSV(type, file);
       console.log('📊 Full response stats:', JSON.stringify(response.stats, null, 2));
       console.log('❌ Errors:', response.errors);
-      setUploadStatus(
-        `Success! ${response.stats?.inserted || 0} inserted, ${response.stats?.updated || 0} updated`
-      );
+      
+      // Handle NR response format
+      if (type === 'nr' && response.rawRecords) {
+        setUploadStatus(
+          `✅ Success! Processed ${response.rawRecords.toLocaleString()} raw records → Generated ${response.kpiRecords} KPI records (${response.inserted} inserted, ${response.updated} updated)`
+        );
+      } else {
+        setUploadStatus(
+          `Success! ${response.stats?.inserted || 0} inserted, ${response.stats?.updated || 0} updated`
+        );
+      }
       // Return success for parent component to handle
       return { success: true, data: response };
     } catch (error) {

@@ -46,7 +46,7 @@ export const CHART_COLORS = {
 // File Upload Settings
 export const FILE_UPLOAD = {
   acceptedFormats: '.csv,.xlsx,.xls',
-  maxSize: 10 * 1024 * 1024, // 10MB
+  maxSize: 50 * 1024 * 1024, // 50MB (for large NR raw data files)
 };
 
 // Network Types
