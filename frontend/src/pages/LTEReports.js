@@ -305,6 +305,14 @@ const LTEReports = () => {
           {loading && <div className="loading">Loading LTE traffic data...</div>}
           {error && <div className="error">Error: {error}</div>}
 
+      {/* No KPI Data Message */}
+      {!kpiLoading && !kpiError && kpiData.length === 0 && (
+        <div className="no-data-message">
+          <p>No LTE KPI data available</p>
+          <p>Please import LTE KPI CSV data using the sidebar or select a different date range.</p>
+        </div>
+      )}
+
       {/* Cell Availability KPIs Section */}
       {visibleSections >= 1 && !kpiLoading && !kpiError && kpiData.length > 0 && (
         <div style={{ 
@@ -766,9 +774,9 @@ const LTEReports = () => {
         )}
 
         {!frequencyLoading && !frequencyError && (!frequencyData?.data || frequencyData.data.length === 0) && (
-          <div className="no-data">
-            <p>No frequency data available for the selected period.</p>
-            <p>Please import LTE Frequency CSV data using the sidebar.</p>
+          <div className="no-data-message">
+            <p>No LTE frequency data available</p>
+            <p>Please import LTE Frequency CSV data using the sidebar or select a different date range.</p>
           </div>
         )}
       </div>}
