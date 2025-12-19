@@ -46,12 +46,19 @@ export async function uploadRawData(req, res) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    console.log('📥 Reading NR raw data file...');
+    const fileSize = (req.file.size / (1024 * 1024)).toFixed(2);
+    console.log(`📥 Reading NR raw data file (${fileSize} MB)...`);
+    const startRead = Date.now();
+    
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
     
+    console.log(`✅ File loaded in ${((Date.now() - startRead) / 1000).toFixed(2)}s, parsing rows...`);
+    const startParse = Date.now();
+    
     const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    console.log(`✅ Parsed ${rawData.length} rows in ${((Date.now() - startParse) / 1000).toFixed(2)}s`);
     
     // Delete file after reading
     deleteFile(req.file.path);
@@ -80,6 +87,8 @@ export async function uploadRawData(req, res) {
     console.log(`📊 Found ${headers.length} columns, ${rawData.length - headerRowIndex - 1} data rows`);
 
     // Parse raw records
+    console.log('🔄 Transforming rows to records...');
+    const startTransform = Date.now();
     const rawRecords = [];
     for (let i = headerRowIndex + 1; i < rawData.length; i++) {
       const row = rawData[i];
@@ -93,16 +102,19 @@ export async function uploadRawData(req, res) {
       rawRecords.push(record);
     }
 
-    console.log(`✅ Parsed ${rawRecords.length} raw records`);
+    console.log(`✅ Transformed ${rawRecords.length} records in ${((Date.now() - startTransform) / 1000).toFixed(2)}s`);
     
     // Process raw data → Calculate KPIs
     console.log('🔄 Processing and calculating KPIs...');
+    const startProcess = Date.now();
     const kpiRecords = nrKpiService.processRawDataToKpis(rawRecords);
-    console.log(`✅ Generated ${kpiRecords.length} KPI records`);
+    console.log(`✅ Generated ${kpiRecords.length} KPI records in ${((Date.now() - startProcess) / 1000).toFixed(2)}s`);
 
     // Insert KPI data to database
     console.log('💾 Inserting KPI data to database...');
+    const startInsert = Date.now();
     const result = await nrKpiService.insertKpiData(kpiRecords);
+    console.log(`✅ Inserted to DB in ${((Date.now() - startInsert) / 1000).toFixed(2)}s`);
 
     res.json({
       success: true,

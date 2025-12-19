@@ -75,6 +75,9 @@ export const processRawDataToKpis = (rawRecords) => {
         pmEndcRelUeAbnormalMenb: 0,
         pmEndcRelUeAbnormalSgnbAct: 0,
         pmEndcRelUeAbnormalMenbAct: 0,
+        // RRC Connected Users
+        pmRrcConnLevelMaxEndc: 0,
+        avgRrcConnectedUsers: 0,
       };
     }
     
@@ -91,6 +94,9 @@ export const processRawDataToKpis = (rawRecords) => {
     group.pmEndcRelUeAbnormalMenb += parseFloat(record.PMENDCRELUEABNORMALMENB || 0);
     group.pmEndcRelUeAbnormalSgnbAct += parseFloat(record.PMENDCRELUEABNORMALSGNBACT || 0);
     group.pmEndcRelUeAbnormalMenbAct += parseFloat(record.PMENDCRELUEABNORMALMENBACT || 0);
+    // RRC Connected Users metrics
+    group.pmRrcConnLevelMaxEndc += parseFloat(record.PMRRCCONNLEVELMAXENDC || 0);
+    group.avgRrcConnectedUsers += parseFloat(record['Average NR EN-DC RRC Connected Users'] || 0);
   });
   
   // Calculate KPIs for each group
@@ -146,6 +152,8 @@ export const processRawDataToKpis = (rawRecords) => {
       scg_retainability_endc_connectivity: scgRetainabilityEndcConnectivity,
       scg_retainability_active: scgRetainabilityActive,
       scg_retainability_overall: scgRetainabilityOverall,
+      peak_rrc_connected_users: group.pmRrcConnLevelMaxEndc,
+      avg_rrc_connected_users: group.avgRrcConnectedUsers,
     };
   });
   
@@ -175,8 +183,10 @@ export const insertKpiData = async (records) => {
           endc_inter_pscell_change_success_rate,
           scg_retainability_endc_connectivity,
           scg_retainability_active,
-          scg_retainability_overall
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          scg_retainability_overall,
+          peak_rrc_connected_users,
+          avg_rrc_connected_users
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         ON CONFLICT (date_id, hour_id, freq_band)
         DO UPDATE SET
           endc_setup_success_rate = EXCLUDED.endc_setup_success_rate,
@@ -185,6 +195,8 @@ export const insertKpiData = async (records) => {
           scg_retainability_endc_connectivity = EXCLUDED.scg_retainability_endc_connectivity,
           scg_retainability_active = EXCLUDED.scg_retainability_active,
           scg_retainability_overall = EXCLUDED.scg_retainability_overall,
+          peak_rrc_connected_users = EXCLUDED.peak_rrc_connected_users,
+          avg_rrc_connected_users = EXCLUDED.avg_rrc_connected_users,
           created_at = CURRENT_TIMESTAMP
         RETURNING (xmax = 0) AS inserted;
       `;
@@ -199,6 +211,8 @@ export const insertKpiData = async (records) => {
         record.scg_retainability_endc_connectivity,
         record.scg_retainability_active,
         record.scg_retainability_overall,
+        record.peak_rrc_connected_users,
+        record.avg_rrc_connected_users,
       ]);
       
       if (result.rows[0].inserted) {
@@ -238,7 +252,9 @@ export const getKpiData = async (startDate, endDate) => {
       endc_inter_pscell_change_success_rate,
       scg_retainability_endc_connectivity,
       scg_retainability_active,
-      scg_retainability_overall
+      scg_retainability_overall,
+      peak_rrc_connected_users,
+      avg_rrc_connected_users
     FROM nr_kpi_data
     WHERE date_id >= $1 AND date_id <= $2
     ORDER BY date_id, hour_id, freq_band;
