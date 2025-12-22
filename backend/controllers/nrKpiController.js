@@ -1,4 +1,5 @@
-import XLSX from 'xlsx';
+import Papa from 'papaparse';
+import fs from 'fs';
 import * as nrKpiService from '../services/nrKpiService.js';
 import { deleteFile } from '../utils/fileUpload.js';
 
@@ -50,14 +51,21 @@ export async function uploadRawData(req, res) {
     console.log(`📥 Reading NR raw data file (${fileSize} MB)...`);
     const startRead = Date.now();
     
-    const workbook = XLSX.readFile(req.file.path);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
+    // Read file content
+    const fileContent = fs.readFileSync(req.file.path, 'utf8');
     
-    console.log(`✅ File loaded in ${((Date.now() - startRead) / 1000).toFixed(2)}s, parsing rows...`);
+    console.log(`✅ File loaded in ${((Date.now() - startRead) / 1000).toFixed(2)}s, parsing CSV...`);
     const startParse = Date.now();
     
-    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+    // Parse CSV with papaparse - let it detect delimiter and handle headers
+    const parseResult = Papa.parse(fileContent, {
+      header: false, // We'll handle headers manually to find the right row
+      skipEmptyLines: true,
+      dynamicTyping: false,
+      delimiter: '', // Auto-detect delimiter (tab or comma)
+    });
+    
+    const rawData = parseResult.data;
     console.log(`✅ Parsed ${rawData.length} rows in ${((Date.now() - startParse) / 1000).toFixed(2)}s`);
     
     // Delete file after reading
@@ -83,8 +91,9 @@ export async function uploadRawData(req, res) {
       });
     }
 
-    const headers = rawData[headerRowIndex].map(h => String(h).trim());
-    console.log(`📊 Found ${headers.length} columns, ${rawData.length - headerRowIndex - 1} data rows`);
+    const headers = rawData[headerRowIndex].map(h => String(h || '').trim());
+    console.log(`📊 Found ${headers.length} columns: ${headers.slice(0, 5).join(', ')}...`);
+    console.log(`📊 Total data rows: ${rawData.length - headerRowIndex - 1}`);
 
     // Parse raw records
     console.log('🔄 Transforming rows to records...');
@@ -96,7 +105,9 @@ export async function uploadRawData(req, res) {
       
       const record = {};
       headers.forEach((header, index) => {
-        record[header] = row[index];
+        if (header) { // Only map non-empty headers
+          record[header] = row[index] !== undefined ? row[index] : '';
+        }
       });
       
       rawRecords.push(record);
