@@ -240,11 +240,79 @@ const NRReports = () => {
     return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
   };
 
+  // Prepare Peak RRC Connected Users chart data (hourly)
+  const preparePeakRrcConnectedUsersData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item.peak_rrc_connected_users !== null && item.peak_rrc_connected_users !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item.peak_rrc_connected_users);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item.peak_rrc_connected_users);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  // Prepare Average RRC Connected Users chart data (hourly)
+  const prepareAvgRrcConnectedUsersData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item.avg_rrc_connected_users !== null && item.avg_rrc_connected_users !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item.avg_rrc_connected_users);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item.avg_rrc_connected_users);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
   const setupSuccessRateData = prepareSetupSuccessRateData();
   const interPsCellChangeData = prepareInterPsCellChangeData();
   const scgRetainabilityEndcData = prepareScgRetainabilityEndcData();
   const scgRetainabilityActiveData = prepareScgRetainabilityActiveData();
   const scgRetainabilityOverallData = prepareScgRetainabilityOverallData();
+  const peakRrcConnectedUsersData = preparePeakRrcConnectedUsersData();
+  const avgRrcConnectedUsersData = prepareAvgRrcConnectedUsersData();
 
   // If comparison mode is active, render NRReportsComparison instead
   if (comparisonMode) {
@@ -385,6 +453,34 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard 
+              title="Peak RRC Connected Users" 
+              description="Peak number of NR EN-DC RRC connected users by frequency band"
+            >
+              <KPILineChart 
+                data={peakRrcConnectedUsersData}
+                dataKeys={['900MHz', '3500MHz']}
+                colors={['#6b21a8', '#ec4899']}
+                yAxisLabel="Users"
+              />
+            </ChartCard>
+          </div>
+
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard 
+              title="Average RRC Connected Users" 
+              description="Average NR EN-DC RRC connected users by frequency band"
+            >
+              <KPILineChart 
+                data={avgRrcConnectedUsersData}
+                dataKeys={['900MHz', '3500MHz']}
+                colors={['#6b21a8', '#ec4899']}
+                yAxisLabel="Users"
               />
             </ChartCard>
           </div>
