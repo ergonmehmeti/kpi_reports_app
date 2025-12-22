@@ -48,72 +48,91 @@ export async function uploadRawData(req, res) {
     }
 
     const fileSize = (req.file.size / (1024 * 1024)).toFixed(2);
-    console.log(`📥 Reading NR raw data file (${fileSize} MB)...`);
+    console.log(`📥 Reading NR raw data file (${fileSize} MB) with streaming...`);
     const startRead = Date.now();
     
-    // Read file content
-    const fileContent = fs.readFileSync(req.file.path, 'utf8');
+    // Stream parse the file to avoid memory overflow
+    const rawRecords = [];
+    let headers = null;
+    let headerRowIndex = -1;
+    let rowIndex = 0;
     
-    console.log(`✅ File loaded in ${((Date.now() - startRead) / 1000).toFixed(2)}s, parsing CSV...`);
-    const startParse = Date.now();
-    
-    // Parse CSV with papaparse - let it detect delimiter and handle headers
-    const parseResult = Papa.parse(fileContent, {
-      header: false, // We'll handle headers manually to find the right row
-      skipEmptyLines: true,
-      dynamicTyping: false,
-      delimiter: '', // Auto-detect delimiter (tab or comma)
+    await new Promise((resolve, reject) => {
+      const stream = fs.createReadStream(req.file.path, { encoding: 'utf8' });
+      
+      Papa.parse(stream, {
+        delimiter: '', // Auto-detect delimiter (comma, tab, etc.)
+        skipEmptyLines: true,
+        step: (result, parser) => {
+          const row = result.data;
+          
+          // Debug first 3 rows
+          if (rowIndex < 3) {
+            console.log(`Row ${rowIndex}: [${row.length} cells] First cell: "${row[0]}", Second cell: "${row[1]}"`);
+          }
+          
+          // Find header row - check for Eniq_Name or DATE_ID in any cell
+          if (headers === null) {
+            const firstCell = String(row[0] || '').toLowerCase().trim();
+            const hasEniq = row.some(cell => String(cell || '').toLowerCase().includes('eniq'));
+            const hasDateId = row.some(cell => String(cell || '').toUpperCase() === 'DATE_ID');
+            
+            if (firstCell.includes('eniq') || hasEniq || hasDateId) {
+              headers = row.map(h => String(h || '').trim());
+              headerRowIndex = rowIndex;
+              console.log(`📊 Found ${headers.length} columns at row ${rowIndex}`);
+              console.log(`📊 First 10 headers: ${headers.slice(0, 10).join(', ')}`);
+              console.log(`📊 Has DATE_ID: ${headers.includes('DATE_ID')}, Has HOUR_ID: ${headers.includes('HOUR_ID')}`);
+            }
+            rowIndex++;
+            return;
+          }
+          
+          // Skip empty rows or rows where first cell is empty (like ,,,,,)
+          const firstCellValue = String(row[0] || '').trim();
+          if (!row || row.length === 0 || !firstCellValue) {
+            rowIndex++;
+            return;
+          }
+          
+          // Build record object
+          const record = {};
+          headers.forEach((header, index) => {
+            if (header) {
+              record[header] = row[index] !== undefined ? row[index] : '';
+            }
+          });
+          
+          rawRecords.push(record);
+          rowIndex++;
+          
+          // Progress indicator every 50k rows
+          if (rawRecords.length % 50000 === 0) {
+            console.log(`   ... processed ${rawRecords.length.toLocaleString()} records`);
+          }
+        },
+        complete: () => {
+          console.log(`✅ Streamed and parsed ${rawRecords.length.toLocaleString()} records in ${((Date.now() - startRead) / 1000).toFixed(2)}s`);
+          resolve();
+        },
+        error: (error) => {
+          reject(error);
+        }
+      });
     });
-    
-    const rawData = parseResult.data;
-    console.log(`✅ Parsed ${rawData.length} rows in ${((Date.now() - startParse) / 1000).toFixed(2)}s`);
     
     // Delete file after reading
     deleteFile(req.file.path);
     
-    if (rawData.length < 2) {
-      return res.status(400).json({ error: 'File is empty or has no data rows' });
-    }
-
-    // Find header row
-    let headerRowIndex = -1;
-    for (let i = 0; i < Math.min(5, rawData.length); i++) {
-      const firstCell = String(rawData[i][0] || '').toLowerCase();
-      if (firstCell.includes('eniq') || firstCell.includes('date')) {
-        headerRowIndex = i;
-        break;
-      }
-    }
-
-    if (headerRowIndex === -1) {
+    if (!headers) {
       return res.status(400).json({ 
         error: 'Could not find header row. Expected columns like Eniq_Name, DATE_ID, etc.' 
       });
     }
-
-    const headers = rawData[headerRowIndex].map(h => String(h || '').trim());
-    console.log(`📊 Found ${headers.length} columns: ${headers.slice(0, 5).join(', ')}...`);
-    console.log(`📊 Total data rows: ${rawData.length - headerRowIndex - 1}`);
-
-    // Parse raw records
-    console.log('🔄 Transforming rows to records...');
-    const startTransform = Date.now();
-    const rawRecords = [];
-    for (let i = headerRowIndex + 1; i < rawData.length; i++) {
-      const row = rawData[i];
-      if (!row || row.length === 0 || !row[0]) continue; // Skip empty rows
-      
-      const record = {};
-      headers.forEach((header, index) => {
-        if (header) { // Only map non-empty headers
-          record[header] = row[index] !== undefined ? row[index] : '';
-        }
-      });
-      
-      rawRecords.push(record);
+    
+    if (rawRecords.length === 0) {
+      return res.status(400).json({ error: 'No data rows found' });
     }
-
-    console.log(`✅ Transformed ${rawRecords.length} records in ${((Date.now() - startTransform) / 1000).toFixed(2)}s`);
     
     // Process raw data → Calculate KPIs
     console.log('🔄 Processing and calculating KPIs...');
