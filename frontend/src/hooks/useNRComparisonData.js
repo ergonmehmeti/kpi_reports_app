@@ -41,6 +41,20 @@ export const NR_KPI_OPTIONS = [
     yAxisLabel: '%',
     category: 'Retainability KPIs'
   },
+  { 
+    id: 'peak_rrc_connected_users', 
+    label: 'Peak RRC Connected Users', 
+    column: 'peak_rrc_connected_users',
+    yAxisLabel: 'Users',
+    category: 'User KPIs'
+  },
+  { 
+    id: 'avg_rrc_connected_users', 
+    label: 'Average RRC Connected Users', 
+    column: 'avg_rrc_connected_users',
+    yAxisLabel: 'Users',
+    category: 'User KPIs'
+  },
 ];
 
 /**
