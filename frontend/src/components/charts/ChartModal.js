@@ -45,6 +45,31 @@ const ChartModal = memo(({
   // Default colors - blue for week1/single, green for week2
   const chartColors = colors || ['#3b82f6', '#22c55e', '#8b5cf6'];
 
+  // Calculate dynamic Y-axis domain based on data (same as KPILineChart)
+  const calculateYDomain = () => {
+    if (!data || data.length === 0) return [0, 100];
+    
+    let min = Infinity;
+    let max = -Infinity;
+    dataKeys.forEach(key => {
+      data.forEach(item => {
+        const value = parseFloat(item[key]);
+        if (!isNaN(value)) {
+          min = Math.min(min, value);
+          max = Math.max(max, value);
+        }
+      });
+    });
+    
+    // If no valid values found, return default domain
+    if (min === Infinity || max === -Infinity) return [0, 100];
+    
+    // Floor the minimum value and ceil the maximum value
+    const flooredMin = Math.floor(min);
+    const ceiledMax = Math.ceil(max);
+    return [flooredMin, ceiledMax];
+  };
+
   // For comparison charts, use week labels
   const isComparison = chartType === 'comparison';
   const legendLabels = isComparison 
@@ -79,6 +104,7 @@ const ChartModal = memo(({
           <YAxis 
             stroke="#666" 
             width={80}
+            domain={calculateYDomain()}
             label={yAxisLabel ? { 
               value: yAxisLabel, 
               angle: -90, 
@@ -109,6 +135,7 @@ const ChartModal = memo(({
         <YAxis 
           stroke="#666" 
           width={80}
+          domain={calculateYDomain()}
           label={yAxisLabel ? { 
             value: yAxisLabel, 
             angle: -90, 

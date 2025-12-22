@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ComparisonLineChart from '../components/charts/ComparisonLineChart';
+import ChartModal from '../components/charts/ChartModal';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useNRComparisonData, NR_KPI_OPTIONS } from '../hooks/useNRComparisonData';
 import './LTEReports.css';
@@ -26,6 +27,19 @@ const NRReportsComparison = () => {
   // Local state
   const [selectedWeek2, setSelectedWeek2] = useState(null);
   const [selectedKPIs, setSelectedKPIs] = useState([]);
+  
+  // Modal state for enlarged chart view
+  const [selectedChart, setSelectedChart] = useState(null);
+
+  // Handle chart click to open modal
+  const handleChartClick = useCallback((chartConfig) => {
+    setSelectedChart(chartConfig);
+  }, []);
+
+  // Handle modal close
+  const handleCloseModal = useCallback(() => {
+    setSelectedChart(null);
+  }, []);
 
   // Initialize second week
   useEffect(() => {
@@ -190,7 +204,14 @@ const NRReportsComparison = () => {
             </p>
           </div>
 
-          {selectedKPIs.map(kpiId => {
+          {/* Sort selectedKPIs by their order in NR_KPI_OPTIONS to match NRReports page order */}
+          {[...selectedKPIs]
+            .sort((a, b) => {
+              const indexA = NR_KPI_OPTIONS.findIndex(k => k.id === a);
+              const indexB = NR_KPI_OPTIONS.findIndex(k => k.id === b);
+              return indexA - indexB;
+            })
+            .map(kpiId => {
             const kpiConfig = NR_KPI_OPTIONS.find(k => k.id === kpiId);
             const chartData = comparisonData[kpiId];
             
@@ -214,12 +235,25 @@ const NRReportsComparison = () => {
                   gap: '1.5rem'
                 }}>
                   {/* 900MHz Chart */}
-                  <div style={{
-                    backgroundColor: '#faf5ff',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    border: '1px solid #e9d5ff'
-                  }}>
+                  <div 
+                    style={{
+                      backgroundColor: '#faf5ff',
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      border: '1px solid #e9d5ff',
+                      cursor: 'pointer',
+                      transition: 'box-shadow 0.2s ease'
+                    }}
+                    onClick={() => handleChartClick({
+                      title: `${kpiConfig.label} - 900MHz Band`,
+                      data: chartData['900MHz'],
+                      yAxisLabel: kpiConfig.yAxisLabel,
+                      week1Label: week1Label,
+                      week2Label: week2Label,
+                      week1Color: colors['900MHz'].week1,
+                      week2Color: colors['900MHz'].week2
+                    })}
+                  >
                     <h5 style={{ 
                       fontSize: '0.95rem', 
                       color: '#6b21a8', 
@@ -240,12 +274,25 @@ const NRReportsComparison = () => {
                   </div>
 
                   {/* 3500MHz Chart */}
-                  <div style={{
-                    backgroundColor: '#fdf2f8',
-                    borderRadius: '8px',
-                    padding: '1rem',
-                    border: '1px solid #fbcfe8'
-                  }}>
+                  <div 
+                    style={{
+                      backgroundColor: '#fdf2f8',
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      border: '1px solid #fbcfe8',
+                      cursor: 'pointer',
+                      transition: 'box-shadow 0.2s ease'
+                    }}
+                    onClick={() => handleChartClick({
+                      title: `${kpiConfig.label} - 3500MHz Band`,
+                      data: chartData['3500MHz'],
+                      yAxisLabel: kpiConfig.yAxisLabel,
+                      week1Label: week1Label,
+                      week2Label: week2Label,
+                      week1Color: colors['3500MHz'].week1,
+                      week2Color: colors['3500MHz'].week2
+                    })}
+                  >
                     <h5 style={{ 
                       fontSize: '0.95rem', 
                       color: '#be185d', 
@@ -276,6 +323,23 @@ const NRReportsComparison = () => {
         <div className="no-data-message">
           <p>Zgjidhni KPI-të nga lista më lart për të parë krahasimin e javëve.</p>
         </div>
+      )}
+
+      {/* Chart Modal for enlarged view */}
+      {selectedChart && (
+        <ChartModal
+          isOpen={true}
+          onClose={handleCloseModal}
+          title={selectedChart.title}
+          badge="Weekly Comparison"
+          data={selectedChart.data}
+          dataKeys={[selectedChart.week1Label, selectedChart.week2Label]}
+          yAxisLabel={selectedChart.yAxisLabel}
+          chartType="comparison"
+          week1Label={selectedChart.week1Label}
+          week2Label={selectedChart.week2Label}
+          colors={[selectedChart.week1Color, selectedChart.week2Color]}
+        />
       )}
     </div>
   );

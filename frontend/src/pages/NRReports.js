@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import KPILineChart from '../components/charts/KPILineChart';
+import ChartModal from '../components/charts/ChartModal';
 import NRReportsComparison from './NRReportsComparison';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useNRKPIData } from '../hooks/useNRKPIData';
@@ -30,6 +31,19 @@ const NRReports = () => {
   
   // Comparison mode state
   const [comparisonMode, setComparisonMode] = useState(false);
+
+  // Modal state for enlarged chart view
+  const [selectedChart, setSelectedChart] = useState(null);
+
+  // Handle chart click to open modal
+  const handleChartClick = useCallback((chartConfig) => {
+    setSelectedChart(chartConfig);
+  }, []);
+
+  // Handle modal close
+  const handleCloseModal = useCallback(() => {
+    setSelectedChart(null);
+  }, []);
 
   // Initialize dates from selected week
   useEffect(() => {
@@ -391,6 +405,13 @@ const NRReports = () => {
             <ChartCard 
               title="EN-DC Setup Success Rate (%)" 
               description="5G connection establishment success rate by frequency band"
+              onClick={() => handleChartClick({
+                title: 'EN-DC Setup Success Rate (%)',
+                data: setupSuccessRateData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%'
+              })}
             >
               <KPILineChart 
                 data={setupSuccessRateData}
@@ -405,6 +426,13 @@ const NRReports = () => {
             <ChartCard 
               title="EN-DC Inter-sgNodeB PSCell Change Success Rate (%)" 
               description="5G inter-gNodeB PSCell change success rate by frequency band"
+              onClick={() => handleChartClick({
+                title: 'EN-DC Inter-sgNodeB PSCell Change Success Rate (%)',
+                data: interPsCellChangeData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%'
+              })}
             >
               <KPILineChart 
                 data={interPsCellChangeData}
@@ -419,6 +447,13 @@ const NRReports = () => {
             <ChartCard 
               title="SCG Active Radio Resource Retainability considering EN-DC connectivity (%)" 
               description="SCG retainability considering EN-DC connectivity by frequency band"
+              onClick={() => handleChartClick({
+                title: 'SCG Active Radio Resource Retainability considering EN-DC connectivity (%)',
+                data: scgRetainabilityEndcData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%'
+              })}
             >
               <KPILineChart 
                 data={scgRetainabilityEndcData}
@@ -433,6 +468,13 @@ const NRReports = () => {
             <ChartCard 
               title="SCG Active Radio Resource Retainability (%)" 
               description="SCG active radio resource retainability by frequency band"
+              onClick={() => handleChartClick({
+                title: 'SCG Active Radio Resource Retainability (%)',
+                data: scgRetainabilityActiveData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%'
+              })}
             >
               <KPILineChart 
                 data={scgRetainabilityActiveData}
@@ -447,6 +489,13 @@ const NRReports = () => {
             <ChartCard 
               title="SCG Radio Resource Retainability (%)" 
               description="Overall SCG radio resource retainability by frequency band"
+              onClick={() => handleChartClick({
+                title: 'SCG Radio Resource Retainability (%)',
+                data: scgRetainabilityOverallData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%'
+              })}
             >
               <KPILineChart 
                 data={scgRetainabilityOverallData}
@@ -461,6 +510,13 @@ const NRReports = () => {
             <ChartCard 
               title="Peak RRC Connected Users" 
               description="Peak number of NR EN-DC RRC connected users by frequency band"
+              onClick={() => handleChartClick({
+                title: 'Peak RRC Connected Users',
+                data: peakRrcConnectedUsersData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: 'Users'
+              })}
             >
               <KPILineChart 
                 data={peakRrcConnectedUsersData}
@@ -475,6 +531,13 @@ const NRReports = () => {
             <ChartCard 
               title="Average RRC Connected Users" 
               description="Average NR EN-DC RRC connected users by frequency band"
+              onClick={() => handleChartClick({
+                title: 'Average RRC Connected Users',
+                data: avgRrcConnectedUsersData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: 'Users'
+              })}
             >
               <KPILineChart 
                 data={avgRrcConnectedUsersData}
@@ -485,6 +548,20 @@ const NRReports = () => {
             </ChartCard>
           </div>
         </div>
+      )}
+
+      {/* Chart Modal for enlarged view */}
+      {selectedChart && (
+        <ChartModal
+          isOpen={true}
+          onClose={handleCloseModal}
+          title={selectedChart.title}
+          data={selectedChart.data}
+          dataKeys={selectedChart.dataKeys}
+          yAxisLabel={selectedChart.yAxisLabel}
+          colors={selectedChart.colors}
+          chartType="line"
+        />
       )}
 
       {!kpiLoading && !kpiError && kpiData.length === 0 && (
