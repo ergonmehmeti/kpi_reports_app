@@ -1,36 +1,36 @@
 import express from 'express';
 import nrKpiController from '../controllers/nrKpiController.js';
 import { upload } from '../utils/fileUpload.js';
-import { verifyToken } from '../middleware/auth.js';
+import { adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
 /**
  * @route   POST /api/nr/upload
  * @desc    Upload and import NR raw data CSV/XLSX
- * @access  Private
+ * @access  Admin only
  */
-router.post('/upload', verifyToken, upload.single('file'), nrKpiController.uploadRawData);
+router.post('/upload', adminOnly, upload.single('file'), nrKpiController.uploadRawData);
 
 /**
  * @route   GET /api/nr/data
  * @desc    Get NR KPI data for date range
- * @access  Private
+ * @access  Public
  */
-router.get('/data', verifyToken, nrKpiController.getKpiData);
+router.get('/data', nrKpiController.getKpiData);
 
 /**
  * @route   GET /api/nr/kpi
  * @desc    Get NR KPI data for date range (alias)
- * @access  Private
+ * @access  Public
  */
-router.get('/kpi', verifyToken, nrKpiController.getKpiData);
+router.get('/kpi', nrKpiController.getKpiData);
 
 /**
  * @route   DELETE /api/nr/kpi
  * @desc    Delete NR KPI data for date range
- * @access  Private (Admin only ideally)
+ * @access  Admin only
  */
-router.delete('/kpi', verifyToken, nrKpiController.deleteKpiData);
+router.delete('/kpi', adminOnly, nrKpiController.deleteKpiData);
 
 export default router;
