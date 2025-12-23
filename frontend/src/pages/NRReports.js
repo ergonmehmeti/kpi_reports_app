@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import KPILineChart from '../components/charts/KPILineChart';
+import NRRrcUsersStackedAreaChart from '../components/charts/NRRrcUsersStackedAreaChart';
 import ChartModal from '../components/charts/ChartModal';
 import NRReportsComparison from './NRReportsComparison';
 import { useWeekSelector } from '../hooks/useWeekSelector';
@@ -515,14 +516,14 @@ const NRReports = () => {
                 data: peakRrcConnectedUsersData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: 'Users'
+                yAxisLabel: 'Users',
+                chartType: 'stackedArea'
               })}
             >
-              <KPILineChart 
+              <NRRrcUsersStackedAreaChart 
                 data={peakRrcConnectedUsersData}
-                dataKeys={['900MHz', '3500MHz']}
-                colors={['#6b21a8', '#ec4899']}
-                yAxisLabel="Users"
+                height={350}
+                title="Peak RRC Connected Users"
               />
             </ChartCard>
           </div>
@@ -536,14 +537,14 @@ const NRReports = () => {
                 data: avgRrcConnectedUsersData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: 'Users'
+                yAxisLabel: 'Users',
+                chartType: 'stackedArea'
               })}
             >
-              <KPILineChart 
+              <NRRrcUsersStackedAreaChart 
                 data={avgRrcConnectedUsersData}
-                dataKeys={['900MHz', '3500MHz']}
-                colors={['#6b21a8', '#ec4899']}
-                yAxisLabel="Users"
+                height={350}
+                title="Average RRC Connected Users"
               />
             </ChartCard>
           </div>
