@@ -1,6 +1,6 @@
 import React, { memo, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import './ChartModal.css';
 
 /**
@@ -124,6 +124,47 @@ const ChartModal = memo(({
             />
           ))}
         </BarChart>
+      );
+    }
+
+    if (chartType === 'stackedArea') {
+      return (
+        <AreaChart data={data}>
+          <defs>
+            {dataKeys.map((key, index) => (
+              <linearGradient key={key} id={`gradient_modal_${key}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor={chartColors[index % chartColors.length]} stopOpacity={0.8} />
+                <stop offset="95%" stopColor={chartColors[index % chartColors.length]} stopOpacity={0.3} />
+              </linearGradient>
+            ))}
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 12 }} />
+          <YAxis 
+            stroke="#666" 
+            width={80}
+            label={yAxisLabel ? { 
+              value: yAxisLabel, 
+              angle: -90, 
+              position: 'insideLeft', 
+              style: { textAnchor: 'middle' } 
+            } : undefined}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Legend />
+          {dataKeys.map((key, index) => (
+            <Area 
+              key={key}
+              type="monotone"
+              dataKey={key} 
+              name={legendLabels[key] || key}
+              stackId="1"
+              stroke={chartColors[index % chartColors.length]}
+              fill={`url(#gradient_modal_${key})`}
+              strokeWidth={2}
+            />
+          ))}
+        </AreaChart>
       );
     }
 
