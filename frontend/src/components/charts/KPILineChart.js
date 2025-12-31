@@ -9,6 +9,14 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
   const calculateYDomain = () => {
     if (!data || data.length === 0) return [0, 100];
     
+    // If custom domain is provided with numeric values, use it directly
+    if (yAxisDomain && 
+        Array.isArray(yAxisDomain) && 
+        typeof yAxisDomain[0] === 'number' && 
+        typeof yAxisDomain[1] === 'number') {
+      return yAxisDomain;
+    }
+    
     let min = Infinity;
     let max = -Infinity;
     dataKeys.forEach(key => {
@@ -59,6 +67,10 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
       if (maxVal === 100) ticks[4] = 100;
       return ticks;
     }
+    // If custom ticks array is provided, use it directly
+    if (Array.isArray(yAxisTicks)) {
+      return yAxisTicks;
+    }
     return yAxisTicks;
   };
 
@@ -100,6 +112,7 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
           width={80}
           domain={calculateYDomain()}
           ticks={calculateYTicks()}
+          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
           label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } } : undefined}
         />
         <Tooltip content={<CustomTooltip />} />

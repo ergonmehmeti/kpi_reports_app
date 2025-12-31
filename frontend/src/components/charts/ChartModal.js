@@ -51,6 +51,14 @@ const ChartModal = memo(({
   const calculateYDomain = () => {
     if (!data || data.length === 0) return [0, 100];
     
+    // If custom domain is provided with numeric values, use it directly
+    if (customYAxisDomain && 
+        Array.isArray(customYAxisDomain) && 
+        typeof customYAxisDomain[0] === 'number' && 
+        typeof customYAxisDomain[1] === 'number') {
+      return customYAxisDomain;
+    }
+    
     let min = Infinity;
     let max = -Infinity;
     dataKeys.forEach(key => {
@@ -101,6 +109,10 @@ const ChartModal = memo(({
       // Ensure max is exactly 100 if that's the upper bound
       if (maxVal === 100) ticks[4] = 100;
       return ticks;
+    }
+    // If custom ticks array is provided, use it directly
+    if (Array.isArray(yAxisTicks)) {
+      return yAxisTicks;
     }
     return yAxisTicks;
   };
@@ -213,6 +225,7 @@ const ChartModal = memo(({
           width={80}
           domain={calculateYDomain()}
           ticks={calculateYTicks()}
+          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
           label={yAxisLabel ? { 
             value: yAxisLabel, 
             angle: -90, 
