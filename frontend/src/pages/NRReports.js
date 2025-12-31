@@ -329,6 +329,71 @@ const NRReports = () => {
   const peakRrcConnectedUsersData = preparePeakRrcConnectedUsersData();
   const avgRrcConnectedUsersData = prepareAvgRrcConnectedUsersData();
 
+  // Calculate custom Y-axis ticks for EN-DC Setup Success Rate (min, middle, max with 1 decimal)
+  const calculateSetupSuccessRateTicks = () => {
+    if (!setupSuccessRateData || setupSuccessRateData.length === 0) return undefined;
+    
+    let min = Infinity;
+    setupSuccessRateData.forEach(item => {
+      const val1 = item['900MHz'];
+      const val2 = item['3500MHz'];
+      if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+        min = Math.min(min, val1);
+      }
+      if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+        min = Math.min(min, val2);
+      }
+    });
+    
+    if (min === Infinity) return undefined;
+    
+    const minTick = Math.floor(min) - 1;
+    const maxTick = 100;
+    const middleTick = (minTick + maxTick) / 2;
+    
+    // Format to 1 decimal place
+    return [
+      parseFloat(minTick.toFixed(1)),
+      parseFloat(middleTick.toFixed(1)),
+      parseFloat(maxTick.toFixed(1))
+    ];
+  };
+
+  const setupSuccessRateTicks = calculateSetupSuccessRateTicks();
+
+  // Calculate custom Y-axis ticks for EN-DC Inter-sgNodeB PSCell Change Success Rate (min rounded to 10, middle, max)
+  const calculateInterPsCellChangeTicks = () => {
+    if (!interPsCellChangeData || interPsCellChangeData.length === 0) return undefined;
+    
+    let min = Infinity;
+    interPsCellChangeData.forEach(item => {
+      const val1 = item['900MHz'];
+      const val2 = item['3500MHz'];
+      if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+        min = Math.min(min, val1);
+      }
+      if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+        min = Math.min(min, val2);
+      }
+    });
+    
+    if (min === Infinity) return undefined;
+    
+    // Round down to nearest 10
+    const minTick = Math.floor(min / 10) * 10;
+    const maxTick = 100.0;
+    const middleTick = (minTick + maxTick) / 2;
+    
+    // Return exact numeric values formatted to 1 decimal
+    return [
+      Number(minTick.toFixed(1)),
+      Number(middleTick.toFixed(1)),
+      Number(maxTick.toFixed(1))
+    ];
+  };
+
+  const interPsCellChangeTicks = calculateInterPsCellChangeTicks();
+
   // If comparison mode is active, render NRReportsComparison instead
   if (comparisonMode) {
     return (
@@ -413,7 +478,7 @@ const NRReports = () => {
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
                 yAxisDomain: ['autoFloorMinus1', 100],
-                yAxisTicks: 'auto5'
+                yAxisTicks: setupSuccessRateTicks
               })}
             >
               <KPILineChart 
@@ -422,7 +487,7 @@ const NRReports = () => {
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
                 yAxisDomain={['autoFloorMinus1', 100]}
-                yAxisTicks="auto5"
+                yAxisTicks={setupSuccessRateTicks}
               />
             </ChartCard>
           </div>
@@ -437,8 +502,8 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: ['autoFloorMinus1', 100],
-                yAxisTicks: 'auto5'
+                yAxisDomain: interPsCellChangeTicks ? [interPsCellChangeTicks[0], 100] : [0, 100],
+                yAxisTicks: interPsCellChangeTicks
               })}
             >
               <KPILineChart 
@@ -446,8 +511,8 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
-                yAxisDomain={['autoFloorMinus1', 100]}
-                yAxisTicks="auto5"
+                yAxisDomain={interPsCellChangeTicks ? [interPsCellChangeTicks[0], 100] : [0, 100]}
+                yAxisTicks={interPsCellChangeTicks}
               />
             </ChartCard>
           </div>

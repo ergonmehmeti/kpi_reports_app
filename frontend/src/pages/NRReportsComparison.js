@@ -217,6 +217,81 @@ const NRReportsComparison = () => {
             
             if (!chartData || !kpiConfig) return null;
 
+            // Helper function to calculate yAxisDomain based on KPI type
+            const getYAxisDomain = (data, freqBand) => {
+              // For RRC Users and Retainability KPIs, start from 0
+              if (kpiConfig.id === 'avg_rrc_connected_users' || 
+                  kpiConfig.id === 'peak_rrc_connected_users' || 
+                  kpiConfig.id === 'scg_retainability_overall' || 
+                  kpiConfig.id === 'scg_retainability_endc_connectivity') {
+                return [0, 'auto'];
+              }
+              
+              // For EN-DC Inter-sgNodeB PSCell Change Success Rate
+              if (kpiConfig.id === 'endc_inter_pscell_change_success_rate') {
+                if (!data || data.length === 0) return [0, 100];
+                
+                let minVal = Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    minVal = Math.min(minVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    minVal = Math.min(minVal, val2);
+                  }
+                });
+                
+                if (minVal === Infinity) return [0, 100];
+                
+                // Round down to nearest 10
+                const roundedMin = Math.floor(minVal / 10) * 10;
+                return [roundedMin, 100];
+              }
+              
+              return undefined;
+            };
+
+            // Helper function to calculate yAxisTicks based on KPI type
+            const getYAxisTicks = (data, freqBand) => {
+              // For EN-DC Inter-sgNodeB PSCell Change Success Rate
+              if (kpiConfig.id === 'endc_inter_pscell_change_success_rate') {
+                if (!data || data.length === 0) return undefined;
+                
+                let minVal = Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    minVal = Math.min(minVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    minVal = Math.min(minVal, val2);
+                  }
+                });
+                
+                if (minVal === Infinity) return undefined;
+                
+                // Round down to nearest 10
+                const roundedMin = Math.floor(minVal / 10) * 10;
+                const range = 100 - roundedMin;
+                
+                // If range / 5 > 5 (i.e., range > 25), use step of 10
+                // Otherwise use step of 5
+                const step = (range / 5) > 5 ? 10 : 5;
+                
+                const ticks = [];
+                for (let i = roundedMin; i <= 100; i += step) {
+                  ticks.push(i);
+                }
+                
+                return ticks;
+              }
+              
+              return undefined;
+            };
+
             return (
               <div key={kpiId} style={{ marginTop: '2rem' }}>
                 <h4 style={{ 
@@ -251,7 +326,9 @@ const NRReportsComparison = () => {
                       week1Label: week1Label,
                       week2Label: week2Label,
                       week1Color: colors['900MHz'].week1,
-                      week2Color: colors['900MHz'].week2
+                      week2Color: colors['900MHz'].week2,
+                      yAxisDomain: getYAxisDomain(chartData['900MHz'], '900MHz'),
+                      yAxisTicks: getYAxisTicks(chartData['900MHz'], '900MHz')
                     })}
                   >
                     <h5 style={{ 
@@ -270,6 +347,8 @@ const NRReportsComparison = () => {
                       yAxisLabel={kpiConfig.yAxisLabel}
                       week1Color={colors['900MHz'].week1}
                       week2Color={colors['900MHz'].week2}
+                      yAxisDomain={getYAxisDomain(chartData['900MHz'], '900MHz')}
+                      yAxisTicks={getYAxisTicks(chartData['900MHz'], '900MHz')}
                     />
                   </div>
 
@@ -290,7 +369,9 @@ const NRReportsComparison = () => {
                       week1Label: week1Label,
                       week2Label: week2Label,
                       week1Color: colors['3500MHz'].week1,
-                      week2Color: colors['3500MHz'].week2
+                      week2Color: colors['3500MHz'].week2,
+                      yAxisDomain: getYAxisDomain(chartData['3500MHz'], '3500MHz'),
+                      yAxisTicks: getYAxisTicks(chartData['3500MHz'], '3500MHz')
                     })}
                   >
                     <h5 style={{ 
@@ -309,6 +390,8 @@ const NRReportsComparison = () => {
                       yAxisLabel={kpiConfig.yAxisLabel}
                       week1Color={colors['3500MHz'].week1}
                       week2Color={colors['3500MHz'].week2}
+                      yAxisDomain={getYAxisDomain(chartData['3500MHz'], '3500MHz')}
+                      yAxisTicks={getYAxisTicks(chartData['3500MHz'], '3500MHz')}
                     />
                   </div>
                 </div>
@@ -339,6 +422,8 @@ const NRReportsComparison = () => {
           week1Label={selectedChart.week1Label}
           week2Label={selectedChart.week2Label}
           colors={[selectedChart.week1Color, selectedChart.week2Color]}
+          yAxisDomain={selectedChart.yAxisDomain}
+          yAxisTicks={selectedChart.yAxisTicks}
         />
       )}
     </div>
