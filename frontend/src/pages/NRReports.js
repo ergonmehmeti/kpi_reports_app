@@ -411,7 +411,9 @@ const NRReports = () => {
                 data: setupSuccessRateData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%'
+                yAxisLabel: '%',
+                yAxisDomain: ['autoFloorMinus1', 100],
+                yAxisTicks: 'auto5'
               })}
             >
               <KPILineChart 
@@ -419,6 +421,8 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+                yAxisDomain={['autoFloorMinus1', 100]}
+                yAxisTicks="auto5"
               />
             </ChartCard>
           </div>
@@ -432,7 +436,9 @@ const NRReports = () => {
                 data: interPsCellChangeData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%'
+                yAxisLabel: '%',
+                yAxisDomain: ['autoFloorMinus1', 100],
+                yAxisTicks: 'auto5'
               })}
             >
               <KPILineChart 
@@ -440,6 +446,8 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+                yAxisDomain={['autoFloorMinus1', 100]}
+                yAxisTicks="auto5"
               />
             </ChartCard>
           </div>
@@ -453,7 +461,8 @@ const NRReports = () => {
                 data: scgRetainabilityEndcData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%'
+                yAxisLabel: '%',
+                yAxisDomain: [0, 'auto']
               })}
             >
               <KPILineChart 
@@ -461,6 +470,7 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+                yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
           </div>
@@ -474,7 +484,8 @@ const NRReports = () => {
                 data: scgRetainabilityActiveData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%'
+                yAxisLabel: '%',
+                yAxisDomain: [0, 'auto']
               })}
             >
               <KPILineChart 
@@ -482,6 +493,7 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+                yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
           </div>
@@ -495,7 +507,8 @@ const NRReports = () => {
                 data: scgRetainabilityOverallData,
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%'
+                yAxisLabel: '%',
+                yAxisDomain: [0, 'auto']
               })}
             >
               <KPILineChart 
@@ -503,6 +516,7 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
+                yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
           </div>
