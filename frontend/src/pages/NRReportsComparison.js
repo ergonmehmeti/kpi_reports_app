@@ -85,16 +85,15 @@ const NRReportsComparison = () => {
   }, {});
 
   // Colors for comparison charts
-  // 900MHz: Purple shades (darker for week1, lighter for week2)
-  // 3500MHz: Pink shades (darker for week1, lighter for week2)
+  // Each frequency band uses two distinct colors for week1 and week2
   const colors = {
     '900MHz': {
-      week1: '#6b21a8', // Dark purple
-      week2: '#a855f7'  // Light purple
+      week1: '#6b21a8', // Purple
+      week2: '#be185d'  // Pink
     },
     '3500MHz': {
-      week1: '#be185d', // Dark pink
-      week2: '#f472b6'  // Light pink
+      week1: '#6b21a8', // Purple
+      week2: '#be185d'  // Pink
     }
   };
 
@@ -105,7 +104,7 @@ const NRReportsComparison = () => {
         <div className="comparison-selectors">
           <div className="date-input-group">
             <label htmlFor="week1-select">
-              <span className="week-indicator week1-indicator">●</span> Week 1:
+              <span className="week-indicator week1-indicator">●</span> Compare
             </label>
             <select 
               id="week1-select"
@@ -122,7 +121,7 @@ const NRReportsComparison = () => {
           </div>
           <div className="date-input-group">
             <label htmlFor="week2-select">
-              <span className="week-indicator week2-indicator">●</span> Week 2:
+              <span className="week-indicator week2-indicator">●</span> with
             </label>
             <select 
               id="week2-select"
@@ -219,12 +218,53 @@ const NRReportsComparison = () => {
 
             // Helper function to calculate yAxisDomain based on KPI type
             const getYAxisDomain = (data, freqBand) => {
-              // For RRC Users and Retainability KPIs, start from 0
+              // For RRC Users and Retainability KPIs, start from 0 with calculated max
               if (kpiConfig.id === 'avg_rrc_connected_users' || 
                   kpiConfig.id === 'peak_rrc_connected_users' || 
                   kpiConfig.id === 'scg_retainability_overall' || 
+                  kpiConfig.id === 'scg_retainability_active' ||
                   kpiConfig.id === 'scg_retainability_endc_connectivity') {
-                return [0, 'auto'];
+                if (!data || data.length === 0) return [0, 100];
+                
+                let maxVal = -Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    maxVal = Math.max(maxVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    maxVal = Math.max(maxVal, val2);
+                  }
+                });
+                
+                if (maxVal === -Infinity) return [0, 100];
+                
+                // Round up max to nearest integer
+                const roundedMax = Math.ceil(maxVal);
+                return [0, roundedMax];
+              }
+              
+              // For EN-DC Setup Success Rate - use floor(min) - 1 to 100
+              if (kpiConfig.id === 'endc_setup_success_rate') {
+                if (!data || data.length === 0) return [0, 100];
+                
+                let minVal = Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    minVal = Math.min(minVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    minVal = Math.min(minVal, val2);
+                  }
+                });
+                
+                if (minVal === Infinity) return [0, 100];
+                
+                const minTick = Math.floor(minVal) - 1;
+                return [minTick, 100];
               }
               
               // For EN-DC Inter-sgNodeB PSCell Change Success Rate
@@ -255,6 +295,35 @@ const NRReportsComparison = () => {
 
             // Helper function to calculate yAxisTicks based on KPI type
             const getYAxisTicks = (data, freqBand) => {
+              // For EN-DC Setup Success Rate - 3 ticks: min, middle, max
+              if (kpiConfig.id === 'endc_setup_success_rate') {
+                if (!data || data.length === 0) return undefined;
+                
+                let minVal = Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    minVal = Math.min(minVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    minVal = Math.min(minVal, val2);
+                  }
+                });
+                
+                if (minVal === Infinity) return undefined;
+                
+                const minTick = Math.floor(minVal) - 1;
+                const maxTick = 100;
+                const middleTick = (minTick + maxTick) / 2;
+                
+                return [
+                  parseFloat(minTick.toFixed(1)),
+                  parseFloat(middleTick.toFixed(1)),
+                  parseFloat(maxTick.toFixed(1))
+                ];
+              }
+              
               // For EN-DC Inter-sgNodeB PSCell Change Success Rate
               if (kpiConfig.id === 'endc_inter_pscell_change_success_rate') {
                 if (!data || data.length === 0) return undefined;
@@ -275,18 +344,43 @@ const NRReportsComparison = () => {
                 
                 // Round down to nearest 10
                 const roundedMin = Math.floor(minVal / 10) * 10;
-                const range = 100 - roundedMin;
+                const maxTick = 100;
+                const middleTick = (roundedMin + maxTick) / 2;
                 
-                // If range / 5 > 5 (i.e., range > 25), use step of 10
-                // Otherwise use step of 5
-                const step = (range / 5) > 5 ? 10 : 5;
+                return [
+                  Number(roundedMin.toFixed(1)),
+                  Number(middleTick.toFixed(1)),
+                  Number(maxTick.toFixed(1))
+                ];
+              }
+              
+              // For RRC Users and Retainability KPIs - calculate ticks from 0 to max
+              if (kpiConfig.id === 'avg_rrc_connected_users' || 
+                  kpiConfig.id === 'peak_rrc_connected_users' || 
+                  kpiConfig.id === 'scg_retainability_overall' || 
+                  kpiConfig.id === 'scg_retainability_active' ||
+                  kpiConfig.id === 'scg_retainability_endc_connectivity') {
+                if (!data || data.length === 0) return undefined;
                 
-                const ticks = [];
-                for (let i = roundedMin; i <= 100; i += step) {
-                  ticks.push(i);
-                }
+                let maxVal = -Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    maxVal = Math.max(maxVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    maxVal = Math.max(maxVal, val2);
+                  }
+                });
                 
-                return ticks;
+                if (maxVal === -Infinity) return undefined;
+                
+                // Round up max to nearest integer
+                const roundedMax = Math.ceil(maxVal);
+                const middleTick = roundedMax / 2;
+                
+                return [0, middleTick, roundedMax];
               }
               
               return undefined;
