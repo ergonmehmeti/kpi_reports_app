@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors, yAxisDomain }) => {
+const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors, yAxisDomain, yAxisTicks }) => {
   const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
 
   // Calculate dynamic Y-axis domain based on data
@@ -21,13 +21,15 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
       });
     });
     
-    // Handle custom domain with 'auto' or 'autoRound30000' for min or max
+    // Handle custom domain with 'auto', 'autoRound30000', or 'autoFloorMinus1' for min or max
     if (yAxisDomain) {
       const calculatedMin = Math.floor(min);
       const calculatedMax = Math.ceil(max);
       const roundedMax30000 = Math.ceil(max / 30000) * 30000; // Round up to nearest 30000
+      const floorMinus1 = Math.floor(min) - 1; // Floor the min and subtract 1
       return [
-        yAxisDomain[0] === 'auto' ? calculatedMin : yAxisDomain[0],
+        yAxisDomain[0] === 'auto' ? calculatedMin : 
+        yAxisDomain[0] === 'autoFloorMinus1' ? floorMinus1 : yAxisDomain[0],
         yAxisDomain[1] === 'auto' ? calculatedMax : 
         yAxisDomain[1] === 'autoRound30000' ? roundedMax30000 : yAxisDomain[1]
       ];
@@ -37,6 +39,27 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
     const flooredMin = Math.floor(min);
     const ceiledMax = Math.ceil(max);
     return [flooredMin, ceiledMax];
+  };
+
+  // Calculate Y-axis ticks for 5 evenly spaced values rounded to 0.5
+  const calculateYTicks = () => {
+    if (yAxisTicks === 'auto5') {
+      const domain = calculateYDomain();
+      const [minVal, maxVal] = domain;
+      const range = maxVal - minVal;
+      const step = range / 4; // 5 ticks = 4 intervals
+      const ticks = [];
+      for (let i = 0; i <= 4; i++) {
+        const rawValue = minVal + (step * i);
+        // Round to nearest 0.5
+        const roundedValue = Math.round(rawValue * 2) / 2;
+        ticks.push(roundedValue);
+      }
+      // Ensure max is exactly 100 if that's the upper bound
+      if (maxVal === 100) ticks[4] = 100;
+      return ticks;
+    }
+    return yAxisTicks;
   };
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -76,6 +99,7 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
           stroke="#666" 
           width={80}
           domain={calculateYDomain()}
+          ticks={calculateYTicks()}
           label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } } : undefined}
         />
         <Tooltip content={<CustomTooltip />} />

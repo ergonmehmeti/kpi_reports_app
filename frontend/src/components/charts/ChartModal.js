@@ -19,7 +19,9 @@ const ChartModal = memo(({
   chartType = 'line',
   colors,
   week1Label,
-  week2Label
+  week2Label,
+  yAxisDomain: customYAxisDomain,
+  yAxisTicks
 }) => {
   // Handle ESC key to close
   const handleKeyDown = useCallback((e) => {
@@ -64,10 +66,43 @@ const ChartModal = memo(({
     // If no valid values found, return default domain
     if (min === Infinity || max === -Infinity) return [0, 100];
     
+    // Handle custom domain with 'auto', 'autoRound30000', or 'autoFloorMinus1'
+    if (customYAxisDomain) {
+      const calculatedMin = Math.floor(min);
+      const calculatedMax = Math.ceil(max);
+      const floorMinus1 = Math.floor(min) - 1;
+      return [
+        customYAxisDomain[0] === 'auto' ? calculatedMin : 
+        customYAxisDomain[0] === 'autoFloorMinus1' ? floorMinus1 : customYAxisDomain[0],
+        customYAxisDomain[1] === 'auto' ? calculatedMax : customYAxisDomain[1]
+      ];
+    }
+    
     // Floor the minimum value and ceil the maximum value
     const flooredMin = Math.floor(min);
     const ceiledMax = Math.ceil(max);
     return [flooredMin, ceiledMax];
+  };
+
+  // Calculate Y-axis ticks for 5 evenly spaced values rounded to 0.5
+  const calculateYTicks = () => {
+    if (yAxisTicks === 'auto5') {
+      const domain = calculateYDomain();
+      const [minVal, maxVal] = domain;
+      const range = maxVal - minVal;
+      const step = range / 4; // 5 ticks = 4 intervals
+      const ticks = [];
+      for (let i = 0; i <= 4; i++) {
+        const rawValue = minVal + (step * i);
+        // Round to nearest 0.5
+        const roundedValue = Math.round(rawValue * 2) / 2;
+        ticks.push(roundedValue);
+      }
+      // Ensure max is exactly 100 if that's the upper bound
+      if (maxVal === 100) ticks[4] = 100;
+      return ticks;
+    }
+    return yAxisTicks;
   };
 
   // For comparison charts, use week labels
@@ -177,6 +212,7 @@ const ChartModal = memo(({
           stroke="#666" 
           width={80}
           domain={calculateYDomain()}
+          ticks={calculateYTicks()}
           label={yAxisLabel ? { 
             value: yAxisLabel, 
             angle: -90, 
