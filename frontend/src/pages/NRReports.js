@@ -640,7 +640,9 @@ const NRReports = () => {
           dataKeys={selectedChart.dataKeys}
           yAxisLabel={selectedChart.yAxisLabel}
           colors={selectedChart.colors}
-          chartType="line"
+          chartType={selectedChart.chartType || 'line'}
+          yAxisDomain={selectedChart.yAxisDomain}
+          yAxisTicks={selectedChart.yAxisTicks}
         />
       )}
 
