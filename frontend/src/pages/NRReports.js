@@ -434,6 +434,7 @@ const NRReports = () => {
         onWeekChange={handleWeekChange}
         onToggleMode={() => setShowWeekSelector(!showWeekSelector)}
         onToggleComparison={handleToggleComparison}
+        hideCustomDatesButton={true}
       />
 
       {kpiLoading && (
@@ -467,7 +468,13 @@ const NRReports = () => {
             </p>
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
             <ChartCard 
               title="EN-DC Setup Success Rate (%)" 
               description="5G connection establishment success rate by frequency band"
@@ -490,9 +497,9 @@ const NRReports = () => {
                 yAxisTicks={setupSuccessRateTicks}
               />
             </ChartCard>
-          </div>
+            </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+            <div>
             <ChartCard 
               title="EN-DC Inter-sgNodeB PSCell Change Success Rate (%)" 
               description="5G inter-gNodeB PSCell change success rate by frequency band"
@@ -515,9 +522,16 @@ const NRReports = () => {
                 yAxisTicks={interPsCellChangeTicks}
               />
             </ChartCard>
+            </div>
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
             <ChartCard 
               title="SCG Active Radio Resource Retainability considering EN-DC connectivity (%)" 
               description="SCG retainability considering EN-DC connectivity by frequency band"
@@ -538,9 +552,9 @@ const NRReports = () => {
                 yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
-          </div>
+            </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+            <div>
             <ChartCard 
               title="SCG Active Radio Resource Retainability (%)" 
               description="SCG active radio resource retainability by frequency band"
@@ -561,9 +575,16 @@ const NRReports = () => {
                 yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
+            </div>
           </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
             <ChartCard 
               title="SCG Radio Resource Retainability (%)" 
               description="Overall SCG radio resource retainability by frequency band"
@@ -584,9 +605,9 @@ const NRReports = () => {
                 yAxisDomain={[0, 'auto']}
               />
             </ChartCard>
-          </div>
+            </div>
 
-          <div style={{ marginTop: '1.5rem' }}>
+            <div>
             <ChartCard 
               title="Peak RRC Connected Users" 
               description="Peak number of NR EN-DC RRC connected users by frequency band"
@@ -605,6 +626,7 @@ const NRReports = () => {
                 title="Peak RRC Connected Users"
               />
             </ChartCard>
+            </div>
           </div>
 
           <div style={{ marginTop: '1.5rem' }}>
