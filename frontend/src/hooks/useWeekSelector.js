@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getWeekOfYear, getMonday, getSunday, formatWeekLabel } from '../utils/dateHelpers';
+import { getWeekOfYear, getMonday, getSunday, formatWeekLabel, getISOWeekYear } from '../utils/dateHelpers';
 
 /**
  * Custom hook for managing week selection
@@ -23,13 +23,14 @@ export const useWeekSelector = (weeksBack = 20) => {
       const monday = getMonday(weekDate);
       const sunday = getSunday(weekDate);
       const weekOfYear = getWeekOfYear(monday);
+      const isoYear = getISOWeekYear(monday);
       
       weeks.push({
         id: i,
         monday,
         sunday,
         weekOfYear,
-        year: monday.getFullYear(),
+        year: isoYear,
         label: formatWeekLabel(monday, sunday, weekOfYear)
       });
     }

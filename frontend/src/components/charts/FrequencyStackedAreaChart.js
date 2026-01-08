@@ -176,15 +176,11 @@ const FrequencyStackedAreaChart = ({ data, height = 400 }) => {
           dataKey="datetime"
           tickFormatter={(datetime) => {
             const date = new Date(datetime);
-            const day = date.getDate();
-            const hour = date.getHours();
-            const month = date.toLocaleDateString('en-US', { month: 'short' });
-            
-            // Show date at midnight, otherwise just show hour
-            if (hour === 0) {
-              return `${month} ${day}`;
-            }
-            return `${hour}:00`;
+            return date.toLocaleString('en-US', { 
+              month: 'short', 
+              day: 'numeric', 
+              hour: '2-digit' 
+            });
           }}
           interval="preserveStartEnd"
           angle={-45}

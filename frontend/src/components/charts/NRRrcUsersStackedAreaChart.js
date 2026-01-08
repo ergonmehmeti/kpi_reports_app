@@ -140,16 +140,12 @@ const NRRrcUsersStackedAreaChart = ({ data, height = 400, title = 'RRC Connected
             if (parts.length === 2) {
               const datePart = parts[0];
               const timePart = parts[1];
-              const hour = parseInt(timePart.split(':')[0], 10);
-              
-              // Show date at midnight, otherwise just show hour
-              if (hour === 0) {
-                const date = new Date(datePart);
-                const month = date.toLocaleDateString('en-US', { month: 'short' });
-                const day = date.getDate();
-                return `${month} ${day}`;
-              }
-              return timePart;
+              const date = new Date(`${datePart}T${timePart}`);
+              return date.toLocaleString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                hour: '2-digit' 
+              });
             }
             return name;
           }}
