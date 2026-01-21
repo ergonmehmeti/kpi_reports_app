@@ -16,9 +16,11 @@ export const useFileUpload = () => {
 
     setLoading(true);
     
-    // Show different messages for large NR imports
-    if (type === 'nr') {
+    // Show different messages for large imports
+    if (type === 'nr' || type === 'nrCell') {
       setUploadStatus('📤 Uploading NR data... This may take 10-30 seconds for large files.');
+    } else if (type === 'endcLte') {
+      setUploadStatus('📤 Uploading EN-DC LTE data... Processing...');
     } else {
       setUploadStatus('Uploading...');
     }
@@ -28,12 +30,25 @@ export const useFileUpload = () => {
       console.log('📊 Full response stats:', JSON.stringify(response.stats, null, 2));
       console.log('❌ Errors:', response.errors);
       
-      // Handle NR response format
-      if (type === 'nr' && response.rawRecords) {
+      // Handle NR Cell response format
+      if (type === 'nrCell' && response.rawRecords) {
+        setUploadStatus(
+          `✅ Success! Processed ${response.rawRecords.toLocaleString()} raw records → ${response.hourlyKpis?.count || 0} hourly KPIs (${response.hourlyKpis?.inserted || 0} inserted, ${response.hourlyKpis?.updated || 0} updated) + ${response.weeklyTraffic?.count || 0} weekly traffic records`
+        );
+      }
+      // Handle original NR response format
+      else if (type === 'nr' && response.rawRecords) {
         setUploadStatus(
           `✅ Success! Processed ${response.rawRecords.toLocaleString()} raw records → Generated ${response.kpiRecords} KPI records (${response.inserted} inserted, ${response.updated} updated)`
         );
-      } else {
+      }
+      // Handle EN-DC LTE response format
+      else if (type === 'endcLte' && response.rawRecords) {
+        setUploadStatus(
+          `✅ Success! Processed ${response.rawRecords.toLocaleString()} raw records → ${response.trafficRecords} traffic records (${response.inserted} inserted, ${response.updated} updated)`
+        );
+      }
+      else {
         setUploadStatus(
           `Success! ${response.stats?.inserted || 0} inserted, ${response.stats?.updated || 0} updated`
         );

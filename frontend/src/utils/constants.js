@@ -32,6 +32,16 @@ export const API_ENDPOINTS = {
     upload: `${API_BASE_URL}/api/nr/upload`,
     data: `${API_BASE_URL}/api/nr/data`,
   },
+  nrCell: {
+    upload: `${API_BASE_URL}/api/nr-cell/upload`,
+    kpiHourly: `${API_BASE_URL}/api/nr-cell/kpi-hourly`,
+    trafficWeekly: `${API_BASE_URL}/api/nr-cell/traffic-weekly`,
+  },
+  endcLte: {
+    upload: `${API_BASE_URL}/api/endc-lte/upload`,
+    traffic: `${API_BASE_URL}/api/endc-lte/traffic`,
+    trafficBySite: `${API_BASE_URL}/api/endc-lte/traffic-by-site`,
+  },
 };
 
 // Chart Configuration
