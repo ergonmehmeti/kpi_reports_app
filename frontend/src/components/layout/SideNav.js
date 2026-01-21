@@ -39,25 +39,43 @@ const SideNav = ({ isOpen, onClose }) => {
 
   const handleImportClick = async (type) => {
     console.log('🔵 Import clicked, type:', type);
+    console.log('🔵 fileInputRef.current:', fileInputRef.current);
+    
+    if (!fileInputRef.current) {
+      console.error('❌ File input ref is null!');
+      return;
+    }
+    
+    // Set type before triggering click
+    fileInputRef.current.setAttribute('data-type', type);
     // Trigger file picker
     fileInputRef.current.click();
-    fileInputRef.current.setAttribute('data-type', type);
   };
 
   const handleFileSelected = async (event) => {
+    console.log('📁 File input changed, event:', event);
     const file = event.target.files[0];
-    if (!file) return;
+    console.log('📁 File object:', file);
+    
+    if (!file) {
+      console.warn('⚠️ No file selected');
+      return;
+    }
 
     const type = event.target.getAttribute('data-type') || 'gsm';
     console.log('🟢 File selected:', file.name, 'type:', type);
     
-    const result = await handleUpload(type, file);
-    console.log('🟡 Upload result:', result);
-    if (result.success) {
-      // Reset file input
-      event.target.value = '';
-      // Close sidebar after successful upload
-      setTimeout(() => onClose(), 2000);
+    try {
+      const result = await handleUpload(type, file);
+      console.log('🟡 Upload result:', result);
+      if (result.success) {
+        // Reset file input
+        event.target.value = '';
+        // Close sidebar after successful upload
+        setTimeout(() => onClose(), 2000);
+      }
+    } catch (error) {
+      console.error('❌ Error in handleFileSelected:', error);
     }
   };
 
@@ -175,6 +193,26 @@ const SideNav = ({ isOpen, onClose }) => {
                 >
                   <span className="sub-icon">📁</span>
                   <span className="sub-text">Import NR Cell CU</span>
+                </button>
+                
+                <button 
+                  className="sub-item"
+                  onClick={() => handleImportClick('nrCell')}
+                  disabled={loading}
+                >
+                  <span className="sub-icon">📊</span>
+                  <span className="sub-text">Import NR KPI</span>
+                </button>
+                
+                <button 
+                  className="sub-item"
+                  onClick={() => handleImportClick('endcLte')}
+                  disabled={true}
+                  style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                >
+                  <span className="sub-icon">🔗</span>
+                  <span className="sub-text">Import ENDC</span>
+                  <span style={{ fontSize: '0.7rem', marginLeft: '0.5rem', color: '#6b7280' }}>(Coming Soon)</span>
                 </button>
               </div>
             </div>

@@ -10,6 +10,8 @@ import usersRoutes from './routes/users.js';
 import lteFrequencyRoutes from './routes/lteFrequency.js';
 import lteKpiRoutes from './routes/lteKpi.js';
 import nrRoutes from './routes/nr.js';
+import nrCellRoutes from './routes/nrCell.js';
+import endcLteRoutes from './routes/endcLte.js';
 
 dotenv.config();
 
@@ -61,6 +63,12 @@ app.use('/api/lte-kpi', lteKpiRoutes);
 
 // NR (5G) KPI routes
 app.use('/api/nr', nrRoutes);
+
+// NR Cell KPI routes (detailed cell-level KPIs)
+app.use('/api/nr-cell', nrCellRoutes);
+
+// EN-DC LTE traffic routes
+app.use('/api/endc-lte', endcLteRoutes);
 
 // Start server
 app.listen(PORT, () => {
