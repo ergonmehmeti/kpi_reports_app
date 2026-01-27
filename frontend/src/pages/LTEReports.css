@@ -37,8 +37,25 @@
 
 .kpi-categories {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Three column layout for NR KPIs */
+.kpi-categories.three-columns {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 900px) {
+  .kpi-categories.three-columns {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-categories.three-columns {
+    grid-template-columns: 1fr;
+  }
 }
 
 .kpi-category {

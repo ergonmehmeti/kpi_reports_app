@@ -4,56 +4,215 @@ import { API_ENDPOINTS } from '../utils/constants';
 
 /**
  * NR KPI definitions with database column names and display labels
+ * Organized in 3 sections matching NRReports.js
  */
 export const NR_KPI_OPTIONS = [
+  // =============================================
+  // Section 1: 5G NR Accessibility & Mobility KPI's
+  // =============================================
+  { 
+    id: 'partial_cell_availability_pct', 
+    label: 'Partial Cell Availability for gNodeB Cell (%)', 
+    column: 'partial_cell_availability_pct',
+    yAxisLabel: '%',
+    category: '5G NR Accessibility & Mobility KPIs'
+  },
+  { 
+    id: 'random_access_success_rate_pct', 
+    label: 'Random Access Success Rate (%)', 
+    column: 'random_access_success_rate_pct',
+    yAxisLabel: '%',
+    category: '5G NR Accessibility & Mobility KPIs'
+  },
+  { 
+    id: 'ue_context_setup_success_rate_pct', 
+    label: 'UE Context Setup Success Rate (%)', 
+    column: 'ue_context_setup_success_rate_pct',
+    yAxisLabel: '%',
+    category: '5G NR Accessibility & Mobility KPIs'
+  },
   { 
     id: 'endc_setup_success_rate', 
     label: 'EN-DC Setup Success Rate (%)', 
     column: 'endc_setup_success_rate',
     yAxisLabel: '%',
-    category: 'Accessibility KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'endc_inter_pscell_change_success_rate', 
     label: 'EN-DC Inter-sgNodeB PSCell Change Success Rate (%)', 
     column: 'endc_inter_pscell_change_success_rate',
     yAxisLabel: '%',
-    category: 'Mobility KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_endc_connectivity', 
-    label: 'SCG Retainability EN-DC Connectivity (%)', 
+    label: 'SCG Active Radio Resource Retainability considering EN-DC connectivity (%)', 
     column: 'scg_retainability_endc_connectivity',
     yAxisLabel: '%',
-    category: 'Retainability KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_active', 
     label: 'SCG Active Radio Resource Retainability (%)', 
     column: 'scg_retainability_active',
     yAxisLabel: '%',
-    category: 'Retainability KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_overall', 
     label: 'SCG Radio Resource Retainability (%)', 
     column: 'scg_retainability_overall',
     yAxisLabel: '%',
-    category: 'Retainability KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'peak_rrc_connected_users', 
     label: 'Peak RRC Connected Users', 
     column: 'peak_rrc_connected_users',
     yAxisLabel: 'Users',
-    category: 'User KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'avg_rrc_connected_users', 
     label: 'Average RRC Connected Users', 
     column: 'avg_rrc_connected_users',
     yAxisLabel: 'Users',
-    category: 'User KPIs'
+    category: '5G NR Accessibility & Mobility KPIs'
+  },
+
+  // =============================================
+  // Section 2: Traffic & Integrity
+  // =============================================
+  { 
+    id: 'avg_dl_mac_drb_throughput_mbps', 
+    label: 'Average DL MAC DRB Throughput (Mbps)', 
+    column: 'avg_dl_mac_drb_throughput_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'normalized_avg_dl_mac_cell_throughput_traffic_mbps', 
+    label: 'Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)', 
+    column: 'normalized_avg_dl_mac_cell_throughput_traffic_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps', 
+    label: 'Normalized DL MAC Cell Throughput Considering Actual PDSCH Slot Only (Mbps)', 
+    column: 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'pdsch_slot_utilization_pct', 
+    label: 'PDSCH Slot Utilization (%)', 
+    column: 'pdsch_slot_utilization_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'dl_rbsym_utilization_pct', 
+    label: 'DL RBSym Utilization (%)', 
+    column: 'dl_rbsym_utilization_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'percentage_unrestricted_volume_dl_pct', 
+    label: 'Percentage Unrestricted Volume DL (%)', 
+    column: 'percentage_unrestricted_volume_dl_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'user_data_traffic_volume_dl_gb', 
+    label: '5G User Data Traffic Volume on Downlink (GB)', 
+    column: 'user_data_traffic_volume_dl_gb',
+    yAxisLabel: 'GB',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'avg_ul_mac_ue_throughput_mbps', 
+    label: 'Average UL MAC UE Throughput (Mbps)', 
+    column: 'avg_ul_mac_ue_throughput_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps', 
+    label: 'Normalized Average UL MAC Cell Throughput Considering Successful PUSCH Slot Only (Mbps)', 
+    column: 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps', 
+    label: 'Normalized Average UL MAC Cell Throughput Considering Actual PUSCH Slot Only (Mbps)', 
+    column: 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps',
+    yAxisLabel: 'Mbps',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'pusch_slot_utilization_pct', 
+    label: 'PUSCH Slot Utilization (%)', 
+    column: 'pusch_slot_utilization_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'ul_rbsym_utilization_pct', 
+    label: 'UL RBSym Utilization (%)', 
+    column: 'ul_rbsym_utilization_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'percentage_unrestricted_volume_ul_pct', 
+    label: 'Percentage Unrestricted Volume UL (%)', 
+    column: 'percentage_unrestricted_volume_ul_pct',
+    yAxisLabel: '%',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'user_data_traffic_volume_ul_gb', 
+    label: '5G User Data Traffic Volume on Uplink (GB)', 
+    column: 'user_data_traffic_volume_ul_gb',
+    yAxisLabel: 'GB',
+    category: 'Traffic & Integrity'
+  },
+  { 
+    id: 'share_5g_traffic_volume', 
+    label: 'Share of 5G Traffic Volume (GB) per Frequency Band', 
+    column: 'share_5g_traffic_volume',
+    yAxisLabel: 'GB',
+    category: 'Traffic & Integrity'
+  },
+
+  // =============================================
+  // Section 3: TOP Sites
+  // =============================================
+  { 
+    id: 'top_sites_total', 
+    label: 'TOP Sites - Total (All Bands)', 
+    column: 'top_sites_total',
+    yAxisLabel: 'GB',
+    category: 'TOP Sites'
+  },
+  { 
+    id: 'top_sites_tdd', 
+    label: 'TOP Sites - TDD (3500MHz)', 
+    column: 'top_sites_tdd',
+    yAxisLabel: 'GB',
+    category: 'TOP Sites'
+  },
+  { 
+    id: 'top_sites_fdd', 
+    label: 'TOP Sites - FDD (900MHz)', 
+    column: 'top_sites_fdd',
+    yAxisLabel: 'GB',
+    category: 'TOP Sites'
   },
 ];
 
@@ -165,19 +324,71 @@ export const useNRComparisonData = () => {
       const week2Start = week2.monday.toISOString().split('T')[0];
       const week2End = week2.sunday.toISOString().split('T')[0];
 
-      const [week1Response, week2Response] = await Promise.all([
-        axios.get(API_ENDPOINTS.nr.data, {
-          params: { startDate: week1Start, endDate: week1End },
-          headers: getAuthHeaders()
-        }),
-        axios.get(API_ENDPOINTS.nr.data, {
-          params: { startDate: week2Start, endDate: week2End },
-          headers: getAuthHeaders()
-        })
-      ]);
+      // Determine which endpoints to call based on selected KPIs
+      // KPIs from nr_kpi_data table (EN-DC related)
+      const nrKpiDataColumns = ['endc_setup_success_rate', 'endc_inter_pscell_change_success_rate', 
+        'scg_retainability_endc_connectivity', 'scg_retainability_active', 'scg_retainability_overall'];
+      
+      // KPIs from nr_kpi_hourly_by_band table (cell level KPIs)
+      const nrCellKpiColumns = ['partial_cell_availability_pct', 'random_access_success_rate_pct', 
+        'ue_context_setup_success_rate_pct', 'peak_rrc_connected_users', 'avg_rrc_connected_users',
+        'avg_dl_mac_drb_throughput_mbps', 'normalized_avg_dl_mac_cell_throughput_traffic_mbps',
+        'normalized_dl_mac_cell_throughput_actual_pdsch_mbps', 'pdsch_slot_utilization_pct',
+        'dl_rbsym_utilization_pct', 'percentage_unrestricted_volume_dl_pct', 'user_data_traffic_volume_dl_gb',
+        'avg_ul_mac_ue_throughput_mbps', 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps',
+        'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps', 'pusch_slot_utilization_pct',
+        'ul_rbsym_utilization_pct', 'percentage_unrestricted_volume_ul_pct', 'user_data_traffic_volume_ul_gb',
+        'share_5g_traffic_volume'];
 
-      const week1Data = week1Response.data.data || [];
-      const week2Data = week2Response.data.data || [];
+      const needsNrKpiData = selectedKPIs.some(kpi => nrKpiDataColumns.includes(kpi));
+      const needsNrCellKpiData = selectedKPIs.some(kpi => nrCellKpiColumns.includes(kpi));
+
+      // Build promises array
+      const promises = [];
+      
+      if (needsNrKpiData) {
+        promises.push(
+          axios.get(API_ENDPOINTS.nr.data, {
+            params: { startDate: week1Start, endDate: week1End },
+            headers: getAuthHeaders()
+          }),
+          axios.get(API_ENDPOINTS.nr.data, {
+            params: { startDate: week2Start, endDate: week2End },
+            headers: getAuthHeaders()
+          })
+        );
+      }
+      
+      if (needsNrCellKpiData) {
+        promises.push(
+          axios.get(API_ENDPOINTS.nrCell.kpiHourly, {
+            params: { startDate: week1Start, endDate: week1End },
+            headers: getAuthHeaders()
+          }),
+          axios.get(API_ENDPOINTS.nrCell.kpiHourly, {
+            params: { startDate: week2Start, endDate: week2End },
+            headers: getAuthHeaders()
+          })
+        );
+      }
+
+      const responses = await Promise.all(promises);
+
+      // Extract data from responses
+      let week1NrKpiData = [];
+      let week2NrKpiData = [];
+      let week1NrCellKpiData = [];
+      let week2NrCellKpiData = [];
+      
+      let responseIndex = 0;
+      if (needsNrKpiData) {
+        week1NrKpiData = responses[responseIndex++]?.data?.data || [];
+        week2NrKpiData = responses[responseIndex++]?.data?.data || [];
+      }
+      if (needsNrCellKpiData) {
+        week1NrCellKpiData = responses[responseIndex++]?.data?.data || [];
+        week2NrCellKpiData = responses[responseIndex++]?.data?.data || [];
+      }
 
       // Process data for each selected KPI and frequency band
       const processedData = {};
@@ -185,6 +396,11 @@ export const useNRComparisonData = () => {
       selectedKPIs.forEach(kpiId => {
         const kpiConfig = NR_KPI_OPTIONS.find(k => k.id === kpiId);
         if (!kpiConfig) return;
+
+        // Determine which data source to use
+        const isNrKpiData = nrKpiDataColumns.includes(kpiId);
+        const week1Data = isNrKpiData ? week1NrKpiData : week1NrCellKpiData;
+        const week2Data = isNrKpiData ? week2NrKpiData : week2NrCellKpiData;
 
         // Process for 900MHz
         const week1Data900 = formatComparisonData(week1Data, kpiConfig.column, '900MHz', w1Label, w2Label, true);

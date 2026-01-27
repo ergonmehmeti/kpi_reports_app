@@ -143,24 +143,57 @@ const NRReportsComparison = () => {
       <div className="kpi-selector-container">
         <h4>Zgjedh KPI-të për krahasim:</h4>
         
-        <div className="kpi-categories">
-          {Object.entries(kpisByCategory).map(([category, kpis]) => (
-            <div key={category} className="kpi-category">
-              <h5>{String(category).replace('KPIs', "KPI's")}</h5>
-              <div className="kpi-checkboxes">
-                {kpis.map(kpi => (
-                  <label key={kpi.id} className="kpi-checkbox">
-                    <input
-                      type="checkbox"
-                      checked={selectedKPIs.includes(kpi.id)}
-                      onChange={() => handleKPIToggle(kpi.id)}
-                    />
-                    <span>{kpi.label}</span>
-                  </label>
-                ))}
-              </div>
+        <div className="kpi-categories three-columns">
+          {/* Column 1: 5G NR Accessibility & Mobility KPI's */}
+          <div className="kpi-category">
+            <h5>5G NR Accessibility & Mobility KPI's</h5>
+            <div className="kpi-checkboxes">
+              {(kpisByCategory['5G NR Accessibility & Mobility KPIs'] || []).map(kpi => (
+                <label key={kpi.id} className="kpi-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedKPIs.includes(kpi.id)}
+                    onChange={() => handleKPIToggle(kpi.id)}
+                  />
+                  <span>{kpi.label}</span>
+                </label>
+              ))}
             </div>
-          ))}
+          </div>
+          
+          {/* Column 2: Traffic & Integrity */}
+          <div className="kpi-category">
+            <h5>Traffic & Integrity</h5>
+            <div className="kpi-checkboxes">
+              {(kpisByCategory['Traffic & Integrity'] || []).map(kpi => (
+                <label key={kpi.id} className="kpi-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedKPIs.includes(kpi.id)}
+                    onChange={() => handleKPIToggle(kpi.id)}
+                  />
+                  <span>{kpi.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          
+          {/* Column 3: TOP Sites */}
+          <div className="kpi-category">
+            <h5>TOP Sites</h5>
+            <div className="kpi-checkboxes">
+              {(kpisByCategory['TOP Sites'] || []).map(kpi => (
+                <label key={kpi.id} className="kpi-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={selectedKPIs.includes(kpi.id)}
+                    onChange={() => handleKPIToggle(kpi.id)}
+                  />
+                  <span>{kpi.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
         
         <p className="kpi-selection-hint">
@@ -194,23 +227,53 @@ const NRReportsComparison = () => {
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
           border: '1px solid #e5e7eb'
         }}>
-          <div className="content-header" style={{ marginTop: '0' }}>
-            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
-              5G NR KPI's Weekly Comparison
-            </h3>
-            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
-              Comparing <span style={{color: colors['900MHz'].week1, fontWeight: 600}}>{week1Label}</span> vs <span style={{color: colors['900MHz'].week2, fontWeight: 600}}>{week2Label}</span>
-            </p>
-          </div>
 
-          {/* Sort selectedKPIs by their order in NR_KPI_OPTIONS to match NRReports page order */}
-          {[...selectedKPIs]
-            .sort((a, b) => {
+          {/* Group KPIs by category and render with section headers */}
+          {(() => {
+            // Sort selectedKPIs by their order in NR_KPI_OPTIONS
+            const sortedKPIs = [...selectedKPIs].sort((a, b) => {
               const indexA = NR_KPI_OPTIONS.findIndex(k => k.id === a);
               const indexB = NR_KPI_OPTIONS.findIndex(k => k.id === b);
               return indexA - indexB;
-            })
-            .map(kpiId => {
+            });
+
+            // Group by category
+            const kpisByCategory = {};
+            sortedKPIs.forEach(kpiId => {
+              const kpiConfig = NR_KPI_OPTIONS.find(k => k.id === kpiId);
+              if (kpiConfig) {
+                if (!kpisByCategory[kpiConfig.category]) {
+                  kpisByCategory[kpiConfig.category] = [];
+                }
+                kpisByCategory[kpiConfig.category].push(kpiId);
+              }
+            });
+
+            // Define section order and titles
+            const sectionOrder = [
+              { category: '5G NR Accessibility & Mobility KPIs', title: "5G NR Accessibility & Mobility KPI's", subtitle: 'Cell availability, EN-DC setup and PSCell change success rates by frequency band' },
+              { category: 'Traffic & Integrity', title: 'Traffic & Integrity', subtitle: 'Throughput, utilization and traffic volume metrics by frequency band' },
+              { category: 'TOP Sites', title: 'TOP Sites', subtitle: 'Top sites traffic comparison by frequency band' }
+            ];
+
+            return sectionOrder.map(section => {
+              const categoryKPIs = kpisByCategory[section.category];
+              if (!categoryKPIs || categoryKPIs.length === 0) return null;
+
+              return (
+                <div key={section.category}>
+                  {/* Section Header */}
+                  <div className="content-header" style={{ marginTop: '2.5rem' }}>
+                    <h3 style={{ fontSize: '1.25rem', color: '#1f2937', marginBottom: '0.25rem' }}>
+                      {section.title}
+                    </h3>
+                    <p className="content-subtitle" style={{ fontSize: '0.8rem' }}>
+                      {section.subtitle}
+                    </p>
+                  </div>
+
+                  {/* KPIs in this section */}
+                  {categoryKPIs.map(kpiId => {
             const kpiConfig = NR_KPI_OPTIONS.find(k => k.id === kpiId);
             const chartData = comparisonData[kpiId];
             
@@ -218,6 +281,13 @@ const NRReportsComparison = () => {
 
             // Helper function to calculate yAxisDomain based on KPI type
             const getYAxisDomain = (data, freqBand) => {
+              // For Partial Cell Availability, Random Access, and UE Context Setup - use [90, 100] domain
+              if (kpiConfig.id === 'partial_cell_availability_pct' || 
+                  kpiConfig.id === 'random_access_success_rate_pct' ||
+                  kpiConfig.id === 'ue_context_setup_success_rate_pct') {
+                return [90, 100];
+              }
+              
               // For RRC Users and Retainability KPIs, start from 0 with calculated max
               if (kpiConfig.id === 'avg_rrc_connected_users' || 
                   kpiConfig.id === 'peak_rrc_connected_users' || 
@@ -290,11 +360,59 @@ const NRReportsComparison = () => {
                 return [roundedMin, 100];
               }
               
+              // For percentage KPIs (utilization, unrestricted volume) - use [0, 100]
+              if (kpiConfig.id === 'pdsch_slot_utilization_pct' || 
+                  kpiConfig.id === 'dl_rbsym_utilization_pct' ||
+                  kpiConfig.id === 'percentage_unrestricted_volume_dl_pct' ||
+                  kpiConfig.id === 'pusch_slot_utilization_pct' ||
+                  kpiConfig.id === 'ul_rbsym_utilization_pct' ||
+                  kpiConfig.id === 'percentage_unrestricted_volume_ul_pct') {
+                return [0, 100];
+              }
+              
+              // For throughput and traffic volume KPIs - calculate from 0 to max
+              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps' || 
+                  kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps' ||
+                  kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
+                  kpiConfig.id === 'user_data_traffic_volume_dl_gb' ||
+                  kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps' ||
+                  kpiConfig.id === 'user_data_traffic_volume_ul_gb' ||
+                  kpiConfig.id === 'share_5g_traffic_volume') {
+                if (!data || data.length === 0) return [0, 100];
+                
+                let maxVal = -Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    maxVal = Math.max(maxVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    maxVal = Math.max(maxVal, val2);
+                  }
+                });
+                
+                if (maxVal === -Infinity) return [0, 100];
+                
+                // Round up max to nearest integer + 10% buffer
+                const roundedMax = Math.ceil(maxVal * 1.1);
+                return [0, roundedMax];
+              }
+              
               return undefined;
             };
 
             // Helper function to calculate yAxisTicks based on KPI type
             const getYAxisTicks = (data, freqBand) => {
+              // For Partial Cell Availability, Random Access, and UE Context Setup - use [90, 95, 100] ticks
+              if (kpiConfig.id === 'partial_cell_availability_pct' || 
+                  kpiConfig.id === 'random_access_success_rate_pct' ||
+                  kpiConfig.id === 'ue_context_setup_success_rate_pct') {
+                return [90, 95, 100];
+              }
+              
               // For EN-DC Setup Success Rate - 3 ticks: min, middle, max
               if (kpiConfig.id === 'endc_setup_success_rate') {
                 if (!data || data.length === 0) return undefined;
@@ -378,6 +496,49 @@ const NRReportsComparison = () => {
                 
                 // Round up max to nearest integer
                 const roundedMax = Math.ceil(maxVal);
+                const middleTick = roundedMax / 2;
+                
+                return [0, middleTick, roundedMax];
+              }
+              
+              // For percentage KPIs (utilization, unrestricted volume) - use [0, 50, 100] ticks
+              if (kpiConfig.id === 'pdsch_slot_utilization_pct' || 
+                  kpiConfig.id === 'dl_rbsym_utilization_pct' ||
+                  kpiConfig.id === 'percentage_unrestricted_volume_dl_pct' ||
+                  kpiConfig.id === 'pusch_slot_utilization_pct' ||
+                  kpiConfig.id === 'ul_rbsym_utilization_pct' ||
+                  kpiConfig.id === 'percentage_unrestricted_volume_ul_pct') {
+                return [0, 50, 100];
+              }
+              
+              // For throughput and traffic volume KPIs - calculate ticks from 0 to max
+              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps' || 
+                  kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps' ||
+                  kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
+                  kpiConfig.id === 'user_data_traffic_volume_dl_gb' ||
+                  kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps' ||
+                  kpiConfig.id === 'user_data_traffic_volume_ul_gb' ||
+                  kpiConfig.id === 'share_5g_traffic_volume') {
+                if (!data || data.length === 0) return undefined;
+                
+                let maxVal = -Infinity;
+                data.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    maxVal = Math.max(maxVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    maxVal = Math.max(maxVal, val2);
+                  }
+                });
+                
+                if (maxVal === -Infinity) return undefined;
+                
+                // Round up max to nearest integer + 10% buffer
+                const roundedMax = Math.ceil(maxVal * 1.1);
                 const middleTick = roundedMax / 2;
                 
                 return [0, middleTick, roundedMax];
@@ -492,6 +653,10 @@ const NRReportsComparison = () => {
               </div>
             );
           })}
+                </div>
+              );
+            });
+          })()}
         </div>
       )}
 

@@ -6,6 +6,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
  * For displaying DL/UL traffic per site
  */
 const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format }) => {
+  const chartHeight = Math.max(360, (data?.length || 0) * 28 + 120);
+
   // Custom tooltip
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -42,21 +44,22 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
 
   return (
     <div className="chart-container">
-      <ResponsiveContainer width="100%" height={600}>
+      <ResponsiveContainer width="100%" height={chartHeight}>
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 20, right: 30, left: 100, bottom: 20 }}
+          margin={{ top: 20, right: 50, left: 140, bottom: 20 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             type="number"
+            tickFormatter={(value) => (format ? format(value) : value)}
             label={{ value: '[GB]', position: 'insideBottom', offset: -10 }}
           />
           <YAxis 
             type="category"
             dataKey="site_name"
-            width={90}
+            width={130}
             tick={{ fontSize: 12 }}
           />
           <Tooltip content={<CustomTooltip />} />
@@ -82,6 +85,12 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
               position="inside" 
               formatter={(value) => value > 0 ? format(value) : ''}
               style={{ fill: '#fff', fontSize: 12, fontWeight: 'bold' }}
+            />
+            <LabelList
+              dataKey="total"
+              position="right"
+              formatter={(value) => value > 0 ? format(value) : ''}
+              style={{ fill: '#111827', fontSize: 12, fontWeight: 'bold' }}
             />
             {data.map((entry, index) => (
               <Cell key={`cell-ul-${index}`} />
