@@ -240,24 +240,59 @@ export const insertKpiData = async (records) => {
 
 /**
  * Get NR KPI data for a date range
+ * Joins data from nr_kpi_data and nr_kpi_hourly_by_band tables
+ * Maps frequency band codes: '8' -> '900MHz', '78' -> '3500MHz'
  */
 export const getKpiData = async (startDate, endDate) => {
   const query = `
     SELECT 
-      date_id,
-      hour_id,
-      freq_band,
-      endc_setup_success_rate,
-      endc_intra_pscell_change_success_rate,
-      endc_inter_pscell_change_success_rate,
-      scg_retainability_endc_connectivity,
-      scg_retainability_active,
-      scg_retainability_overall,
-      peak_rrc_connected_users,
-      avg_rrc_connected_users
-    FROM nr_kpi_data
-    WHERE date_id >= $1 AND date_id <= $2
-    ORDER BY date_id, hour_id, freq_band;
+      COALESCE(a.date_id, b.date_id) as date_id,
+      COALESCE(a.hour_id, b.hour_id) as hour_id,
+      COALESCE(a.freq_band, 
+        CASE 
+          WHEN b.freq_band = '8' THEN '900MHz'
+          WHEN b.freq_band = '78' THEN '3500MHz'
+          ELSE b.freq_band
+        END
+      ) as freq_band,
+      a.endc_setup_success_rate,
+      a.endc_intra_pscell_change_success_rate,
+      a.endc_inter_pscell_change_success_rate,
+      a.scg_retainability_endc_connectivity,
+      a.scg_retainability_active,
+      a.scg_retainability_overall,
+      a.peak_rrc_connected_users,
+      a.avg_rrc_connected_users,
+      b.partial_cell_availability_pct,
+      b.random_access_success_rate_pct,
+      b.ue_context_setup_success_rate_pct,
+      -- Traffic & Integrity - Downlink KPIs
+      b.avg_dl_mac_drb_throughput_mbps,
+      b.normalized_avg_dl_mac_cell_throughput_traffic_mbps,
+      b.normalized_dl_mac_cell_throughput_actual_pdsch_mbps,
+      b.pdsch_slot_utilization_pct,
+      b.dl_rbsym_utilization_pct,
+      b.percentage_unrestricted_volume_dl_pct,
+      b.user_data_traffic_volume_dl_gb,
+      -- Traffic & Integrity - Uplink KPIs
+      b.avg_ul_mac_ue_throughput_mbps,
+      b.normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps,
+      b.normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps,
+      b.pusch_slot_utilization_pct,
+      b.ul_rbsym_utilization_pct,
+      b.percentage_unrestricted_volume_ul_pct,
+      b.user_data_traffic_volume_ul_gb
+    FROM nr_kpi_data a
+    FULL OUTER JOIN nr_kpi_hourly_by_band b 
+      ON a.date_id = b.date_id 
+      AND a.hour_id = b.hour_id 
+      AND a.freq_band = CASE 
+        WHEN b.freq_band = '8' THEN '900MHz'
+        WHEN b.freq_band = '78' THEN '3500MHz'
+        ELSE b.freq_band
+      END
+    WHERE (a.date_id >= $1 AND a.date_id <= $2) OR (b.date_id >= $1 AND b.date_id <= $2)
+    ORDER BY COALESCE(a.date_id, b.date_id), COALESCE(a.hour_id, b.hour_id), COALESCE(a.freq_band, b.freq_band);
   `;
   
   const result = await pool.query(query, [startDate, endDate]);

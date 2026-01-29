@@ -2,11 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import KPILineChart from '../components/charts/KPILineChart';
+import StackedBarChart from '../components/charts/StackedBarChart';
+import HorizontalStackedBarChart from '../components/charts/HorizontalStackedBarChart';
 import NRRrcUsersStackedAreaChart from '../components/charts/NRRrcUsersStackedAreaChart';
 import ChartModal from '../components/charts/ChartModal';
 import NRReportsComparison from './NRReportsComparison';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useNRKPIData } from '../hooks/useNRKPIData';
+import { useNRWeeklyTrafficData } from '../hooks/useNRWeeklyTrafficData';
 import './LTEReports.css';
 
 /**
@@ -24,6 +27,14 @@ const NRReports = () => {
     error: kpiError, 
     fetchData: fetchKPIData 
   } = useNRKPIData();
+
+  // Weekly traffic data hook for TOP Sites
+  const {
+    data: weeklyTrafficData,
+    loading: weeklyTrafficLoading,
+    error: weeklyTrafficError,
+    fetchData: fetchWeeklyTrafficData
+  } = useNRWeeklyTrafficData();
   
   // Local state for date range
   const [startDate, setStartDate] = useState('');
@@ -56,11 +67,14 @@ const NRReports = () => {
 
   const loadData = useCallback(async () => {
     try {
-      await fetchKPIData(startDate, endDate);
+      await Promise.all([
+        fetchKPIData(startDate, endDate),
+        fetchWeeklyTrafficData(startDate, endDate)
+      ]);
     } catch (error) {
       console.error('Error loading NR data:', error);
     }
-  }, [startDate, endDate, fetchKPIData]);
+  }, [startDate, endDate, fetchKPIData, fetchWeeklyTrafficData]);
 
   // Fetch data when dates change
   useEffect(() => {
@@ -321,6 +335,108 @@ const NRReports = () => {
     return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
   };
 
+  // Prepare Partial Cell Availability chart data (hourly)
+  const preparePartialCellAvailabilityData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item.partial_cell_availability_pct !== null && item.partial_cell_availability_pct !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item.partial_cell_availability_pct);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item.partial_cell_availability_pct);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  // Prepare Random Access Success Rate chart data (hourly)
+  const prepareRandomAccessSuccessRateData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item.random_access_success_rate_pct !== null && item.random_access_success_rate_pct !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item.random_access_success_rate_pct);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item.random_access_success_rate_pct);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  // Prepare UE Context Setup Success Rate chart data (hourly)
+  const prepareUeContextSetupSuccessRateData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item.ue_context_setup_success_rate_pct !== null && item.ue_context_setup_success_rate_pct !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item.ue_context_setup_success_rate_pct);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item.ue_context_setup_success_rate_pct);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  const partialCellAvailabilityData = preparePartialCellAvailabilityData();
+  const randomAccessSuccessRateData = prepareRandomAccessSuccessRateData();
+  const ueContextSetupSuccessRateData = prepareUeContextSetupSuccessRateData();
   const setupSuccessRateData = prepareSetupSuccessRateData();
   const interPsCellChangeData = prepareInterPsCellChangeData();
   const scgRetainabilityEndcData = prepareScgRetainabilityEndcData();
@@ -328,6 +444,292 @@ const NRReports = () => {
   const scgRetainabilityOverallData = prepareScgRetainabilityOverallData();
   const peakRrcConnectedUsersData = preparePeakRrcConnectedUsersData();
   const avgRrcConnectedUsersData = prepareAvgRrcConnectedUsersData();
+
+  // ============================================
+  // Traffic & Integrity KPI Data Preparation Functions
+  // ============================================
+
+  // Generic function to prepare hourly data for Traffic & Integrity KPIs
+  const prepareTrafficKpiData = (fieldName) => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByHour = {};
+    
+    kpiData.forEach(item => {
+      const key = `${item.date_id}_${item.hour_id}`;
+      if (!dataByHour[key]) {
+        dataByHour[key] = { 
+          name: `${item.date_id} ${String(item.hour_id).padStart(2, '0')}:00`,
+          date: item.date_id,
+          hour: item.hour_id,
+          timestamp: new Date(`${item.date_id}T${String(item.hour_id).padStart(2, '0')}:00:00`).getTime(),
+          '900MHz': null, 
+          '3500MHz': null
+        };
+      }
+      
+      if (item[fieldName] !== null && item[fieldName] !== undefined) {
+        if (item.freq_band === '900MHz') {
+          dataByHour[key]['900MHz'] = parseFloat(item[fieldName]);
+        } else if (item.freq_band === '3500MHz') {
+          dataByHour[key]['3500MHz'] = parseFloat(item[fieldName]);
+        }
+      }
+    });
+
+    return Object.values(dataByHour).sort((a, b) => a.timestamp - b.timestamp);
+  };
+
+  // Downlink KPIs
+  const avgDlMacDrbThroughputData = prepareTrafficKpiData('avg_dl_mac_drb_throughput_mbps');
+  const normalizedAvgDlMacCellThroughputTrafficData = prepareTrafficKpiData('normalized_avg_dl_mac_cell_throughput_traffic_mbps');
+  const normalizedDlMacCellThroughputActualPdschData = prepareTrafficKpiData('normalized_dl_mac_cell_throughput_actual_pdsch_mbps');
+  const pdschSlotUtilizationData = prepareTrafficKpiData('pdsch_slot_utilization_pct');
+  const dlRbsymUtilizationData = prepareTrafficKpiData('dl_rbsym_utilization_pct');
+  const percentageUnrestrictedVolumeDlData = prepareTrafficKpiData('percentage_unrestricted_volume_dl_pct');
+  const userDataTrafficVolumeDlData = prepareTrafficKpiData('user_data_traffic_volume_dl_gb');
+
+  // Uplink KPIs
+  const avgUlMacUeThroughputData = prepareTrafficKpiData('avg_ul_mac_ue_throughput_mbps');
+  const normalizedAvgUlMacCellThroughputSuccessfulPuschData = prepareTrafficKpiData('normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps');
+  const normalizedAvgUlMacCellThroughputActualPuschData = prepareTrafficKpiData('normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps');
+  const puschSlotUtilizationData = prepareTrafficKpiData('pusch_slot_utilization_pct');
+  const ulRbsymUtilizationData = prepareTrafficKpiData('ul_rbsym_utilization_pct');
+  const percentageUnrestrictedVolumeUlData = prepareTrafficKpiData('percentage_unrestricted_volume_ul_pct');
+  const userDataTrafficVolumeUlData = prepareTrafficKpiData('user_data_traffic_volume_ul_gb');
+
+  // Prepare Share of 5G Traffic Volume data (aggregated by date, DL + UL combined)
+  const prepareShareOf5gTrafficVolumeData = () => {
+    if (!kpiData || kpiData.length === 0) {
+      return [];
+    }
+
+    const dataByDate = {};
+    
+    kpiData.forEach(item => {
+      const dateKey = item.date_id;
+      if (!dataByDate[dateKey]) {
+        dataByDate[dateKey] = { 
+          name: dateKey,
+          '900MHz': 0, 
+          '3500MHz': 0
+        };
+      }
+      
+      // Sum DL and UL traffic volumes for each frequency band
+      const dlVolume = parseFloat(item.user_data_traffic_volume_dl_gb) || 0;
+      const ulVolume = parseFloat(item.user_data_traffic_volume_ul_gb) || 0;
+      const totalVolume = dlVolume + ulVolume;
+      
+      if (item.freq_band === '900MHz') {
+        dataByDate[dateKey]['900MHz'] += totalVolume;
+      } else if (item.freq_band === '3500MHz') {
+        dataByDate[dateKey]['3500MHz'] += totalVolume;
+      }
+    });
+
+    // Round values to 2 decimal places
+    Object.values(dataByDate).forEach(item => {
+      item['900MHz'] = parseFloat(item['900MHz'].toFixed(2));
+      item['3500MHz'] = parseFloat(item['3500MHz'].toFixed(2));
+    });
+
+    return Object.values(dataByDate).sort((a, b) => new Date(a.name) - new Date(b.name));
+  };
+
+  const shareOf5gTrafficVolumeData = prepareShareOf5gTrafficVolumeData();
+
+  // ============================================
+  // TOP Sites Data Preparation Functions
+  // ============================================
+  
+  // Prepare TOP Sites data - Total (all bands combined)
+  const prepareTopSitesTotalData = () => {
+    console.log('📊 weeklyTrafficData:', weeklyTrafficData?.length, 'records');
+    console.log('📊 weeklyTrafficData sample:', weeklyTrafficData?.slice(0, 2));
+    if (!weeklyTrafficData || weeklyTrafficData.length === 0) {
+      return [];
+    }
+
+    const dataBySite = {};
+    
+    weeklyTrafficData.forEach(item => {
+      const siteName = item.site_name;
+      if (!dataBySite[siteName]) {
+        dataBySite[siteName] = { 
+          site_name: siteName,
+          dl: 0, 
+          ul: 0
+        };
+      }
+      
+      dataBySite[siteName].dl += parseFloat(item.user_data_traffic_volume_dl_gb) || 0;
+      dataBySite[siteName].ul += parseFloat(item.user_data_traffic_volume_ul_gb) || 0;
+    });
+
+    // Convert to array, calculate total, sort by total descending, take top 20
+    return Object.values(dataBySite)
+      .map(item => ({
+        ...item,
+        dl: parseFloat(item.dl.toFixed(2)),
+        ul: parseFloat(item.ul.toFixed(2)),
+        total: parseFloat((item.dl + item.ul).toFixed(2))
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 20);
+  };
+
+  // Prepare TOP Sites data - TDD (3500MHz band)
+  const prepareTopSitesTddData = () => {
+    if (!weeklyTrafficData || weeklyTrafficData.length === 0) {
+      return [];
+    }
+
+    const dataBySite = {};
+    
+    weeklyTrafficData.forEach(item => {
+      // Only include 3500MHz (TDD) data
+      if (item.freq_band !== '3500MHz') return;
+      
+      const siteName = item.site_name;
+      if (!dataBySite[siteName]) {
+        dataBySite[siteName] = { 
+          site_name: siteName,
+          dl: 0, 
+          ul: 0
+        };
+      }
+      
+      dataBySite[siteName].dl += parseFloat(item.user_data_traffic_volume_dl_gb) || 0;
+      dataBySite[siteName].ul += parseFloat(item.user_data_traffic_volume_ul_gb) || 0;
+    });
+
+    // Convert to array, calculate total, sort by total descending, take top 20
+    return Object.values(dataBySite)
+      .map(item => ({
+        ...item,
+        dl: parseFloat(item.dl.toFixed(2)),
+        ul: parseFloat(item.ul.toFixed(2)),
+        total: parseFloat((item.dl + item.ul).toFixed(2))
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 20);
+  };
+
+  // Prepare TOP Sites data - FDD (900MHz band)
+  const prepareTopSitesFddData = () => {
+    if (!weeklyTrafficData || weeklyTrafficData.length === 0) {
+      return [];
+    }
+
+    const dataBySite = {};
+    
+    weeklyTrafficData.forEach(item => {
+      // Only include 900MHz (FDD) data
+      if (item.freq_band !== '900MHz') return;
+      
+      const siteName = item.site_name;
+      if (!dataBySite[siteName]) {
+        dataBySite[siteName] = { 
+          site_name: siteName,
+          dl: 0, 
+          ul: 0
+        };
+      }
+      
+      dataBySite[siteName].dl += parseFloat(item.user_data_traffic_volume_dl_gb) || 0;
+      dataBySite[siteName].ul += parseFloat(item.user_data_traffic_volume_ul_gb) || 0;
+    });
+
+    // Convert to array, calculate total, sort by total descending, take top 20
+    return Object.values(dataBySite)
+      .map(item => ({
+        ...item,
+        dl: parseFloat(item.dl.toFixed(2)),
+        ul: parseFloat(item.ul.toFixed(2)),
+        total: parseFloat((item.dl + item.ul).toFixed(2))
+      }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 20);
+  };
+
+  const topSitesTotalData = prepareTopSitesTotalData();
+  const topSitesTddData = prepareTopSitesTddData();
+  const topSitesFddData = prepareTopSitesFddData();
+
+  // Format function for TOP Sites charts
+  const formatTrafficValue = (value) => {
+    return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : value.toFixed(1);
+  };
+
+  // ============================================
+  // Utility function to calculate nice rounded Y-axis max
+  // ============================================
+  const calculateNiceAxisMax = (data, dataKeys = ['900MHz', '3500MHz']) => {
+    if (!data || data.length === 0) return 100;
+    
+    let max = 0;
+    data.forEach(item => {
+      dataKeys.forEach(key => {
+        const val = item[key];
+        if (val !== null && val !== undefined && !isNaN(val)) {
+          max = Math.max(max, val);
+        }
+      });
+    });
+    
+    if (max === 0) return 100;
+    
+    // Determine the order of magnitude and round up nicely
+    const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
+    const normalized = max / magnitude;
+    
+    let niceMax;
+    if (normalized <= 1) {
+      niceMax = magnitude;
+    } else if (normalized <= 1.5) {
+      niceMax = 1.5 * magnitude;
+    } else if (normalized <= 2) {
+      niceMax = 2 * magnitude;
+    } else if (normalized <= 2.5) {
+      niceMax = 2.5 * magnitude;
+    } else if (normalized <= 3) {
+      niceMax = 3 * magnitude;
+    } else if (normalized <= 4) {
+      niceMax = 4 * magnitude;
+    } else if (normalized <= 5) {
+      niceMax = 5 * magnitude;
+    } else if (normalized <= 5.5) {
+      niceMax = 5.5 * magnitude;
+    } else if (normalized <= 6) {
+      niceMax = 6 * magnitude;
+    } else if (normalized <= 7) {
+      niceMax = 7 * magnitude;
+    } else if (normalized <= 8) {
+      niceMax = 8 * magnitude;
+    } else {
+      niceMax = 10 * magnitude;
+    }
+    
+    return niceMax;
+  };
+
+  // Pre-calculate nice Y-axis domains for Traffic KPIs
+  const avgDlMacDrbThroughputYMax = calculateNiceAxisMax(avgDlMacDrbThroughputData);
+  const normalizedAvgDlMacCellThroughputTrafficYMax = calculateNiceAxisMax(normalizedAvgDlMacCellThroughputTrafficData);
+  const normalizedDlMacCellThroughputActualPdschYMax = calculateNiceAxisMax(normalizedDlMacCellThroughputActualPdschData);
+  const userDataTrafficVolumeDlYMax = calculateNiceAxisMax(userDataTrafficVolumeDlData);
+  const avgUlMacUeThroughputYMax = calculateNiceAxisMax(avgUlMacUeThroughputData);
+  const normalizedAvgUlMacCellThroughputSuccessfulPuschYMax = calculateNiceAxisMax(normalizedAvgUlMacCellThroughputSuccessfulPuschData);
+  const normalizedAvgUlMacCellThroughputActualPuschYMax = calculateNiceAxisMax(normalizedAvgUlMacCellThroughputActualPuschData);
+  const userDataTrafficVolumeUlYMax = calculateNiceAxisMax(userDataTrafficVolumeUlData);
+
+  // Pre-calculate nice Y-axis domains for Accessibility & Mobility KPIs
+  const scgRetainabilityEndcYMax = calculateNiceAxisMax(scgRetainabilityEndcData);
+  const scgRetainabilityActiveYMax = calculateNiceAxisMax(scgRetainabilityActiveData);
+  const scgRetainabilityOverallYMax = calculateNiceAxisMax(scgRetainabilityOverallData);
 
   // Calculate custom Y-axis ticks for EN-DC Setup Success Rate (min, middle, max with 1 decimal)
   const calculateSetupSuccessRateTicks = () => {
@@ -464,8 +866,62 @@ const NRReports = () => {
               5G NR Accessibility & Mobility KPI's
             </h3>
             <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
-              EN-DC setup and PSCell change success rates by frequency band
+              Cell availability, EN-DC setup and PSCell change success rates by frequency band
             </p>
+          </div>
+
+          {/* Partial Cell Availability and Random Access Success Rate - Side by side */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Partial Cell Availability for gNodeB Cell (%)" 
+                description="Cell availability percentage by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Partial Cell Availability for gNodeB Cell (%)',
+                  data: partialCellAvailabilityData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [90, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={partialCellAvailabilityData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[90, 100]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="Random Access Success Rate (%)" 
+                description="Random access success rate by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Random Access Success Rate (%)',
+                  data: randomAccessSuccessRateData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [90, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={randomAccessSuccessRateData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[90, 100]}
+                />
+              </ChartCard>
+            </div>
           </div>
 
           <div style={{ 
@@ -474,6 +930,29 @@ const NRReports = () => {
             gap: '1.5rem',
             marginTop: '1.5rem'
           }}>
+            <div>
+              <ChartCard 
+                title="UE Context Setup Success Rate (%)" 
+                description="UE context setup success rate by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'UE Context Setup Success Rate (%)',
+                  data: ueContextSetupSuccessRateData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [90, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={ueContextSetupSuccessRateData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[90, 100]}
+                />
+              </ChartCard>
+            </div>
+
             <div>
             <ChartCard 
               title="EN-DC Setup Success Rate (%)" 
@@ -498,7 +977,14 @@ const NRReports = () => {
               />
             </ChartCard>
             </div>
+          </div>
 
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
             <div>
             <ChartCard 
               title="EN-DC Inter-sgNodeB PSCell Change Success Rate (%)" 
@@ -523,14 +1009,7 @@ const NRReports = () => {
               />
             </ChartCard>
             </div>
-          </div>
 
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '1.5rem',
-            marginTop: '1.5rem'
-          }}>
             <div>
             <ChartCard 
               title="SCG Active Radio Resource Retainability considering EN-DC connectivity (%)" 
@@ -541,7 +1020,7 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: [0, 'auto']
+                yAxisDomain: [0, scgRetainabilityEndcYMax]
               })}
             >
               <KPILineChart 
@@ -549,30 +1028,7 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
-                yAxisDomain={[0, 'auto']}
-              />
-            </ChartCard>
-            </div>
-
-            <div>
-            <ChartCard 
-              title="SCG Active Radio Resource Retainability (%)" 
-              description="SCG active radio resource retainability by frequency band"
-              onClick={() => handleChartClick({
-                title: 'SCG Active Radio Resource Retainability (%)',
-                data: scgRetainabilityActiveData,
-                dataKeys: ['900MHz', '3500MHz'],
-                colors: ['#6b21a8', '#ec4899'],
-                yAxisLabel: '%',
-                yAxisDomain: [0, 'auto']
-              })}
-            >
-              <KPILineChart 
-                data={scgRetainabilityActiveData}
-                dataKeys={['900MHz', '3500MHz']}
-                colors={['#6b21a8', '#ec4899']}
-                yAxisLabel="%"
-                yAxisDomain={[0, 'auto']}
+                yAxisDomain={[0, scgRetainabilityEndcYMax]}
               />
             </ChartCard>
             </div>
@@ -586,6 +1042,29 @@ const NRReports = () => {
           }}>
             <div>
             <ChartCard 
+              title="SCG Active Radio Resource Retainability (%)" 
+              description="SCG active radio resource retainability by frequency band"
+              onClick={() => handleChartClick({
+                title: 'SCG Active Radio Resource Retainability (%)',
+                data: scgRetainabilityActiveData,
+                dataKeys: ['900MHz', '3500MHz'],
+                colors: ['#6b21a8', '#ec4899'],
+                yAxisLabel: '%',
+                yAxisDomain: [0, scgRetainabilityActiveYMax]
+              })}
+            >
+              <KPILineChart 
+                data={scgRetainabilityActiveData}
+                dataKeys={['900MHz', '3500MHz']}
+                colors={['#6b21a8', '#ec4899']}
+                yAxisLabel="%"
+                yAxisDomain={[0, scgRetainabilityActiveYMax]}
+              />
+            </ChartCard>
+            </div>
+
+            <div>
+            <ChartCard 
               title="SCG Radio Resource Retainability (%)" 
               description="Overall SCG radio resource retainability by frequency band"
               onClick={() => handleChartClick({
@@ -594,7 +1073,7 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: [0, 'auto']
+                yAxisDomain: [0, scgRetainabilityOverallYMax]
               })}
             >
               <KPILineChart 
@@ -602,11 +1081,18 @@ const NRReports = () => {
                 dataKeys={['900MHz', '3500MHz']}
                 colors={['#6b21a8', '#ec4899']}
                 yAxisLabel="%"
-                yAxisDomain={[0, 'auto']}
+                yAxisDomain={[0, scgRetainabilityOverallYMax]}
               />
             </ChartCard>
             </div>
+          </div>
 
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
             <div>
             <ChartCard 
               title="Peak RRC Connected Users" 
@@ -648,6 +1134,511 @@ const NRReports = () => {
                 title="Average RRC Connected Users"
               />
             </ChartCard>
+          </div>
+
+          {/* ============================================ */}
+          {/* Traffic & Integrity Section */}
+          {/* ============================================ */}
+          <div className="content-header" style={{ marginTop: '3rem' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              Traffic & Integrity
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              Throughput, utilization and traffic volume metrics by frequency band
+            </p>
+          </div>
+
+          {/* Row 1: Average DL MAC DRB Throughput | Normalized Average DL MAC Cell Throughput Considering Traffic */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Average DL MAC DRB Throughput (Mbps)" 
+                description="Average downlink MAC DRB throughput by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Average DL MAC DRB Throughput (Mbps)',
+                  data: avgDlMacDrbThroughputData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, avgDlMacDrbThroughputYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={avgDlMacDrbThroughputData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, avgDlMacDrbThroughputYMax]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)" 
+                description="Normalized average DL MAC cell throughput by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)',
+                  data: normalizedAvgDlMacCellThroughputTrafficData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, normalizedAvgDlMacCellThroughputTrafficYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={normalizedAvgDlMacCellThroughputTrafficData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, normalizedAvgDlMacCellThroughputTrafficYMax]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 2: Normalized DL MAC Cell Throughput Actual PDSCH | PDSCH Slot Utilization */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Normalized DL MAC Cell Throughput Captured in gNodeB Considering Actual PDSCH Slot Only (Mbps)" 
+                description="Normalized DL MAC cell throughput for actual PDSCH slots"
+                onClick={() => handleChartClick({  
+                  title: 'Normalized DL MAC Cell Throughput Captured in gNodeB Considering Actual PDSCH Slot Only (Mbps)',
+                  data: normalizedDlMacCellThroughputActualPdschData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, normalizedDlMacCellThroughputActualPdschYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={normalizedDlMacCellThroughputActualPdschData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, normalizedDlMacCellThroughputActualPdschYMax]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="PDSCH Slot Utilization (%)" 
+                description="PDSCH slot utilization percentage by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'PDSCH Slot Utilization (%)',
+                  data: pdschSlotUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={pdschSlotUtilizationData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 3: DL RBSym Utilization | Percentage Unrestricted Volume DL */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="DL RBSym Utilization (%)" 
+                description="Downlink RBSym utilization percentage by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'DL RBSym Utilization (%)',
+                  data: dlRbsymUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={dlRbsymUtilizationData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="Percentage Unrestricted Volume DL (%)" 
+                description="Percentage of unrestricted volume on downlink by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Percentage Unrestricted Volume DL (%)',
+                  data: percentageUnrestrictedVolumeDlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={percentageUnrestrictedVolumeDlData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 4: 5G User Data Traffic Volume DL | Average UL MAC UE Throughput */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="5G User Data Traffic Volume on Downlink (GB)" 
+                description="User data traffic volume on downlink by frequency band"
+                onClick={() => handleChartClick({  
+                  title: '5G User Data Traffic Volume on Downlink (GB)',
+                  data: userDataTrafficVolumeDlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'GB',
+                  yAxisDomain: [0, userDataTrafficVolumeDlYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={userDataTrafficVolumeDlData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="GB"
+                  yAxisDomain={[0, userDataTrafficVolumeDlYMax]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="Average UL MAC UE Throughput (Mbps)" 
+                description="Average uplink MAC UE throughput by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Average UL MAC UE Throughput (Mbps)',
+                  data: avgUlMacUeThroughputData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, avgUlMacUeThroughputYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={avgUlMacUeThroughputData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, avgUlMacUeThroughputYMax]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 5: Normalized UL MAC Cell Throughput Successful PUSCH | Normalized UL MAC Cell Throughput Actual PUSCH */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)" 
+                description="Normalized average UL MAC cell throughput for successful PUSCH slots"
+                onClick={() => handleChartClick({  
+                  title: 'Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)',
+                  data: normalizedAvgUlMacCellThroughputSuccessfulPuschData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={normalizedAvgUlMacCellThroughputSuccessfulPuschData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Actual PUSCH Slot Only (Mbps)" 
+                description="Normalized average UL MAC cell throughput for actual PUSCH slots"
+                onClick={() => handleChartClick({  
+                  title: 'Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Actual PUSCH Slot Only (Mbps)',
+                  data: normalizedAvgUlMacCellThroughputActualPuschData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, normalizedAvgUlMacCellThroughputActualPuschYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={normalizedAvgUlMacCellThroughputActualPuschData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="Mbps"
+                  yAxisDomain={[0, normalizedAvgUlMacCellThroughputActualPuschYMax]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 6: PUSCH Slot Utilization | UL RBSym Utilization */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="PUSCH Slot Utilization (%)" 
+                description="PUSCH slot utilization percentage by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'PUSCH Slot Utilization (%)',
+                  data: puschSlotUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={puschSlotUtilizationData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="UL RBSym Utilization (%)" 
+                description="Uplink RBSym utilization percentage by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'UL RBSym Utilization (%)',
+                  data: ulRbsymUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={ulRbsymUtilizationData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 7: Percentage Unrestricted Volume UL | 5G User Data Traffic Volume UL */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Percentage Unrestricted Volume UL (%)" 
+                description="Percentage of unrestricted volume on uplink by frequency band"
+                onClick={() => handleChartClick({  
+                  title: 'Percentage Unrestricted Volume UL (%)',
+                  data: percentageUnrestrictedVolumeUlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                })}
+              >
+                <KPILineChart 
+                  data={percentageUnrestrictedVolumeUlData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="%"
+                  yAxisDomain={[0, 100]}
+                />
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="5G User Data Traffic Volume on Uplink (GB)" 
+                description="User data traffic volume on uplink by frequency band"
+                onClick={() => handleChartClick({  
+                  title: '5G User Data Traffic Volume on Uplink (GB)',
+                  data: userDataTrafficVolumeUlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'GB',
+                  yAxisDomain: [0, userDataTrafficVolumeUlYMax]
+                })}
+              >
+                <KPILineChart 
+                  data={userDataTrafficVolumeUlData}
+                  dataKeys={['900MHz', '3500MHz']}
+                  colors={['#6b21a8', '#ec4899']}
+                  yAxisLabel="GB"
+                  yAxisDomain={[0, userDataTrafficVolumeUlYMax]}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* Row 8: Share of 5G Traffic Volume */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="Share of 5G Traffic Volume (GB) per Frequency Band" 
+                description="Total traffic volume (DL + UL) per frequency band aggregated by date"
+                onClick={() => handleChartClick({  
+                  title: 'Share of 5G Traffic Volume (GB) per Frequency Band',
+                  data: shareOf5gTrafficVolumeData,
+                  dataKeys: ['3500MHz', '900MHz'],
+                  colors: ['#2563eb', '#f97316'],
+                  yAxisLabel: 'GB',
+                  chartType: 'stackedBar'
+                })}
+              >
+                <StackedBarChart 
+                  data={shareOf5gTrafficVolumeData}
+                  dataKeys={['3500MHz', '900MHz']}
+                  colors={['#2563eb', '#f97316']}
+                  yAxisLabel="GB"
+                  height={350}
+                />
+              </ChartCard>
+            </div>
+          </div>
+
+          {/* ============================================ */}
+          {/* TOP Sites Section */}
+          {/* ============================================ */}
+          <div className="content-header" style={{ marginTop: '3rem' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              TOP Sites
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              Top 20 sites by traffic volume (DL + UL)
+            </p>
+          </div>
+
+          {/* TOP Sites - Total */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <ChartCard 
+              title="TOP Sites - Total (All Bands)" 
+              description="Top 20 sites by total traffic volume across all frequency bands"
+            >
+              {topSitesTotalData.length > 0 ? (
+                <HorizontalStackedBarChart 
+                  data={topSitesTotalData}
+                  dataKeys={['dl', 'ul']}
+                  colors={['#3b82f6', '#22c55e']}
+                  labels={['DL', 'UL']}
+                  format={formatTrafficValue}
+                />
+              ) : (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                  No site traffic data available for the selected period
+                </div>
+              )}
+            </ChartCard>
+          </div>
+
+          {/* TOP Sites - TDD and FDD side by side */}
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="TOP Sites - TDD (3500MHz)" 
+                description="Top 20 sites by traffic volume on 3500MHz (TDD) band"
+              >
+                {topSitesTddData.length > 0 ? (
+                  <HorizontalStackedBarChart 
+                    data={topSitesTddData}
+                    dataKeys={['dl', 'ul']}
+                    colors={['#2563eb', '#16a34a']}
+                    labels={['DL', 'UL']}
+                    format={formatTrafficValue}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    No TDD site traffic data available
+                  </div>
+                )}
+              </ChartCard>
+            </div>
+
+            <div>
+              <ChartCard 
+                title="TOP Sites - FDD (900MHz)" 
+                description="Top 20 sites by traffic volume on 900MHz (FDD) band"
+              >
+                {topSitesFddData.length > 0 ? (
+                  <HorizontalStackedBarChart 
+                    data={topSitesFddData}
+                    dataKeys={['dl', 'ul']}
+                    colors={['#f97316', '#eab308']}
+                    labels={['DL', 'UL']}
+                    format={formatTrafficValue}
+                  />
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    No FDD site traffic data available
+                  </div>
+                )}
+              </ChartCard>
+            </div>
           </div>
         </div>
       )}

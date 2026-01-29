@@ -25,11 +25,16 @@ function parseDate(dateValue) {
 }
 
 /**
- * Extract site name from cell name (e.g., abria_N09_1 -> abria)
+ * Extract site name from cell name (e.g., abria_N09_1 -> abria, pr_abc_N09_1 -> pr_abc)
  */
 function extractSiteName(cellName) {
   if (!cellName) return null;
-  const parts = String(cellName).split('_');
+  const cellStr = String(cellName);
+  const match = cellStr.match(/^(.*)_N\d{2,3}_.+$/i);
+  if (match && match[1]) {
+    return match[1];
+  }
+  const parts = cellStr.split('_');
   return parts[0] || null;
 }
 
@@ -94,7 +99,7 @@ export const processRawDataToKpis = (rawRecords) => {
     }
     
     const cellName = record.NRCellDU || '';
-    const siteName = extractSiteName(cellName);
+    const siteName = record.NR_NAME || extractSiteName(cellName);
     const freqBand = determineFreqBand(cellName);
     const band = record.BAND || freqBand;
     
@@ -517,9 +522,39 @@ export const insertWeeklyTrafficData = async (records) => {
 /**
  * Get NR KPI hourly data for a date range
  */
+/**
+ * Get NR Cell KPI hourly data for a date range
+ * Transforms freq_band values: '8' -> '900MHz', '78' -> '3500MHz'
+ */
 export const getHourlyKpiData = async (startDate, endDate) => {
   const query = `
-    SELECT *
+    SELECT 
+      id,
+      date_id,
+      hour_id,
+      CASE 
+        WHEN freq_band = '8' THEN '900MHz'
+        WHEN freq_band = '78' THEN '3500MHz'
+        ELSE freq_band
+      END as freq_band,
+      avg_dl_mac_drb_throughput_mbps,
+      normalized_avg_dl_mac_cell_throughput_traffic_mbps,
+      normalized_dl_mac_cell_throughput_actual_pdsch_mbps,
+      pdsch_slot_utilization_pct,
+      dl_rbsym_utilization_pct,
+      percentage_unrestricted_volume_dl_pct,
+      user_data_traffic_volume_dl_gb,
+      avg_ul_mac_ue_throughput_mbps,
+      normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps,
+      normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps,
+      pusch_slot_utilization_pct,
+      ul_rbsym_utilization_pct,
+      percentage_unrestricted_volume_ul_pct,
+      user_data_traffic_volume_ul_gb,
+      partial_cell_availability_pct,
+      ue_context_setup_success_rate_pct,
+      random_access_success_rate_pct,
+      created_at
     FROM nr_kpi_hourly_by_band
     WHERE date_id >= $1 AND date_id <= $2
     ORDER BY date_id, hour_id, freq_band;
@@ -531,17 +566,67 @@ export const getHourlyKpiData = async (startDate, endDate) => {
 
 /**
  * Get NR weekly traffic data for a date range
+ * Transforms freq_band values: '8' -> '900MHz', '78' -> '3500MHz'
  */
 export const getWeeklyTrafficData = async (startDate, endDate) => {
   const query = `
-    SELECT *
+    SELECT 
+      id,
+      week_start_date,
+      week_number,
+      year,
+      site_name,
+      CASE 
+        WHEN freq_band = '8' THEN '900MHz'
+        WHEN freq_band = '78' THEN '3500MHz'
+        ELSE freq_band
+      END as freq_band,
+      user_data_traffic_volume_dl_gb,
+      user_data_traffic_volume_ul_gb,
+      total_traffic_volume_gb,
+      created_at
     FROM nr_site_traffic_weekly
     WHERE week_start_date >= $1 AND week_start_date <= $2
     ORDER BY week_start_date, site_name, freq_band;
   `;
   
   const result = await pool.query(query, [startDate, endDate]);
-  return result.rows;
+  if (result.rows.length > 0) {
+    return result.rows;
+  }
+
+  const latestWeekResult = await pool.query(`
+    SELECT MAX(week_start_date) AS latest_week_start_date
+    FROM nr_site_traffic_weekly;
+  `);
+
+  const latestWeekStart = latestWeekResult.rows[0]?.latest_week_start_date;
+  if (!latestWeekStart) {
+    return [];
+  }
+
+  const fallbackResult = await pool.query(`
+    SELECT 
+      id,
+      week_start_date,
+      week_number,
+      year,
+      site_name,
+      CASE 
+        WHEN freq_band = '8' THEN '900MHz'
+        WHEN freq_band = '78' THEN '3500MHz'
+        ELSE freq_band
+      END as freq_band,
+      user_data_traffic_volume_dl_gb,
+      user_data_traffic_volume_ul_gb,
+      total_traffic_volume_gb,
+      created_at
+    FROM nr_site_traffic_weekly
+    WHERE week_start_date = $1
+    ORDER BY week_start_date, site_name, freq_band;
+  `, [latestWeekStart]);
+
+  return fallbackResult.rows;
 };
 
 /**
