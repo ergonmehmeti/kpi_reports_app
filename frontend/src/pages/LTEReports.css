@@ -207,3 +207,8 @@
   font-size: 3rem;
   margin-bottom: 16px;
 }
+
+/* TOP Sites horizontal bar chart title alignment */
+.top-sites-chart .chart-card .chart-header {
+  padding-left: 146px;
+}
