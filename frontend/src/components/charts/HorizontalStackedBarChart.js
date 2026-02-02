@@ -48,7 +48,7 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
         <BarChart
           data={data}
           layout="vertical"
-          margin={{ top: 20, right: 50, left: 140, bottom: 20 }}
+          margin={{ top: 20, right: 80, left: 10, bottom: 20 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
@@ -59,7 +59,7 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
           <YAxis 
             type="category"
             dataKey="site_name"
-            width={130}
+            width={160}
             tick={{ fontSize: 12 }}
           />
           <Tooltip content={<CustomTooltip />} />
