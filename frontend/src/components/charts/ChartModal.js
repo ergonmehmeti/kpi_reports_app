@@ -225,7 +225,7 @@ const ChartModal = memo(({
           width={80}
           domain={calculateYDomain()}
           ticks={calculateYTicks()}
-          tickFormatter={(value) => typeof value === 'number' ? value.toFixed(1) : value}
+          tickFormatter={(value) => typeof value === 'number' ? (Number.isInteger(value) ? value.toString() : value.toFixed(1)) : value}
           label={yAxisLabel ? { 
             value: yAxisLabel, 
             angle: -90, 

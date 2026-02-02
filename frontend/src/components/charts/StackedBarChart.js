@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
  * Stacked Bar Chart Component
  * For displaying stacked vertical bars (e.g., Traffic Volume with/without CA)
  */
-const StackedBarChart = memo(({ data, dataKeys, colors, yAxisLabel, barSize = 40, height = 400 }) => {
+const StackedBarChart = memo(({ data, dataKeys, colors, yAxisLabel, barSize = 40, height = 400, yAxisDomain, yAxisTicks }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       // Calculate total
@@ -49,6 +49,8 @@ const StackedBarChart = memo(({ data, dataKeys, colors, yAxisLabel, barSize = 40
         <YAxis 
           stroke="#666" 
           width={80}
+          domain={yAxisDomain}
+          ticks={yAxisTicks}
           label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } } : undefined}
         />
         <Tooltip content={<CustomTooltip />} />

@@ -14,7 +14,7 @@ import {
  * NRRrcUsersStackedAreaChart Component
  * Displays NR RRC Connected Users by frequency band in a stacked area chart
  */
-const NRRrcUsersStackedAreaChart = ({ data, height = 400, title = 'RRC Connected Users' }) => {
+const NRRrcUsersStackedAreaChart = ({ data, height = 400, title = 'RRC Connected Users', yAxisDomain, yAxisTicks }) => {
   if (!data || data.length === 0) {
     return (
       <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -156,6 +156,8 @@ const NRRrcUsersStackedAreaChart = ({ data, height = 400, title = 'RRC Connected
           tick={{ fontSize: 10, fill: '#6b7280' }}
         />
         <YAxis 
+          domain={yAxisDomain}
+          ticks={yAxisTicks}
           label={{ 
             value: 'Users', 
             angle: -90, 

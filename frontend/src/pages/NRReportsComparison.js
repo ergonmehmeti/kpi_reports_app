@@ -281,38 +281,53 @@ const NRReportsComparison = () => {
 
             // Helper function to calculate yAxisDomain based on KPI type
             const getYAxisDomain = (data, freqBand) => {
-              // For Partial Cell Availability, Random Access, and UE Context Setup - use [90, 100] domain
+              // Random Access Success Rate - use [40, 100] domain
+              if (kpiConfig.id === 'random_access_success_rate_pct') {
+                return [40, 100];
+              }
+              
+              // For Partial Cell Availability and UE Context Setup - use [90, 100] domain
               if (kpiConfig.id === 'partial_cell_availability_pct' || 
-                  kpiConfig.id === 'random_access_success_rate_pct' ||
                   kpiConfig.id === 'ue_context_setup_success_rate_pct') {
                 return [90, 100];
               }
               
-              // For RRC Users and Retainability KPIs, start from 0 with calculated max
-              if (kpiConfig.id === 'avg_rrc_connected_users' || 
-                  kpiConfig.id === 'peak_rrc_connected_users' || 
-                  kpiConfig.id === 'scg_retainability_overall' || 
+              // SCG Retainability KPIs - use [0, 8] domain
+              if (kpiConfig.id === 'scg_retainability_overall' || 
                   kpiConfig.id === 'scg_retainability_active' ||
                   kpiConfig.id === 'scg_retainability_endc_connectivity') {
-                if (!data || data.length === 0) return [0, 100];
-                
-                let maxVal = -Infinity;
-                data.forEach(item => {
-                  const val1 = item[week1Label];
-                  const val2 = item[week2Label];
-                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
-                    maxVal = Math.max(maxVal, val1);
-                  }
-                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
-                    maxVal = Math.max(maxVal, val2);
-                  }
-                });
-                
-                if (maxVal === -Infinity) return [0, 100];
-                
-                // Round up max to nearest integer
-                const roundedMax = Math.ceil(maxVal);
-                return [0, roundedMax];
+                return [0, 8];
+              }
+              
+              // RRC Connected Users - use [0, 12000] domain
+              if (kpiConfig.id === 'avg_rrc_connected_users' || 
+                  kpiConfig.id === 'peak_rrc_connected_users') {
+                return [0, 12000];
+              }
+              
+              // Average DL MAC DRB Throughput - use [0, 60000] domain
+              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps') {
+                return [0, 60000];
+              }
+              
+              // Normalized Average DL MAC Cell Throughput Considering Traffic - use [0, 16000] domain
+              if (kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps') {
+                return [0, 16000];
+              }
+              
+              // 5G User Data Traffic Volume on Downlink - use [0, 800] domain
+              if (kpiConfig.id === 'user_data_traffic_volume_dl_gb') {
+                return [0, 800];
+              }
+              
+              // 5G User Data Traffic Volume on Uplink - use [0, 80] domain
+              if (kpiConfig.id === 'user_data_traffic_volume_ul_gb') {
+                return [0, 80];
+              }
+              
+              // Share of 5G Traffic Volume - use [0, 16000] domain
+              if (kpiConfig.id === 'share_5g_traffic_volume') {
+                return [0, 16000];
               }
               
               // For EN-DC Setup Success Rate - use floor(min) - 1 to 100
@@ -370,16 +385,11 @@ const NRReportsComparison = () => {
                 return [0, 100];
               }
               
-              // For throughput and traffic volume KPIs - calculate from 0 to max
-              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps' || 
-                  kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps' ||
-                  kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
-                  kpiConfig.id === 'user_data_traffic_volume_dl_gb' ||
+              // For other throughput KPIs - calculate from 0 to max
+              if (kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
                   kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
                   kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
-                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps' ||
-                  kpiConfig.id === 'user_data_traffic_volume_ul_gb' ||
-                  kpiConfig.id === 'share_5g_traffic_volume') {
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps') {
                 if (!data || data.length === 0) return [0, 100];
                 
                 let maxVal = -Infinity;
@@ -406,11 +416,53 @@ const NRReportsComparison = () => {
 
             // Helper function to calculate yAxisTicks based on KPI type
             const getYAxisTicks = (data, freqBand) => {
-              // For Partial Cell Availability, Random Access, and UE Context Setup - use [90, 95, 100] ticks
+              // Random Access Success Rate - use [40, 60, 80, 100] ticks
+              if (kpiConfig.id === 'random_access_success_rate_pct') {
+                return [40, 60, 80, 100];
+              }
+              
+              // For Partial Cell Availability and UE Context Setup - use [90, 95, 100] ticks
               if (kpiConfig.id === 'partial_cell_availability_pct' || 
-                  kpiConfig.id === 'random_access_success_rate_pct' ||
                   kpiConfig.id === 'ue_context_setup_success_rate_pct') {
                 return [90, 95, 100];
+              }
+              
+              // SCG Retainability KPIs - use [0, 2, 4, 6, 8] ticks
+              if (kpiConfig.id === 'scg_retainability_overall' || 
+                  kpiConfig.id === 'scg_retainability_active' ||
+                  kpiConfig.id === 'scg_retainability_endc_connectivity') {
+                return [0, 2, 4, 6, 8];
+              }
+              
+              // RRC Connected Users - use [0, 3000, 6000, 9000, 12000] ticks
+              if (kpiConfig.id === 'avg_rrc_connected_users' || 
+                  kpiConfig.id === 'peak_rrc_connected_users') {
+                return [0, 3000, 6000, 9000, 12000];
+              }
+              
+              // Average DL MAC DRB Throughput - use [0, 20000, 40000, 60000] ticks
+              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps') {
+                return [0, 20000, 40000, 60000];
+              }
+              
+              // Normalized Average DL MAC Cell Throughput Considering Traffic - use [0, 4000, 8000, 12000, 16000] ticks
+              if (kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps') {
+                return [0, 4000, 8000, 12000, 16000];
+              }
+              
+              // 5G User Data Traffic Volume on Downlink - use [0, 200, 400, 600, 800] ticks
+              if (kpiConfig.id === 'user_data_traffic_volume_dl_gb') {
+                return [0, 200, 400, 600, 800];
+              }
+              
+              // 5G User Data Traffic Volume on Uplink - use [0, 20, 40, 60, 80] ticks
+              if (kpiConfig.id === 'user_data_traffic_volume_ul_gb') {
+                return [0, 20, 40, 60, 80];
+              }
+              
+              // Share of 5G Traffic Volume - use [0, 4000, 8000, 12000, 16000] ticks
+              if (kpiConfig.id === 'share_5g_traffic_volume') {
+                return [0, 4000, 8000, 12000, 16000];
               }
               
               // For EN-DC Setup Success Rate - 3 ticks: min, middle, max
@@ -472,35 +524,6 @@ const NRReportsComparison = () => {
                 ];
               }
               
-              // For RRC Users and Retainability KPIs - calculate ticks from 0 to max
-              if (kpiConfig.id === 'avg_rrc_connected_users' || 
-                  kpiConfig.id === 'peak_rrc_connected_users' || 
-                  kpiConfig.id === 'scg_retainability_overall' || 
-                  kpiConfig.id === 'scg_retainability_active' ||
-                  kpiConfig.id === 'scg_retainability_endc_connectivity') {
-                if (!data || data.length === 0) return undefined;
-                
-                let maxVal = -Infinity;
-                data.forEach(item => {
-                  const val1 = item[week1Label];
-                  const val2 = item[week2Label];
-                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
-                    maxVal = Math.max(maxVal, val1);
-                  }
-                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
-                    maxVal = Math.max(maxVal, val2);
-                  }
-                });
-                
-                if (maxVal === -Infinity) return undefined;
-                
-                // Round up max to nearest integer
-                const roundedMax = Math.ceil(maxVal);
-                const middleTick = roundedMax / 2;
-                
-                return [0, middleTick, roundedMax];
-              }
-              
               // For percentage KPIs (utilization, unrestricted volume) - use [0, 50, 100] ticks
               if (kpiConfig.id === 'pdsch_slot_utilization_pct' || 
                   kpiConfig.id === 'dl_rbsym_utilization_pct' ||
@@ -511,16 +534,11 @@ const NRReportsComparison = () => {
                 return [0, 50, 100];
               }
               
-              // For throughput and traffic volume KPIs - calculate ticks from 0 to max
-              if (kpiConfig.id === 'avg_dl_mac_drb_throughput_mbps' || 
-                  kpiConfig.id === 'normalized_avg_dl_mac_cell_throughput_traffic_mbps' ||
-                  kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
-                  kpiConfig.id === 'user_data_traffic_volume_dl_gb' ||
+              // For other throughput KPIs - calculate ticks from 0 to max
+              if (kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
                   kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
                   kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
-                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps' ||
-                  kpiConfig.id === 'user_data_traffic_volume_ul_gb' ||
-                  kpiConfig.id === 'share_5g_traffic_volume') {
+                  kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps') {
                 if (!data || data.length === 0) return undefined;
                 
                 let maxVal = -Infinity;

@@ -1006,7 +1006,8 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: '%',
-                  yAxisDomain: [90, 100]
+                  yAxisDomain: [40, 100],
+                  yAxisTicks: [40, 60, 80, 100]
                 }) : null}
               >
                 {hasChartData(randomAccessSuccessRateData, ['900MHz', '3500MHz']) ? (
@@ -1015,7 +1016,8 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="%"
-                    yAxisDomain={[90, 100]}
+                    yAxisDomain={[40, 100]}
+                    yAxisTicks={[40, 60, 80, 100]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1132,7 +1134,8 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: [0, scgRetainabilityEndcYMax]
+                yAxisDomain: [0, 8],
+                yAxisTicks: [0, 2, 4, 6, 8]
               }) : null}
             >
               {hasChartData(scgRetainabilityEndcData, ['900MHz', '3500MHz']) ? (
@@ -1141,7 +1144,8 @@ const NRReports = () => {
                   dataKeys={['900MHz', '3500MHz']}
                   colors={['#6b21a8', '#ec4899']}
                   yAxisLabel="%"
-                  yAxisDomain={[0, scgRetainabilityEndcYMax]}
+                  yAxisDomain={[0, 8]}
+                  yAxisTicks={[0, 2, 4, 6, 8]}
                 />
               ) : (
                 <NoDataWarning />
@@ -1166,7 +1170,8 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: [0, scgRetainabilityActiveYMax]
+                yAxisDomain: [0, 8],
+                yAxisTicks: [0, 2, 4, 6, 8]
               }) : null}
             >
               {hasChartData(scgRetainabilityActiveData, ['900MHz', '3500MHz']) ? (
@@ -1175,7 +1180,8 @@ const NRReports = () => {
                   dataKeys={['900MHz', '3500MHz']}
                   colors={['#6b21a8', '#ec4899']}
                   yAxisLabel="%"
-                  yAxisDomain={[0, scgRetainabilityActiveYMax]}
+                  yAxisDomain={[0, 8]}
+                  yAxisTicks={[0, 2, 4, 6, 8]}
                 />
               ) : (
                 <NoDataWarning />
@@ -1193,7 +1199,8 @@ const NRReports = () => {
                 dataKeys: ['900MHz', '3500MHz'],
                 colors: ['#6b21a8', '#ec4899'],
                 yAxisLabel: '%',
-                yAxisDomain: [0, scgRetainabilityOverallYMax]
+                yAxisDomain: [0, 8],
+                yAxisTicks: [0, 2, 4, 6, 8]
               }) : null}
             >
               {hasChartData(scgRetainabilityOverallData, ['900MHz', '3500MHz']) ? (
@@ -1202,7 +1209,8 @@ const NRReports = () => {
                   dataKeys={['900MHz', '3500MHz']}
                   colors={['#6b21a8', '#ec4899']}
                   yAxisLabel="%"
-                  yAxisDomain={[0, scgRetainabilityOverallYMax]}
+                  yAxisDomain={[0, 8]}
+                  yAxisTicks={[0, 2, 4, 6, 8]}
                 />
               ) : (
                 <NoDataWarning />
@@ -1235,6 +1243,8 @@ const NRReports = () => {
                   data={peakRrcConnectedUsersData}
                   height={350}
                   title="Peak RRC Connected Users"
+                  yAxisDomain={[0, 12000]}
+                  yAxisTicks={[0, 3000, 6000, 9000, 12000]}
                 />
               ) : (
                 <NoDataWarning />
@@ -1260,6 +1270,8 @@ const NRReports = () => {
                   data={avgRrcConnectedUsersData}
                   height={350}
                   title="Average RRC Connected Users"
+                  yAxisDomain={[0, 12000]}
+                  yAxisTicks={[0, 3000, 6000, 9000, 12000]}
                 />
               ) : (
                 <NoDataWarning />
@@ -1299,7 +1311,8 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, avgDlMacDrbThroughputYMax]
+                  yAxisDomain: [0, 60000],
+                  yAxisTicks: [0, 20000, 40000, 60000]
                 }) : null}
               >
                 {hasChartData(avgDlMacDrbThroughputData, ['900MHz', '3500MHz']) ? (
@@ -1308,7 +1321,8 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="Mbps"
-                    yAxisDomain={[0, avgDlMacDrbThroughputYMax]}
+                    yAxisDomain={[0, 60000]}
+                    yAxisTicks={[0, 20000, 40000, 60000]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1364,7 +1378,7 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, normalizedAvgDlMacCellThroughputTrafficYMax]
+                  yAxisDomain: [0, 16000]
                 }) : null}
               >
                 {hasChartData(normalizedAvgDlMacCellThroughputTrafficData, ['900MHz', '3500MHz']) ? (
@@ -1373,7 +1387,7 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="Mbps"
-                    yAxisDomain={[0, normalizedAvgDlMacCellThroughputTrafficYMax]}
+                    yAxisDomain={[0, 16000]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1684,16 +1698,18 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'GB',
-                  yAxisDomain: [0, userDataTrafficVolumeDlYMax]
+                  yAxisDomain: [0, 800],
+                  yAxisTicks: [0, 200, 400, 600, 800]
                 }) : null}
               >
                 {hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
+                  <KPILineChart
                     data={userDataTrafficVolumeDlData}
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="GB"
-                    yAxisDomain={[0, userDataTrafficVolumeDlYMax]}
+                    yAxisDomain={[0, 800]}
+                    yAxisTicks={[0, 200, 400, 600, 800]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1711,7 +1727,8 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'GB',
-                  yAxisDomain: [0, userDataTrafficVolumeUlYMax]
+                  yAxisDomain: [0, 80],
+                  yAxisTicks: [0, 20, 40, 60, 80]
                 }) : null}
               >
                 {hasChartData(userDataTrafficVolumeUlData, ['900MHz', '3500MHz']) ? (
@@ -1720,7 +1737,8 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="GB"
-                    yAxisDomain={[0, userDataTrafficVolumeUlYMax]}
+                    yAxisDomain={[0, 80]}
+                    yAxisTicks={[0, 20, 40, 60, 80]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1758,6 +1776,8 @@ const NRReports = () => {
                     colors={['#2563eb', '#f97316']}
                     yAxisLabel="GB"
                     height={350}
+                    yAxisDomain={[0, 16000]}
+                    yAxisTicks={[0, 4000, 8000, 12000, 16000]}
                   />
                 ) : (
                   <NoDataWarning />
