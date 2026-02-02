@@ -25,40 +25,6 @@ function parseDate(dateValue) {
 }
 
 /**
- * Extract site name from LTE cell name (e.g., abria_L18_1 -> abria)
- */
-function extractSiteName(cellName) {
-  if (!cellName) return null;
-  const parts = String(cellName).split('_');
-  return parts[0] || null;
-}
-
-/**
- * Determine LTE frequency band from FREQUENCY column or cell name
- */
-function determineFreqBand(frequency, cellName) {
-  // Priority 1: Use FREQUENCY column if available
-  if (frequency) {
-    const freqStr = String(frequency).toLowerCase();
-    if (freqStr.includes('1800') || freqStr.includes('18')) return '1800MHz';
-    if (freqStr.includes('2600') || freqStr.includes('26')) return '2600MHz';
-    if (freqStr.includes('800') || freqStr.includes('08')) return '800MHz';
-    if (freqStr.includes('2100') || freqStr.includes('21')) return '2100MHz';
-  }
-  
-  // Priority 2: Try to extract from cell name (e.g., _L18_ = 1800MHz)
-  if (cellName) {
-    const cellStr = String(cellName).toUpperCase();
-    if (cellStr.includes('_L18_')) return '1800MHz';
-    if (cellStr.includes('_L26_')) return '2600MHz';
-    if (cellStr.includes('_L08_')) return '800MHz';
-    if (cellStr.includes('_L21_')) return '2100MHz';
-  }
-  
-  return 'Unknown';
-}
-
-/**
  * Process raw LTE EN-DC CSV data and calculate network-wide hourly traffic
  * @param {Array} rawRecords - Raw CSV records from pm_DC_E_ERBS_EUTRANCELLFDD_FLEX_HOUR
  * @returns {Array} EN-DC traffic records aggregated by date/hour (network-wide)
@@ -164,14 +130,14 @@ export const insertTrafficData = async (records) => {
 };
 
 /**
- * Get EN-DC LTE traffic data for a date range
+ * Get EN-DC LTE traffic data for a date range (hourly)
  */
 export const getTrafficData = async (startDate, endDate) => {
   const query = `
     SELECT *
     FROM endc_lte_traffic_hourly
     WHERE date_id >= $1 AND date_id <= $2
-    ORDER BY date_id, hour_id, lte_cell_name;
+    ORDER BY date_id, hour_id;
   `;
   
   const result = await pool.query(query, [startDate, endDate]);
@@ -179,19 +145,7 @@ export const getTrafficData = async (startDate, endDate) => {
 };
 
 /**
- * Get EN-DC LTE traffic data aggregated by site
- */
-export const getTrafficDataBySite = async (startDate, endDate) => {
-  const query = `
-    SELECT 
-      date_id,
-      site_name,
-      freq_band,
-      SUM(endc_traffic_volume_dl_gb) as total_dl_gb,
-      SUM(endc_traffic_volume_ul_gb) as total_ul_gb,
-      SUM(endc_total_traffic_volume_gb) as total_gb
-    FROM endc_lte_traffic_hourly
-    WHERE date_id >= $1 AND date_id <= $2date (daily totals)
+ * Get EN-DC LTE traffic data aggregated by date (daily totals)
  */
 export const getTrafficDataByDate = async (startDate, endDate) => {
   const query = `
@@ -201,7 +155,19 @@ export const getTrafficDataByDate = async (startDate, endDate) => {
     FROM endc_lte_traffic_hourly
     WHERE date_id >= $1 AND date_id <= $2
     GROUP BY date_id
-    ORDER BY date_i
+    ORDER BY date_id;
+  `;
+  
+  const result = await pool.query(query, [startDate, endDate]);
+  return result.rows;
+};
+
+/**
+ * Delete EN-DC LTE traffic data for a date range
+ */
+export const deleteTrafficData = async (startDate, endDate) => {
+  const query = `
+    DELETE FROM endc_lte_traffic_hourly
     WHERE date_id >= $1 AND date_id <= $2;
   `;
   

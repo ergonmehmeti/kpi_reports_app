@@ -40,7 +40,7 @@ export const API_ENDPOINTS = {
   endcLte: {
     upload: `${API_BASE_URL}/api/endc-lte/upload`,
     traffic: `${API_BASE_URL}/api/endc-lte/traffic`,
-    trafficBySite: `${API_BASE_URL}/api/endc-lte/traffic-by-site`,
+    trafficByDate: `${API_BASE_URL}/api/endc-lte/traffic-by-date`,
   },
 };
 

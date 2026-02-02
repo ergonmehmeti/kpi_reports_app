@@ -205,14 +205,12 @@ const SideNav = ({ isOpen, onClose }) => {
                 </button>
                 
                 <button 
-                  className="sub-item"
+                  className="sub-item active"
                   onClick={() => handleImportClick('endcLte')}
-                  disabled={true}
-                  style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                  disabled={loading}
                 >
                   <span className="sub-icon">🔗</span>
-                  <span className="sub-text">Import ENDC</span>
-                  <span style={{ fontSize: '0.7rem', marginLeft: '0.5rem', color: '#6b7280' }}>(Coming Soon)</span>
+                  <span className="sub-text">Import LTE EN-DC</span>
                 </button>
               </div>
             </div>
