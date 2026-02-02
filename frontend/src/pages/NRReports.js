@@ -839,20 +839,26 @@ const NRReports = () => {
         hideCustomDatesButton={true}
       />
 
-      {kpiLoading && (
+      {(kpiLoading || weeklyTrafficLoading) && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading NR KPI data...</p>
+          <p>
+            Loading NR data...
+            {kpiLoading && weeklyTrafficLoading && ' (KPI & Traffic)'}
+            {kpiLoading && !weeklyTrafficLoading && ' (KPI)'}
+            {!kpiLoading && weeklyTrafficLoading && ' (Traffic)'}
+          </p>
         </div>
       )}
 
-      {kpiError && (
+      {(kpiError || weeklyTrafficError) && (
         <div className="error-message">
-          <p>Error loading data: {kpiError}</p>
+          {kpiError && <p>Error loading KPI data: {kpiError}</p>}
+          {weeklyTrafficError && <p>Error loading traffic data: {weeklyTrafficError}</p>}
         </div>
       )}
 
-      {!kpiLoading && !kpiError && kpiData.length > 0 && (
+      {!kpiLoading && !weeklyTrafficLoading && !kpiError && !weeklyTrafficError && kpiData.length > 0 && (
         <div style={{ 
           backgroundColor: '#ffffff', 
           borderRadius: '12px', 
@@ -1575,7 +1581,16 @@ const NRReports = () => {
               title="TOP Sites - Total (All Bands)" 
               description="Top 20 sites by total traffic volume across all frequency bands"
             >
-              {topSitesTotalData.length > 0 ? (
+              {weeklyTrafficLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                  <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+                  Loading traffic data...
+                </div>
+              ) : weeklyTrafficError ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#dc2626' }}>
+                  Error loading traffic data: {weeklyTrafficError}
+                </div>
+              ) : topSitesTotalData.length > 0 ? (
                 <HorizontalStackedBarChart 
                   data={topSitesTotalData}
                   dataKeys={['dl', 'ul']}
@@ -1603,7 +1618,16 @@ const NRReports = () => {
                 title="TOP Sites - TDD (3500MHz)" 
                 description="Top 20 sites by traffic volume on 3500MHz (TDD) band"
               >
-                {topSitesTddData.length > 0 ? (
+                {weeklyTrafficLoading ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+                    Loading...
+                  </div>
+                ) : weeklyTrafficError ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#dc2626' }}>
+                    Error loading data
+                  </div>
+                ) : topSitesTddData.length > 0 ? (
                   <HorizontalStackedBarChart 
                     data={topSitesTddData}
                     dataKeys={['dl', 'ul']}
@@ -1624,7 +1648,16 @@ const NRReports = () => {
                 title="TOP Sites - FDD (900MHz)" 
                 description="Top 20 sites by traffic volume on 900MHz (FDD) band"
               >
-                {topSitesFddData.length > 0 ? (
+                {weeklyTrafficLoading ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    <div className="loading-spinner" style={{ margin: '0 auto 1rem' }}></div>
+                    Loading...
+                  </div>
+                ) : weeklyTrafficError ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#dc2626' }}>
+                    Error loading data
+                  </div>
+                ) : topSitesFddData.length > 0 ? (
                   <HorizontalStackedBarChart 
                     data={topSitesFddData}
                     dataKeys={['dl', 'ul']}
@@ -1659,7 +1692,7 @@ const NRReports = () => {
         />
       )}
 
-      {!kpiLoading && !kpiError && kpiData.length === 0 && (
+      {!kpiLoading && !weeklyTrafficLoading && !kpiError && !weeklyTrafficError && kpiData.length === 0 && (
         <div className="no-data-message">
           <p>No NR data available</p>
           <p>Please import NR data using the sidebar or select a different date range.</p>
