@@ -201,7 +201,7 @@ const SideNav = ({ isOpen, onClose }) => {
                   disabled={loading}
                 >
                   <span className="sub-icon">📊</span>
-                  <span className="sub-text">Import NR KPI</span>
+                  <span className="sub-text">Import NR Cell DU</span>
                 </button>
                 
                 <button 

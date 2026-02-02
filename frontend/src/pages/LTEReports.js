@@ -159,6 +159,7 @@ const LTEReports = () => {
 
     // Convert to array and sort by total traffic
     const sortedSites = Object.values(siteTraffic)
+      .filter(site => site.total_traffic_gb > 0) // Exclude sites with 0 traffic
       .sort((a, b) => b.total_traffic_gb - a.total_traffic_gb);
 
     // Get top 20 and bottom 20

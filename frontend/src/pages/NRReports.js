@@ -1318,6 +1318,44 @@ const NRReports = () => {
 
             <div>
               <ChartCard 
+                title="Average UL MAC UE Throughput (Mbps)" 
+                description="Average uplink MAC UE throughput by frequency band"
+                onClick={() => hasChartData(avgUlMacUeThroughputData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: 'Average UL MAC UE Throughput (Mbps)',
+                  data: avgUlMacUeThroughputData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, avgUlMacUeThroughputYMax]
+                }) : null}
+              >
+                {hasChartData(avgUlMacUeThroughputData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={avgUlMacUeThroughputData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="Mbps"
+                    yAxisDomain={[0, avgUlMacUeThroughputYMax]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
+          </div>
+            </>
+          )}
+
+          {/* Row 2: Normalized DL MAC Cell Throughput Traffic | Normalized UL Successful PUSCH */}
+          {visibleSections >= 3 && (
+            <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
                 title="Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)" 
                 description="Normalized average DL MAC cell throughput by frequency band"
                 onClick={() => hasChartData(normalizedAvgDlMacCellThroughputTrafficData, ['900MHz', '3500MHz']) ? handleChartClick({  
@@ -1342,12 +1380,38 @@ const NRReports = () => {
                 )}
               </ChartCard>
             </div>
+
+            <div>
+              <ChartCard 
+                title="Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)" 
+                description="Normalized average UL MAC cell throughput for successful PUSCH slots"
+                onClick={() => hasChartData(normalizedAvgUlMacCellThroughputSuccessfulPuschData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: 'Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)',
+                  data: normalizedAvgUlMacCellThroughputSuccessfulPuschData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'Mbps',
+                  yAxisDomain: [0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]
+                }) : null}
+              >
+                {hasChartData(normalizedAvgUlMacCellThroughputSuccessfulPuschData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={normalizedAvgUlMacCellThroughputSuccessfulPuschData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="Mbps"
+                    yAxisDomain={[0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
           </div>
-            </>
           )}
 
-          {/* Row 2: Normalized DL MAC Cell Throughput Actual PDSCH | PDSCH Slot Utilization */}
-          {visibleSections >= 3 && (
+          {/* Row 3: Normalized DL MAC Cell Throughput Actual PDSCH | Normalized UL Actual PUSCH */}
+          {visibleSections >= 4 && (
             <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(2, 1fr)', 
@@ -1374,198 +1438,6 @@ const NRReports = () => {
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="Mbps"
                     yAxisDomain={[0, normalizedDlMacCellThroughputActualPdschYMax]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-
-            <div>
-              <ChartCard 
-                title="PDSCH Slot Utilization (%)" 
-                description="PDSCH slot utilization percentage by frequency band"
-                onClick={() => hasChartData(pdschSlotUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: 'PDSCH Slot Utilization (%)',
-                  data: pdschSlotUtilizationData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: '%',
-                  yAxisDomain: [0, 100]
-                }) : null}
-              >
-                {hasChartData(pdschSlotUtilizationData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={pdschSlotUtilizationData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="%"
-                    yAxisDomain={[0, 100]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-          </div>
-          )}
-
-          {/* Row 3: DL RBSym Utilization | Percentage Unrestricted Volume DL */}
-          {visibleSections >= 4 && (
-            <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '1.5rem',
-            marginTop: '1.5rem'
-          }}>
-            <div>
-              <ChartCard 
-                title="DL RBSym Utilization (%)" 
-                description="Downlink RBSym utilization percentage by frequency band"
-                onClick={() => hasChartData(dlRbsymUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: 'DL RBSym Utilization (%)',
-                  data: dlRbsymUtilizationData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: '%',
-                  yAxisDomain: [0, 100]
-                }) : null}
-              >
-                {hasChartData(dlRbsymUtilizationData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={dlRbsymUtilizationData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="%"
-                    yAxisDomain={[0, 100]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-
-            <div>
-              <ChartCard 
-                title="Percentage Unrestricted Volume DL (%)" 
-                description="Percentage of unrestricted volume on downlink by frequency band"
-                onClick={() => hasChartData(percentageUnrestrictedVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: 'Percentage Unrestricted Volume DL (%)',
-                  data: percentageUnrestrictedVolumeDlData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: '%',
-                  yAxisDomain: [0, 100]
-                }) : null}
-              >
-                {hasChartData(percentageUnrestrictedVolumeDlData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={percentageUnrestrictedVolumeDlData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="%"
-                    yAxisDomain={[0, 100]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-          </div>
-          )}
-
-          {/* Row 4: 5G User Data Traffic Volume DL | Average UL MAC UE Throughput */}
-          {visibleSections >= 5 && (
-            <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '1.5rem',
-            marginTop: '1.5rem'
-          }}>
-            <div>
-              <ChartCard 
-                title="5G User Data Traffic Volume on Downlink (GB)" 
-                description="User data traffic volume on downlink by frequency band"
-                onClick={() => hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: '5G User Data Traffic Volume on Downlink (GB)',
-                  data: userDataTrafficVolumeDlData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: 'GB',
-                  yAxisDomain: [0, userDataTrafficVolumeDlYMax]
-                }) : null}
-              >
-                {hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={userDataTrafficVolumeDlData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="GB"
-                    yAxisDomain={[0, userDataTrafficVolumeDlYMax]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-
-            <div>
-              <ChartCard 
-                title="Average UL MAC UE Throughput (Mbps)" 
-                description="Average uplink MAC UE throughput by frequency band"
-                onClick={() => hasChartData(avgUlMacUeThroughputData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: 'Average UL MAC UE Throughput (Mbps)',
-                  data: avgUlMacUeThroughputData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, avgUlMacUeThroughputYMax]
-                }) : null}
-              >
-                {hasChartData(avgUlMacUeThroughputData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={avgUlMacUeThroughputData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="Mbps"
-                    yAxisDomain={[0, avgUlMacUeThroughputYMax]}
-                  />
-                ) : (
-                  <NoDataWarning />
-                )}
-              </ChartCard>
-            </div>
-          </div>
-          )}
-
-          {/* Row 5: Normalized UL MAC Cell Throughput Successful PUSCH | Normalized UL MAC Cell Throughput Actual PUSCH */}
-          {visibleSections >= 6 && (
-            <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
-            gap: '1.5rem',
-            marginTop: '1.5rem'
-          }}>
-            <div>
-              <ChartCard 
-                title="Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)" 
-                description="Normalized average UL MAC cell throughput for successful PUSCH slots"
-                onClick={() => hasChartData(normalizedAvgUlMacCellThroughputSuccessfulPuschData, ['900MHz', '3500MHz']) ? handleChartClick({  
-                  title: 'Normalized Average UL MAC Cell Throughput Captured in gNodeB Considering Successful PUSCH Slot Only (Mbps)',
-                  data: normalizedAvgUlMacCellThroughputSuccessfulPuschData,
-                  dataKeys: ['900MHz', '3500MHz'],
-                  colors: ['#6b21a8', '#ec4899'],
-                  yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]
-                }) : null}
-              >
-                {hasChartData(normalizedAvgUlMacCellThroughputSuccessfulPuschData, ['900MHz', '3500MHz']) ? (
-                  <KPILineChart 
-                    data={normalizedAvgUlMacCellThroughputSuccessfulPuschData}
-                    dataKeys={['900MHz', '3500MHz']}
-                    colors={['#6b21a8', '#ec4899']}
-                    yAxisLabel="Mbps"
-                    yAxisDomain={[0, normalizedAvgUlMacCellThroughputSuccessfulPuschYMax]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1602,14 +1474,41 @@ const NRReports = () => {
           </div>
           )}
 
-          {/* Row 6: PUSCH Slot Utilization | UL RBSym Utilization */}
-          {visibleSections >= 7 && (
+          {/* Row 4: PDSCH Slot Utilization | PUSCH Slot Utilization */}
+          {visibleSections >= 5 && (
             <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(2, 1fr)', 
             gap: '1.5rem',
             marginTop: '1.5rem'
           }}>
+            <div>
+              <ChartCard 
+                title="PDSCH Slot Utilization (%)" 
+                description="PDSCH slot utilization percentage by frequency band"
+                onClick={() => hasChartData(pdschSlotUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: 'PDSCH Slot Utilization (%)',
+                  data: pdschSlotUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                }) : null}
+              >
+                {hasChartData(pdschSlotUtilizationData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={pdschSlotUtilizationData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="%"
+                    yAxisDomain={[0, 100]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
+
             <div>
               <ChartCard 
                 title="PUSCH Slot Utilization (%)" 
@@ -1626,6 +1525,43 @@ const NRReports = () => {
                 {hasChartData(puschSlotUtilizationData, ['900MHz', '3500MHz']) ? (
                   <KPILineChart 
                     data={puschSlotUtilizationData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="%"
+                    yAxisDomain={[0, 100]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
+          </div>
+          )}
+
+          {/* Row 5: DL RBSym Utilization | UL RBSym Utilization */}
+          {visibleSections >= 6 && (
+            <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="DL RBSym Utilization (%)" 
+                description="Downlink RBSym utilization percentage by frequency band"
+                onClick={() => hasChartData(dlRbsymUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: 'DL RBSym Utilization (%)',
+                  data: dlRbsymUtilizationData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                }) : null}
+              >
+                {hasChartData(dlRbsymUtilizationData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={dlRbsymUtilizationData}
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="%"
@@ -1666,14 +1602,41 @@ const NRReports = () => {
           </div>
           )}
 
-          {/* Row 7: Percentage Unrestricted Volume UL | 5G User Data Traffic Volume UL */}
-          {visibleSections >= 8 && (
+          {/* Row 6: Percentage Unrestricted Volume DL | Percentage Unrestricted Volume UL */}
+          {visibleSections >= 7 && (
             <div style={{ 
             display: 'grid', 
             gridTemplateColumns: 'repeat(2, 1fr)', 
             gap: '1.5rem',
             marginTop: '1.5rem'
           }}>
+            <div>
+              <ChartCard 
+                title="Percentage Unrestricted Volume DL (%)" 
+                description="Percentage of unrestricted volume on downlink by frequency band"
+                onClick={() => hasChartData(percentageUnrestrictedVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: 'Percentage Unrestricted Volume DL (%)',
+                  data: percentageUnrestrictedVolumeDlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: '%',
+                  yAxisDomain: [0, 100]
+                }) : null}
+              >
+                {hasChartData(percentageUnrestrictedVolumeDlData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={percentageUnrestrictedVolumeDlData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="%"
+                    yAxisDomain={[0, 100]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
+
             <div>
               <ChartCard 
                 title="Percentage Unrestricted Volume UL (%)" 
@@ -1694,6 +1657,43 @@ const NRReports = () => {
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="%"
                     yAxisDomain={[0, 100]}
+                  />
+                ) : (
+                  <NoDataWarning />
+                )}
+              </ChartCard>
+            </div>
+          </div>
+          )}
+
+          {/* Row 7: 5G User Data Traffic Volume DL | 5G User Data Traffic Volume UL */}
+          {visibleSections >= 8 && (
+            <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gap: '1.5rem',
+            marginTop: '1.5rem'
+          }}>
+            <div>
+              <ChartCard 
+                title="5G User Data Traffic Volume on Downlink (GB)" 
+                description="User data traffic volume on downlink by frequency band"
+                onClick={() => hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
+                  title: '5G User Data Traffic Volume on Downlink (GB)',
+                  data: userDataTrafficVolumeDlData,
+                  dataKeys: ['900MHz', '3500MHz'],
+                  colors: ['#6b21a8', '#ec4899'],
+                  yAxisLabel: 'GB',
+                  yAxisDomain: [0, userDataTrafficVolumeDlYMax]
+                }) : null}
+              >
+                {hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? (
+                  <KPILineChart 
+                    data={userDataTrafficVolumeDlData}
+                    dataKeys={['900MHz', '3500MHz']}
+                    colors={['#6b21a8', '#ec4899']}
+                    yAxisLabel="GB"
+                    yAxisDomain={[0, userDataTrafficVolumeDlYMax]}
                   />
                 ) : (
                   <NoDataWarning />
