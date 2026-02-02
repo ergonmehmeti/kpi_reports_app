@@ -1,6 +1,8 @@
 -- Migration: Create EN-DC LTE Traffic Hourly Table
 -- Description: Stores EN-DC traffic volumes on LTE anchor cells (hourly)
 -- Date: 2026-01-20
+-- NOTE: This migration is superseded by 013_simplify_endc_lte_traffic_to_hourly_totals.sql
+--       which removes cell/site/band granularity in favor of network-wide hourly aggregation
 
 CREATE TABLE IF NOT EXISTS endc_lte_traffic_hourly (
   id SERIAL PRIMARY KEY,

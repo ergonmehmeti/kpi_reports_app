@@ -59,12 +59,12 @@ function determineFreqBand(frequency, cellName) {
 }
 
 /**
- * Process raw LTE EN-DC CSV data and calculate traffic
+ * Process raw LTE EN-DC CSV data and calculate network-wide hourly traffic
  * @param {Array} rawRecords - Raw CSV records from pm_DC_E_ERBS_EUTRANCELLFDD_FLEX_HOUR
- * @returns {Array} EN-DC traffic records grouped by date/hour/lte_cell_name
+ * @returns {Array} EN-DC traffic records aggregated by date/hour (network-wide)
  */
 export const processRawDataToTraffic = (rawRecords) => {
-  // Group by date_id, hour_id, and lte_cell_name
+  // Group by date_id and hour_id only (network-wide aggregation)
   const groups = {};
   
   rawRecords.forEach(record => {
@@ -77,47 +77,32 @@ export const processRawDataToTraffic = (rawRecords) => {
       return;
     }
     
-    const lteCellName = record.EUtranCellFDD || '';
-    const siteName = extractSiteName(lteCellName);
-    const freqBand = determineFreqBand(record.FREQUENCY, lteCellName);
-    
-    const key = `${dateId}_${hourId}_${lteCellName}`;
+    const key = `${dateId}_${hourId}`;
     
     if (!groups[key]) {
       groups[key] = {
         dateId,
         hourId,
-        lteCellName,
-        siteName,
-        freqBand,
-        // EN-DC traffic counters
+        // EN-DC traffic counters (sum across all cells)
         pmFlexPdcpVolDlDrbEndc: 0,
         pmFlexPdcpVolUlDrbEndc: 0,
       };
     }
     
-    // Aggregate EN-DC traffic counters (SUM)
+    // Aggregate EN-DC traffic counters from all cells (SUM)
     const group = groups[key];
     group.pmFlexPdcpVolDlDrbEndc += parseFloat(record['PMFLEXPDCPVOLDLDRB[Endc2To99]'] || 0);
     group.pmFlexPdcpVolUlDrbEndc += parseFloat(record['PMFLEXPDCPVOLULDRB[Endc2To99]'] || 0);
   });
   
-  // Calculate EN-DC traffic
+  // Calculate EN-DC traffic using the formula: 8*(DL + UL)/(1000*1000)
   const trafficRecords = Object.values(groups).map(g => {
-    // Formula: 8*(PMFLEXPDCPVOLDLDRB[Endc2To99] + PMFLEXPDCPVOLULDRB[Endc2To99])/(1000*1000)
-    // Convert to GB: divide by 1000*1000*1000
-    const endcTrafficVolumeDl = (8 * g.pmFlexPdcpVolDlDrbEndc) / (1000 * 1000 * 1000);
-    const endcTrafficVolumeUl = (8 * g.pmFlexPdcpVolUlDrbEndc) / (1000 * 1000 * 1000);
-    const endcTotalTrafficVolume = endcTrafficVolumeDl + endcTrafficVolumeUl;
+    // Formula from document: 8*(PMFLEXPDCPVOLDLDRB[Endc2To99] + PMFLEXPDCPVOLULDRB[Endc2To99])/(1000*1000)
+    const endcTotalTrafficVolume = (8 * (g.pmFlexPdcpVolDlDrbEndc + g.pmFlexPdcpVolUlDrbEndc)) / (1000 * 1000);
     
     return {
       date_id: g.dateId,
       hour_id: g.hourId,
-      lte_cell_name: g.lteCellName,
-      site_name: g.siteName,
-      freq_band: g.freqBand,
-      endc_traffic_volume_dl_gb: endcTrafficVolumeDl,
-      endc_traffic_volume_ul_gb: endcTrafficVolumeUl,
       endc_total_traffic_volume_gb: endcTotalTrafficVolume,
     };
   });
@@ -126,7 +111,7 @@ export const processRawDataToTraffic = (rawRecords) => {
 };
 
 /**
- * Insert EN-DC LTE traffic data (UPSERT)
+ * Insert EN-DC LTE traffic data (UPSERT) - Network-wide hourly totals
  */
 export const insertTrafficData = async (records) => {
   const client = await pool.connect();
@@ -140,17 +125,10 @@ export const insertTrafficData = async (records) => {
     for (const record of records) {
       const query = `
         INSERT INTO endc_lte_traffic_hourly (
-          date_id, hour_id, lte_cell_name, site_name, freq_band,
-          endc_traffic_volume_dl_gb,
-          endc_traffic_volume_ul_gb,
-          endc_total_traffic_volume_gb
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (date_id, hour_id, lte_cell_name)
+          date_id, hour_id, endc_total_traffic_volume_gb
+        ) VALUES ($1, $2, $3)
+        ON CONFLICT (date_id, hour_id)
         DO UPDATE SET
-          site_name = EXCLUDED.site_name,
-          freq_band = EXCLUDED.freq_band,
-          endc_traffic_volume_dl_gb = EXCLUDED.endc_traffic_volume_dl_gb,
-          endc_traffic_volume_ul_gb = EXCLUDED.endc_traffic_volume_ul_gb,
           endc_total_traffic_volume_gb = EXCLUDED.endc_total_traffic_volume_gb,
           created_at = CURRENT_TIMESTAMP
         RETURNING (xmax = 0) AS inserted;
@@ -159,11 +137,6 @@ export const insertTrafficData = async (records) => {
       const result = await client.query(query, [
         record.date_id,
         record.hour_id,
-        record.lte_cell_name,
-        record.site_name,
-        record.freq_band,
-        record.endc_traffic_volume_dl_gb,
-        record.endc_traffic_volume_ul_gb,
         record.endc_total_traffic_volume_gb,
       ]);
       
@@ -218,21 +191,17 @@ export const getTrafficDataBySite = async (startDate, endDate) => {
       SUM(endc_traffic_volume_ul_gb) as total_ul_gb,
       SUM(endc_total_traffic_volume_gb) as total_gb
     FROM endc_lte_traffic_hourly
-    WHERE date_id >= $1 AND date_id <= $2
-    GROUP BY date_id, site_name, freq_band
-    ORDER BY date_id, site_name, freq_band;
-  `;
-  
-  const result = await pool.query(query, [startDate, endDate]);
-  return result.rows;
-};
-
-/**
- * Delete EN-DC LTE traffic data for a date range
+    WHERE date_id >= $1 AND date_id <= $2date (daily totals)
  */
-export const deleteTrafficData = async (startDate, endDate) => {
+export const getTrafficDataByDate = async (startDate, endDate) => {
   const query = `
-    DELETE FROM endc_lte_traffic_hourly
+    SELECT 
+      date_id,
+      SUM(endc_total_traffic_volume_gb) as total_gb
+    FROM endc_lte_traffic_hourly
+    WHERE date_id >= $1 AND date_id <= $2
+    GROUP BY date_id
+    ORDER BY date_i
     WHERE date_id >= $1 AND date_id <= $2;
   `;
   

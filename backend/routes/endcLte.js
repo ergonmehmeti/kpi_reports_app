@@ -14,17 +14,17 @@ router.post('/upload', adminOnly, upload.single('file'), endcLteController.uploa
 
 /**
  * @route   GET /api/endc-lte/traffic
- * @desc    Get EN-DC LTE traffic data for date range
+ * @desc    Get EN-DC LTE traffic data (hourly) for date range
  * @access  Public
  */
 router.get('/traffic', endcLteController.getTrafficData);
 
 /**
- * @route   GET /api/endc-lte/traffic-by-site
- * @desc    Get EN-DC LTE traffic data aggregated by site for date range
+ * @route   GET /api/endc-lte/traffic-by-date
+ * @desc    Get EN-DC LTE traffic data aggregated by date (daily totals)
  * @access  Public
  */
-router.get('/traffic-by-site', endcLteController.getTrafficDataBySite);
+router.get('/traffic-by-date', endcLteController.getTrafficDataByDate);
 
 /**
  * @route   DELETE /api/endc-lte/traffic

@@ -166,9 +166,9 @@ export async function getTrafficData(req, res) {
 }
 
 /**
- * Get EN-DC LTE traffic data aggregated by site
+ * Get EN-DC LTE traffic data aggregated by date (daily totals)
  */
-export async function getTrafficDataBySite(req, res) {
+export async function getTrafficDataByDate(req, res) {
   try {
     const { startDate, endDate } = req.query;
 
@@ -178,7 +178,7 @@ export async function getTrafficDataBySite(req, res) {
       });
     }
 
-    const data = await endcLteService.getTrafficDataBySite(startDate, endDate);
+    const data = await endcLteService.getTrafficDataByDate(startDate, endDate);
 
     res.json({
       success: true,
@@ -186,9 +186,9 @@ export async function getTrafficDataBySite(req, res) {
       data
     });
   } catch (error) {
-    console.error('Error fetching EN-DC LTE traffic data by site:', error);
+    console.error('Error fetching EN-DC LTE traffic data by date:', error);
     res.status(500).json({
-      error: 'Failed to fetch EN-DC LTE traffic data by site',
+      error: 'Failed to fetch EN-DC LTE traffic data by date',
       details: error.message
     });
   }
@@ -226,6 +226,6 @@ export async function deleteTrafficData(req, res) {
 export default {
   uploadRawData,
   getTrafficData,
-  getTrafficDataBySite,
+  getTrafficDataByDate,
   deleteTrafficData
 };
