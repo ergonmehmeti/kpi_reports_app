@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ComparisonLineChart from '../components/charts/ComparisonLineChart';
+import ChartCard from '../components/charts/ChartCard';
 import ChartModal from '../components/charts/ChartModal';
 import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useNRComparisonData, NR_KPI_OPTIONS } from '../hooks/useNRComparisonData';
@@ -385,7 +386,28 @@ const NRReportsComparison = () => {
                 return [0, 100];
               }
               
-              // For other throughput KPIs - calculate from 0 to max
+              // Helper to calculate nice rounded max (similar to NRReports.js)
+              const calculateNiceMax = (maxVal) => {
+                if (maxVal === 0) return 100;
+                const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+                const normalized = maxVal / magnitude;
+                let niceMax;
+                if (normalized <= 1) niceMax = magnitude;
+                else if (normalized <= 1.5) niceMax = 1.5 * magnitude;
+                else if (normalized <= 2) niceMax = 2 * magnitude;
+                else if (normalized <= 2.5) niceMax = 2.5 * magnitude;
+                else if (normalized <= 3) niceMax = 3 * magnitude;
+                else if (normalized <= 4) niceMax = 4 * magnitude;
+                else if (normalized <= 5) niceMax = 5 * magnitude;
+                else if (normalized <= 5.5) niceMax = 5.5 * magnitude;
+                else if (normalized <= 6) niceMax = 6 * magnitude;
+                else if (normalized <= 7) niceMax = 7 * magnitude;
+                else if (normalized <= 8) niceMax = 8 * magnitude;
+                else niceMax = 10 * magnitude;
+                return niceMax;
+              };
+
+              // For other throughput KPIs - calculate from 0 to nice max
               if (kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
                   kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
                   kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
@@ -406,9 +428,9 @@ const NRReportsComparison = () => {
                 
                 if (maxVal === -Infinity) return [0, 100];
                 
-                // Round up max to nearest integer + 10% buffer
-                const roundedMax = Math.ceil(maxVal * 1.1);
-                return [0, roundedMax];
+                // Use nice rounded max calculation
+                const niceMax = calculateNiceMax(maxVal);
+                return [0, niceMax];
               }
               
               return undefined;
@@ -534,7 +556,28 @@ const NRReportsComparison = () => {
                 return [0, 50, 100];
               }
               
-              // For other throughput KPIs - calculate ticks from 0 to max
+              // Helper to calculate nice rounded max for ticks (same as in getYAxisDomain)
+              const calculateNiceMaxForTicks = (maxVal) => {
+                if (maxVal === 0) return 100;
+                const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+                const normalized = maxVal / magnitude;
+                let niceMax;
+                if (normalized <= 1) niceMax = magnitude;
+                else if (normalized <= 1.5) niceMax = 1.5 * magnitude;
+                else if (normalized <= 2) niceMax = 2 * magnitude;
+                else if (normalized <= 2.5) niceMax = 2.5 * magnitude;
+                else if (normalized <= 3) niceMax = 3 * magnitude;
+                else if (normalized <= 4) niceMax = 4 * magnitude;
+                else if (normalized <= 5) niceMax = 5 * magnitude;
+                else if (normalized <= 5.5) niceMax = 5.5 * magnitude;
+                else if (normalized <= 6) niceMax = 6 * magnitude;
+                else if (normalized <= 7) niceMax = 7 * magnitude;
+                else if (normalized <= 8) niceMax = 8 * magnitude;
+                else niceMax = 10 * magnitude;
+                return niceMax;
+              };
+
+              // For other throughput KPIs - calculate ticks from 0 to nice max
               if (kpiConfig.id === 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps' ||
                   kpiConfig.id === 'avg_ul_mac_ue_throughput_mbps' ||
                   kpiConfig.id === 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps' ||
@@ -555,15 +598,197 @@ const NRReportsComparison = () => {
                 
                 if (maxVal === -Infinity) return undefined;
                 
-                // Round up max to nearest integer + 10% buffer
-                const roundedMax = Math.ceil(maxVal * 1.1);
-                const middleTick = roundedMax / 2;
+                // Use nice rounded max calculation
+                const niceMax = calculateNiceMaxForTicks(maxVal);
+                const middleTick = niceMax / 2;
                 
-                return [0, middleTick, roundedMax];
+                return [0, middleTick, niceMax];
               }
               
               return undefined;
             };
+
+            // Special handling for TOP Sites KPIs (horizontal bar chart showing site comparison)
+            if (kpiId === 'top_sites_total' || kpiId === 'top_sites_tdd' || kpiId === 'top_sites_fdd') {
+              const sitesData = chartData['sites'];
+              if (!sitesData || sitesData.length === 0) return null;
+
+              // Format function for TOP Sites charts
+              const formatTrafficValue = (value) => {
+                return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : value.toFixed(1);
+              };
+
+              return (
+                <div key={kpiId} style={{ marginTop: '2rem' }}>
+                  <h4 style={{ 
+                    fontSize: '1.1rem', 
+                    color: '#374151', 
+                    marginBottom: '1rem',
+                    fontWeight: 600
+                  }}>
+                    {kpiConfig.label}
+                  </h4>
+                  
+                  <ChartCard 
+                    title={`${kpiConfig.label} - Weekly Comparison`}
+                    description={`Comparing top 20 sites traffic: ${week1Label} vs ${week2Label}`}
+                  >
+                    <div>
+                      {sitesData.map((site, index) => {
+                        const maxTraffic = Math.max(...sitesData.map(s => Math.max(s[week1Label] || 0, s[week2Label] || 0)));
+                        return (
+                          <div key={site.site_name} style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '6px 0',
+                            borderBottom: index < 19 ? '1px solid #f0f0f0' : 'none'
+                          }}>
+                            <span style={{ width: '140px', fontSize: '0.75rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {site.site_name}
+                            </span>
+                            <div style={{ flex: 1, display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.65rem', color: '#6b21a8', minWidth: '50px' }}>{week1Label}</span>
+                              <div style={{
+                                height: '12px',
+                                width: `${Math.min((site[week1Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#6b21a8',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.65rem', color: '#6b21a8', minWidth: '55px' }}>{formatTrafficValue(site[week1Label])} GB</span>
+                            </div>
+                            <div style={{ flex: 1, display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.65rem', color: '#be185d', minWidth: '50px' }}>{week2Label}</span>
+                              <div style={{
+                                height: '12px',
+                                width: `${Math.min((site[week2Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#be185d',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.65rem', color: '#be185d', minWidth: '55px' }}>{formatTrafficValue(site[week2Label])} GB</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    
+                    {/* Legend */}
+                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '12px', height: '12px', backgroundColor: '#6b21a8', borderRadius: '2px' }}></div>
+                        <span style={{ fontSize: '0.75rem', color: '#6b21a8', fontWeight: 600 }}>{week1Label}</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <div style={{ width: '12px', height: '12px', backgroundColor: '#be185d', borderRadius: '2px' }}></div>
+                        <span style={{ fontSize: '0.75rem', color: '#be185d', fontWeight: 600 }}>{week2Label}</span>
+                      </div>
+                    </div>
+                  </ChartCard>
+                </div>
+              );
+            }
+
+            // Special handling for EN-DC LTE Traffic (single chart, no frequency bands)
+            if (kpiId === 'endc_lte_traffic') {
+              const allData = chartData['all'];
+              if (!allData || allData.length === 0) return null;
+
+              // Calculate nice Y-axis domain for EN-DC traffic
+              const calculateEndcYAxis = () => {
+                let maxVal = 0;
+                allData.forEach(item => {
+                  const val1 = item[week1Label];
+                  const val2 = item[week2Label];
+                  if (val1 !== null && val1 !== undefined && !isNaN(val1)) {
+                    maxVal = Math.max(maxVal, val1);
+                  }
+                  if (val2 !== null && val2 !== undefined && !isNaN(val2)) {
+                    maxVal = Math.max(maxVal, val2);
+                  }
+                });
+                
+                if (maxVal === 0) return { domain: [0, 100], ticks: [0, 25, 50, 75, 100] };
+                
+                // Calculate nice rounded max
+                const magnitude = Math.pow(10, Math.floor(Math.log10(maxVal)));
+                const normalized = maxVal / magnitude;
+                let niceMax;
+                if (normalized <= 1) niceMax = magnitude;
+                else if (normalized <= 1.5) niceMax = 1.5 * magnitude;
+                else if (normalized <= 2) niceMax = 2 * magnitude;
+                else if (normalized <= 2.5) niceMax = 2.5 * magnitude;
+                else if (normalized <= 3) niceMax = 3 * magnitude;
+                else if (normalized <= 4) niceMax = 4 * magnitude;
+                else if (normalized <= 5) niceMax = 5 * magnitude;
+                else if (normalized <= 6) niceMax = 6 * magnitude;
+                else if (normalized <= 8) niceMax = 8 * magnitude;
+                else niceMax = 10 * magnitude;
+                
+                // Create 5 evenly spaced ticks
+                const step = niceMax / 4;
+                const ticks = [0, step, step * 2, step * 3, niceMax];
+                
+                return { domain: [0, niceMax], ticks };
+              };
+
+              const endcYAxis = calculateEndcYAxis();
+
+              return (
+                <div key={kpiId} style={{ marginTop: '2rem' }}>
+                  <h4 style={{ 
+                    fontSize: '1.1rem', 
+                    color: '#374151', 
+                    marginBottom: '1rem',
+                    fontWeight: 600
+                  }}>
+                    {kpiConfig.label}
+                  </h4>
+                  
+                  {/* Single chart for EN-DC traffic */}
+                  <div 
+                    style={{
+                      backgroundColor: '#faf5ff',
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      border: '1px solid #e9d5ff',
+                      cursor: 'pointer',
+                      transition: 'box-shadow 0.2s ease',
+                      maxWidth: '50%'
+                    }}
+                    onClick={() => handleChartClick({
+                      title: kpiConfig.label,
+                      data: allData,
+                      yAxisLabel: kpiConfig.yAxisLabel,
+                      week1Label: week1Label,
+                      week2Label: week2Label,
+                      week1Color: '#6b21a8',
+                      week2Color: '#be185d',
+                      yAxisDomain: endcYAxis.domain,
+                      yAxisTicks: endcYAxis.ticks
+                    })}
+                  >
+                    <h5 style={{ 
+                      fontSize: '0.95rem', 
+                      color: '#6b21a8', 
+                      marginBottom: '0.75rem',
+                      fontWeight: 600,
+                      textAlign: 'center'
+                    }}>
+                      📊 EN-DC LTE Traffic
+                    </h5>
+                    <ComparisonLineChart
+                      data={allData}
+                      week1Label={week1Label}
+                      week2Label={week2Label}
+                      yAxisLabel={kpiConfig.yAxisLabel}
+                      week1Color="#6b21a8"
+                      week2Color="#be185d"
+                      yAxisDomain={endcYAxis.domain}
+                      yAxisTicks={endcYAxis.ticks}
+                    />
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div key={kpiId} style={{ marginTop: '2rem' }}>
