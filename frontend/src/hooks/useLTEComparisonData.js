@@ -378,18 +378,20 @@ export const useLTEComparisonData = () => {
       const week1Data = week1Response.data?.data || [];
       const week2Data = week2Response.data?.data || [];
 
-      // Check which week(s) have no data
-      if (week1Data.length === 0 && week2Data.length === 0) {
-        setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear} dhe Javën ${week2.weekOfYear}. Zgjedhni javë tjetër për krahasim.`);
-        return;
-      }
-      if (week1Data.length === 0) {
-        setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
-        return;
-      }
-      if (week2Data.length === 0) {
-        setError(`Nuk ka të dhëna për Javën ${week2.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
-        return;
+      // Check which week(s) have no data - only if KPIs are selected
+      if (selectedKPIs && selectedKPIs.length > 0) {
+        if (week1Data.length === 0 && week2Data.length === 0) {
+          setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear} dhe Javën ${week2.weekOfYear}. Zgjedhni javë tjetër për krahasim.`);
+          return;
+        }
+        if (week1Data.length === 0) {
+          setError(`Nuk ka të dhëna për Javën ${week1.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
+          return;
+        }
+        if (week2Data.length === 0) {
+          setError(`Nuk ka të dhëna për Javën ${week2.weekOfYear}. Zgjedhni një javë tjetër për krahasim.`);
+          return;
+        }
       }
 
       // Create labels for the weeks
