@@ -196,7 +196,7 @@ const SideNav = ({ isOpen, onClose }) => {
                 </button>
                 
                 <button 
-                  className="sub-item"
+                  className="sub-item active"
                   onClick={() => handleImportClick('nrCell')}
                   disabled={loading}
                 >

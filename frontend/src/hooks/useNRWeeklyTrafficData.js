@@ -23,6 +23,8 @@ export const useNRWeeklyTrafficData = () => {
       return;
     }
 
+    console.log('🔍 Fetching NR Weekly Traffic Data:', { startDate, endDate });
+
     setLoading(true);
     setError(null);
 
@@ -31,6 +33,11 @@ export const useNRWeeklyTrafficData = () => {
       const response = await axios.get(API_ENDPOINTS.nrCell.trafficWeekly, { 
         params,
         headers: getAuthHeaders()
+      });
+
+      console.log('📊 NR Weekly Traffic Response:', { 
+        count: response.data.data?.length,
+        firstRecord: response.data.data?.[0]
       });
 
       setData(response.data.data || []);

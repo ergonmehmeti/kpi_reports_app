@@ -22,7 +22,8 @@ const NRReportsComparison = () => {
     error: comparisonError,
     fetchComparisonData,
     week1Label,
-    week2Label
+    week2Label,
+    missingDataWarnings
   } = useNRComparisonData();
   
   // Local state
@@ -228,6 +229,31 @@ const NRReportsComparison = () => {
           boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
           border: '1px solid #e5e7eb'
         }}>
+
+          {/* Display Missing Data Warnings */}
+          {Object.keys(missingDataWarnings).length > 0 && (
+            <div style={{
+              backgroundColor: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1.5rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                <span style={{ fontSize: '1.25rem', lineHeight: '1' }}>⚠️</span>
+                <div>
+                  <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#92400e', margin: '0 0 0.5rem 0' }}>
+                    Missing Data Warning
+                  </h4>
+                  <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#78350f', fontSize: '0.875rem' }}>
+                    {Object.values(missingDataWarnings).map((warning, index) => (
+                      <li key={index} style={{ marginBottom: '0.25rem' }}>{warning}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Group KPIs by category and render with section headers */}
           {(() => {
@@ -608,83 +634,9 @@ const NRReportsComparison = () => {
               return undefined;
             };
 
-            // Special handling for TOP Sites KPIs (horizontal bar chart showing site comparison)
+            // Special handling for TOP Sites KPIs - Skip individual rendering, will be grouped later
             if (kpiId === 'top_sites_total' || kpiId === 'top_sites_tdd' || kpiId === 'top_sites_fdd') {
-              const sitesData = chartData['sites'];
-              if (!sitesData || sitesData.length === 0) return null;
-
-              // Format function for TOP Sites charts
-              const formatTrafficValue = (value) => {
-                return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : value.toFixed(1);
-              };
-
-              return (
-                <div key={kpiId} style={{ marginTop: '2rem' }}>
-                  <h4 style={{ 
-                    fontSize: '1.1rem', 
-                    color: '#374151', 
-                    marginBottom: '1rem',
-                    fontWeight: 600
-                  }}>
-                    {kpiConfig.label}
-                  </h4>
-                  
-                  <ChartCard 
-                    title={`${kpiConfig.label} - Weekly Comparison`}
-                    description={`Comparing top 20 sites traffic: ${week1Label} vs ${week2Label}`}
-                  >
-                    <div>
-                      {sitesData.map((site, index) => {
-                        const maxTraffic = Math.max(...sitesData.map(s => Math.max(s[week1Label] || 0, s[week2Label] || 0)));
-                        return (
-                          <div key={site.site_name} style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '6px 0',
-                            borderBottom: index < 19 ? '1px solid #f0f0f0' : 'none'
-                          }}>
-                            <span style={{ width: '140px', fontSize: '0.75rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {site.site_name}
-                            </span>
-                            <div style={{ flex: 1, display: 'flex', gap: '4px', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.65rem', color: '#6b21a8', minWidth: '50px' }}>{week1Label}</span>
-                              <div style={{
-                                height: '12px',
-                                width: `${Math.min((site[week1Label] / maxTraffic) * 100, 100)}%`,
-                                backgroundColor: '#6b21a8',
-                                borderRadius: '2px'
-                              }}></div>
-                              <span style={{ fontSize: '0.65rem', color: '#6b21a8', minWidth: '55px' }}>{formatTrafficValue(site[week1Label])} GB</span>
-                            </div>
-                            <div style={{ flex: 1, display: 'flex', gap: '4px', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.65rem', color: '#be185d', minWidth: '50px' }}>{week2Label}</span>
-                              <div style={{
-                                height: '12px',
-                                width: `${Math.min((site[week2Label] / maxTraffic) * 100, 100)}%`,
-                                backgroundColor: '#be185d',
-                                borderRadius: '2px'
-                              }}></div>
-                              <span style={{ fontSize: '0.65rem', color: '#be185d', minWidth: '55px' }}>{formatTrafficValue(site[week2Label])} GB</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                    
-                    {/* Legend */}
-                    <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ width: '12px', height: '12px', backgroundColor: '#6b21a8', borderRadius: '2px' }}></div>
-                        <span style={{ fontSize: '0.75rem', color: '#6b21a8', fontWeight: 600 }}>{week1Label}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <div style={{ width: '12px', height: '12px', backgroundColor: '#be185d', borderRadius: '2px' }}></div>
-                        <span style={{ fontSize: '0.75rem', color: '#be185d', fontWeight: 600 }}>{week2Label}</span>
-                      </div>
-                    </div>
-                  </ChartCard>
-                </div>
-              );
+              return null; // Will be rendered together in a grid below
             }
 
             // Special handling for EN-DC LTE Traffic (single chart, no frequency bands)
@@ -900,6 +852,184 @@ const NRReportsComparison = () => {
               );
             });
           })()}
+        </div>
+      )}
+
+      {/* TOP Sites Section - Horizontal Layout */}
+      {!comparisonLoading && !comparisonError && 
+       (selectedKPIs.includes('top_sites_tdd') || selectedKPIs.includes('top_sites_fdd') || selectedKPIs.includes('top_sites_total')) && 
+       Object.keys(comparisonData).length > 0 && (
+        <div style={{ 
+          backgroundColor: '#ffffff', 
+          borderRadius: '12px', 
+          padding: '2rem', 
+          marginTop: '2rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+          border: '1px solid #e5e7eb'
+        }}>
+          <div className="content-header" style={{ marginTop: '0', marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.5rem' }}>
+              TOP Sites - Traffic Comparison
+            </h3>
+            <p className="content-subtitle" style={{ fontSize: '0.875rem' }}>
+              Comparing top 20 sites traffic: <span style={{color: '#6b21a8', fontWeight: 600}}>{week1Label}</span> vs <span style={{color: '#be185d', fontWeight: 600}}>{week2Label}</span>
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
+            {/* TDD (3500MHz) */}
+            {selectedKPIs.includes('top_sites_tdd') && comparisonData['top_sites_tdd'] && (() => {
+              const sitesData = comparisonData['top_sites_tdd']['sites'];
+              if (!sitesData || sitesData.length === 0) return null;
+              
+              return (
+                <ChartCard 
+                  title="TDD (3500MHz)"
+                  badge="Weekly Comparison"
+                >
+                  <div>
+                    {sitesData.map((site, index) => {
+                      const maxTraffic = Math.max(...sitesData.map(s => Math.max(s[week1Label] || 0, s[week2Label] || 0)));
+                      return (
+                        <div key={site.site_name} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '6px 0',
+                          borderBottom: index < 19 ? '1px solid #f0f0f0' : 'none'
+                        }}>
+                          <span style={{ width: '80px', fontSize: '0.65rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                            {site.site_name}
+                          </span>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week1Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#6b21a8',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#6b21a8', minWidth: '45px', fontWeight: 600 }}>{site[week1Label].toFixed(1)}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week2Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#be185d',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#be185d', minWidth: '45px', fontWeight: 600 }}>{site[week2Label].toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ChartCard>
+              );
+            })()}
+
+            {/* FDD (900MHz) */}
+            {selectedKPIs.includes('top_sites_fdd') && comparisonData['top_sites_fdd'] && (() => {
+              const sitesData = comparisonData['top_sites_fdd']['sites'];
+              if (!sitesData || sitesData.length === 0) return null;
+              
+              return (
+                <ChartCard 
+                  title="FDD (900MHz)"
+                  badge="Weekly Comparison"
+                >
+                  <div>
+                    {sitesData.map((site, index) => {
+                      const maxTraffic = Math.max(...sitesData.map(s => Math.max(s[week1Label] || 0, s[week2Label] || 0)));
+                      return (
+                        <div key={site.site_name} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '6px 0',
+                          borderBottom: index < 19 ? '1px solid #f0f0f0' : 'none'
+                        }}>
+                          <span style={{ width: '80px', fontSize: '0.65rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                            {site.site_name}
+                          </span>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week1Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#6b21a8',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#6b21a8', minWidth: '45px', fontWeight: 600 }}>{site[week1Label].toFixed(1)}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week2Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#be185d',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#be185d', minWidth: '45px', fontWeight: 600 }}>{site[week2Label].toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ChartCard>
+              );
+            })()}
+
+            {/* Total (All Bands) */}
+            {selectedKPIs.includes('top_sites_total') && comparisonData['top_sites_total'] && (() => {
+              const sitesData = comparisonData['top_sites_total']['sites'];
+              if (!sitesData || sitesData.length === 0) return null;
+              
+              return (
+                <ChartCard 
+                  title="Total (All Bands)"
+                  badge="Weekly Comparison"
+                >
+                  <div>
+                    {sitesData.map((site, index) => {
+                      const maxTraffic = Math.max(...sitesData.map(s => Math.max(s[week1Label] || 0, s[week2Label] || 0)));
+                      return (
+                        <div key={site.site_name} style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '6px 0',
+                          borderBottom: index < 19 ? '1px solid #f0f0f0' : 'none'
+                        }}>
+                          <span style={{ width: '80px', fontSize: '0.65rem', color: '#475569', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: 500 }}>
+                            {site.site_name}
+                          </span>
+                          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week1Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#6b21a8',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#6b21a8', minWidth: '45px', fontWeight: 600 }}>{site[week1Label].toFixed(1)}</span>
+                            </div>
+                            <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                              <div style={{
+                                height: '10px',
+                                width: `${Math.min((site[week2Label] / maxTraffic) * 100, 100)}%`,
+                                backgroundColor: '#be185d',
+                                borderRadius: '2px'
+                              }}></div>
+                              <span style={{ fontSize: '0.6rem', color: '#be185d', minWidth: '45px', fontWeight: 600 }}>{site[week2Label].toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </ChartCard>
+              );
+            })()}
+          </div>
         </div>
       )}
 

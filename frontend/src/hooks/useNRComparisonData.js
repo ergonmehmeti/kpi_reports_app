@@ -309,6 +309,7 @@ export const useNRComparisonData = () => {
   const [error, setError] = useState(null);
   const [week1Label, setWeek1Label] = useState('');
   const [week2Label, setWeek2Label] = useState('');
+  const [missingDataWarnings, setMissingDataWarnings] = useState({});
 
   const fetchComparisonData = useCallback(async (week1, week2, selectedKPIs, includeSiteTraffic = false) => {
     console.log('fetchComparisonData called with:', { week1, week2, selectedKPIs, includeSiteTraffic });
@@ -322,6 +323,7 @@ export const useNRComparisonData = () => {
 
     setLoading(true);
     setError(null);
+    setMissingDataWarnings({});
 
     try {
       // Set week labels
@@ -430,6 +432,9 @@ export const useNRComparisonData = () => {
       const responses = await Promise.all(promises);
       console.log('Responses received:', responses.length, responses.map(r => ({ status: r.status, dataLength: r.data?.data?.length })));
 
+      // Track missing data warnings
+      const warnings = {};
+
       // Extract data from responses
       let week1NrKpiData = [];
       let week2NrKpiData = [];
@@ -444,18 +449,50 @@ export const useNRComparisonData = () => {
       if (needsNrKpiData) {
         week1NrKpiData = responses[responseIndex++]?.data?.data || [];
         week2NrKpiData = responses[responseIndex++]?.data?.data || [];
+        
+        // Check for missing data
+        if (week1NrKpiData.length === 0) {
+          warnings.week1_nr_kpi = `${w1Label} data is missing for NR KPI metrics`;
+        }
+        if (week2NrKpiData.length === 0) {
+          warnings.week2_nr_kpi = `${w2Label} data is missing for NR KPI metrics`;
+        }
       }
       if (needsNrCellKpiData) {
         week1NrCellKpiData = responses[responseIndex++]?.data?.data || [];
         week2NrCellKpiData = responses[responseIndex++]?.data?.data || [];
+        
+        // Check for missing data
+        if (week1NrCellKpiData.length === 0) {
+          warnings.week1_nr_cell = `${w1Label} data is missing for NR Cell KPI metrics`;
+        }
+        if (week2NrCellKpiData.length === 0) {
+          warnings.week2_nr_cell = `${w2Label} data is missing for NR Cell KPI metrics`;
+        }
       }
       if (needsEndcLteTraffic) {
         week1EndcTrafficData = responses[responseIndex++]?.data?.data || [];
         week2EndcTrafficData = responses[responseIndex++]?.data?.data || [];
+        
+        // Check for missing data
+        if (week1EndcTrafficData.length === 0) {
+          warnings.week1_endc = `${w1Label} data is missing for EN-DC LTE Traffic`;
+        }
+        if (week2EndcTrafficData.length === 0) {
+          warnings.week2_endc = `${w2Label} data is missing for EN-DC LTE Traffic`;
+        }
       }
       if (needsSiteTrafficData) {
         week1SiteTrafficData = responses[responseIndex++]?.data?.data || [];
         week2SiteTrafficData = responses[responseIndex++]?.data?.data || [];
+        
+        // Check for missing data
+        if (week1SiteTrafficData.length === 0) {
+          warnings.week1_sites = `${w1Label} data is missing for TOP Sites`;
+        }
+        if (week2SiteTrafficData.length === 0) {
+          warnings.week2_sites = `${w2Label} data is missing for TOP Sites`;
+        }
       }
 
       // Process site traffic comparison if includeSiteTraffic checkbox is checked OR if TOP Sites KPIs are selected
@@ -727,6 +764,7 @@ export const useNRComparisonData = () => {
       });
 
       setComparisonData(processedData);
+      setMissingDataWarnings(warnings);
     } catch (err) {
       const errorMsg = err.response?.data?.error || err.message;
       setError(errorMsg);
@@ -738,10 +776,12 @@ export const useNRComparisonData = () => {
 
   return {
     comparisonData,
+    siteTrafficComparison,
     loading,
     error,
     fetchComparisonData,
     week1Label,
-    week2Label
+    week2Label,
+    missingDataWarnings
   };
 };

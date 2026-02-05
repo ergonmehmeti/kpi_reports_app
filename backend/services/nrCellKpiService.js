@@ -55,7 +55,7 @@ function determineFreqBand(cellName) {
  * Get ISO week number and week start date (Monday)
  */
 function getWeekInfo(dateStr) {
-  const date = new Date(dateStr);
+  const date = new Date(dateStr + 'T12:00:00'); // Add time to avoid timezone issues
   const tempDate = new Date(date.getTime());
   tempDate.setHours(0, 0, 0, 0);
   tempDate.setDate(tempDate.getDate() + 3 - (tempDate.getDay() + 6) % 7);
@@ -67,12 +67,17 @@ function getWeekInfo(dateStr) {
   const day = weekStart.getDay();
   const diff = day === 0 ? -6 : 1 - day; // If Sunday (0), go back 6 days; else go to Monday
   weekStart.setDate(weekStart.getDate() + diff);
-  weekStart.setHours(0, 0, 0, 0);
+  
+  // Format as YYYY-MM-DD without timezone conversion
+  const year = weekStart.getFullYear();
+  const month = String(weekStart.getMonth() + 1).padStart(2, '0');
+  const dayOfMonth = String(weekStart.getDate()).padStart(2, '0');
+  const weekStartDate = `${year}-${month}-${dayOfMonth}`;
   
   return {
     weekNumber,
     year: tempDate.getFullYear(),
-    weekStartDate: weekStart.toISOString().substring(0, 10)
+    weekStartDate
   };
 }
 
@@ -569,6 +574,8 @@ export const getHourlyKpiData = async (startDate, endDate) => {
  * Transforms freq_band values: '8' -> '900MHz', '78' -> '3500MHz'
  */
 export const getWeeklyTrafficData = async (startDate, endDate) => {
+  console.log(`📊 getWeeklyTrafficData query: startDate=${startDate}, endDate=${endDate}`);
+  
   const query = `
     SELECT 
       id,
@@ -591,42 +598,11 @@ export const getWeeklyTrafficData = async (startDate, endDate) => {
   `;
   
   const result = await pool.query(query, [startDate, endDate]);
+  console.log(`📊 getWeeklyTrafficData result: ${result.rows.length} records`);
   if (result.rows.length > 0) {
-    return result.rows;
+    console.log(`   First record: week_start_date=${result.rows[0].week_start_date}, site=${result.rows[0].site_name}`);
   }
-
-  const latestWeekResult = await pool.query(`
-    SELECT MAX(week_start_date) AS latest_week_start_date
-    FROM nr_site_traffic_weekly;
-  `);
-
-  const latestWeekStart = latestWeekResult.rows[0]?.latest_week_start_date;
-  if (!latestWeekStart) {
-    return [];
-  }
-
-  const fallbackResult = await pool.query(`
-    SELECT 
-      id,
-      week_start_date,
-      week_number,
-      year,
-      site_name,
-      CASE 
-        WHEN freq_band = '8' THEN '900MHz'
-        WHEN freq_band = '78' THEN '3500MHz'
-        ELSE freq_band
-      END as freq_band,
-      user_data_traffic_volume_dl_gb,
-      user_data_traffic_volume_ul_gb,
-      total_traffic_volume_gb,
-      created_at
-    FROM nr_site_traffic_weekly
-    WHERE week_start_date = $1
-    ORDER BY week_start_date, site_name, freq_band;
-  `, [latestWeekStart]);
-
-  return fallbackResult.rows;
+  return result.rows;
 };
 
 /**
