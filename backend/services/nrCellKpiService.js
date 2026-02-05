@@ -227,17 +227,17 @@ export const processRawDataToKpis = (rawRecords) => {
     // KPI 1: Average DL MAC DRB Throughput (Mbps)
     const denomDlDrb = g.pmMacTimeDlDrb - g.pmMacOverlapTimeDlDrbExtScell;
     const avgDlMacDrbThroughput = denomDlDrb > 0
-      ? (8 * (g.pmMacVolDlDrb + g.pmMacVolDlDrbOverlapLastSlot)) / denomDlDrb
+      ? (64 * (g.pmMacVolDlDrb + g.pmMacVolDlDrbOverlapLastSlot)) / denomDlDrb / 1000
       : null;
     
     // KPI 2: Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)
     const normAvgDlMacCellThroughputTraffic = g.pmPdschSchedActivity > 0
-      ? (8 * g.pmMacVolDl) / g.pmPdschSchedActivity
+      ? (64 * g.pmMacVolDl) / g.pmPdschSchedActivity / 1000
       : null;
     
     // KPI 3: Normalized DL MAC Cell Throughput Considering Actual PDSCH Slot Only (Mbps)
     const normDlMacCellThroughputActualPdsch = g.pmPdschAvailTime > 0
-      ? (8 * g.pmMacVolDl) / g.pmPdschAvailTime
+      ? (64 * g.pmMacVolDl) / g.pmPdschAvailTime / 1000
       : null;
     
     // KPI 4: PDSCH Slot Utilization (%)
@@ -265,17 +265,17 @@ export const processRawDataToKpis = (rawRecords) => {
     
     // KPI 8: Average UL MAC UE Throughput (Mbps)
     const avgUlMacUeThroughput = g.pmMacTimeUlResUe > 0
-      ? (8 * g.pmMacVolUlResUe) / g.pmMacTimeUlResUe
+      ? (64 * g.pmMacVolUlResUe) / (g.pmMacTimeUlResUe / 1000)
       : null;
     
     // KPI 9: Normalized Average UL MAC Cell Throughput Considering Successful PUSCH Slot Only (Mbps)
     const normAvgUlMacCellThroughputSuccessfulPusch = g.pmPuschSchedActivity > 0
-      ? (8 * g.pmMacVolUl) / g.pmPuschSchedActivity
+      ? (64 * g.pmMacVolUl) / g.pmPuschSchedActivity / 1000
       : null;
     
     // KPI 10: Normalized Average UL MAC Cell Throughput Considering Actual PUSCH Slot Only (Mbps)
     const normAvgUlMacCellThroughputActualPusch = g.pmPuschAvailTime > 0
-      ? (8 * g.pmMacVolUl) / g.pmPuschAvailTime
+      ? (64 * g.pmMacVolUl) / g.pmPuschAvailTime / 1000
       : null;
     
     // KPI 11: PUSCH Slot Utilization (%)
