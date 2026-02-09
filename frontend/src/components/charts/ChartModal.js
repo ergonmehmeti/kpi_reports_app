@@ -117,10 +117,10 @@ const ChartModal = memo(({
     return yAxisTicks;
   };
 
-  // For comparison charts, use week labels
-  const isComparison = chartType === 'comparison';
-  const legendLabels = isComparison 
-    ? { week1Value: week1Label || 'Week 1', week2Value: week2Label || 'Week 2' }
+  // For comparison charts and bar charts with week labels, use week labels
+  const isComparison = chartType === 'comparison' || chartType === 'bar';
+  const legendLabels = isComparison && week1Label && week2Label
+    ? { [week1Label]: week1Label, [week2Label]: week2Label }
     : {};
 
   const CustomTooltip = ({ active, payload, label }) => {
@@ -152,6 +152,8 @@ const ChartModal = memo(({
             stroke="#666" 
             width={80}
             domain={calculateYDomain()}
+            ticks={calculateYTicks()}
+            tickFormatter={(value) => typeof value === 'number' ? (Number.isInteger(value) ? value.toString() : value.toFixed(1)) : value}
             label={yAxisLabel ? { 
               value: yAxisLabel, 
               angle: -90, 

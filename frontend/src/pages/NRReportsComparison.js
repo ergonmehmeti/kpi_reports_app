@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ComparisonLineChart from '../components/charts/ComparisonLineChart';
+import ComparisonBarChart from '../components/charts/ComparisonBarChart';
 import ChartCard from '../components/charts/ChartCard';
 import ChartModal from '../components/charts/ChartModal';
 import { useWeekSelector } from '../hooks/useWeekSelector';
@@ -252,6 +253,16 @@ const NRReportsComparison = () => {
                 } else {
                   week1Missing = sitesData.every(item => !item[week1Label] || item[week1Label] === 0);
                   week2Missing = sitesData.every(item => !item[week2Label] || item[week2Label] === 0);
+                }
+              } else if (kpiConfig.id === 'endc_lte_traffic') {
+                // EN-DC LTE Traffic uses 'all' key (not split by frequency bands)
+                const allData = chartData['all'] || [];
+                if (allData.length === 0) {
+                  week1Missing = true;
+                  week2Missing = true;
+                } else {
+                  week1Missing = allData.every(item => item[week1Label] === null || item[week1Label] === undefined);
+                  week2Missing = allData.every(item => item[week2Label] === null || item[week2Label] === undefined);
                 }
               } else {
                 // Regular KPIs check both frequency bands
@@ -880,7 +891,8 @@ const NRReportsComparison = () => {
                       week1Color: '#6b21a8',
                       week2Color: '#be185d',
                       yAxisDomain: endcYAxis.domain,
-                      yAxisTicks: endcYAxis.ticks
+                      yAxisTicks: endcYAxis.ticks,
+                      chartType: 'bar'
                     })}
                   >
                     <h5 style={{ 
@@ -892,7 +904,7 @@ const NRReportsComparison = () => {
                     }}>
                       📊 EN-DC LTE Traffic
                     </h5>
-                    <ComparisonLineChart
+                    <ComparisonBarChart
                       data={allData}
                       week1Label={week1Label}
                       week2Label={week2Label}
@@ -901,6 +913,8 @@ const NRReportsComparison = () => {
                       week2Color="#be185d"
                       yAxisDomain={endcYAxis.domain}
                       yAxisTicks={endcYAxis.ticks}
+                      height={350}
+                      barSize={30}
                     />
                   </div>
                 </div>
@@ -1038,7 +1052,7 @@ const NRReportsComparison = () => {
           data={selectedChart.data}
           dataKeys={[selectedChart.week1Label, selectedChart.week2Label]}
           yAxisLabel={selectedChart.yAxisLabel}
-          chartType="comparison"
+          chartType={selectedChart.chartType || "comparison"}
           week1Label={selectedChart.week1Label}
           week2Label={selectedChart.week2Label}
           colors={[selectedChart.week1Color, selectedChart.week2Color]}
