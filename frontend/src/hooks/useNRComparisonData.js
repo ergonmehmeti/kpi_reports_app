@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../utils/constants';
+import { getKpiDisplayName } from '../config/nrKpiMetadata';
 
 /**
  * NR KPI definitions with database column names and display labels
  * Organized in 3 sections matching NRReports.js
+ * Labels are fetched from nrKpiMetadata.js for consistency
  */
 export const NR_KPI_OPTIONS = [
   // =============================================
@@ -12,70 +14,70 @@ export const NR_KPI_OPTIONS = [
   // =============================================
   { 
     id: 'partial_cell_availability_pct', 
-    label: 'Partial Cell Availability for gNodeB Cell (%)', 
+    label: getKpiDisplayName('partial_cell_availability_pct'), 
     column: 'partial_cell_availability_pct',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'random_access_success_rate_pct', 
-    label: 'Random Access Success Rate (%)', 
+    label: getKpiDisplayName('random_access_success_rate_pct'), 
     column: 'random_access_success_rate_pct',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'ue_context_setup_success_rate_pct', 
-    label: 'UE Context Setup Success Rate (%)', 
+    label: getKpiDisplayName('ue_context_setup_success_rate_pct'), 
     column: 'ue_context_setup_success_rate_pct',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'endc_setup_success_rate', 
-    label: 'EN-DC Setup Success Rate (%)', 
+    label: getKpiDisplayName('endc_setup_success_rate'), 
     column: 'endc_setup_success_rate',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'endc_inter_pscell_change_success_rate', 
-    label: 'EN-DC Inter-sgNodeB PSCell Change Success Rate (%)', 
+    label: getKpiDisplayName('endc_inter_pscell_change_success_rate'), 
     column: 'endc_inter_pscell_change_success_rate',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_endc_connectivity', 
-    label: 'SCG Active Radio Resource Retainability considering EN-DC connectivity (%)', 
+    label: getKpiDisplayName('scg_retainability_endc_connectivity'), 
     column: 'scg_retainability_endc_connectivity',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_active', 
-    label: 'SCG Active Radio Resource Retainability (%)', 
+    label: getKpiDisplayName('scg_retainability_active'), 
     column: 'scg_retainability_active',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'scg_retainability_overall', 
-    label: 'SCG Radio Resource Retainability (%)', 
+    label: getKpiDisplayName('scg_retainability_overall'), 
     column: 'scg_retainability_overall',
     yAxisLabel: '%',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'peak_rrc_connected_users', 
-    label: 'Peak RRC Connected Users', 
+    label: getKpiDisplayName('peak_rrc_connected_users'), 
     column: 'peak_rrc_connected_users',
     yAxisLabel: 'Users',
     category: '5G NR Accessibility & Mobility KPIs'
   },
   { 
     id: 'avg_rrc_connected_users', 
-    label: 'Average RRC Connected Users', 
+    label: getKpiDisplayName('avg_rrc_connected_users'), 
     column: 'avg_rrc_connected_users',
     yAxisLabel: 'Users',
     category: '5G NR Accessibility & Mobility KPIs'
@@ -86,98 +88,98 @@ export const NR_KPI_OPTIONS = [
   // =============================================
   { 
     id: 'avg_dl_mac_drb_throughput_mbps', 
-    label: 'Average DL MAC DRB Throughput (Mbps)', 
+    label: getKpiDisplayName('avg_dl_mac_drb_throughput_mbps'), 
     column: 'avg_dl_mac_drb_throughput_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'normalized_avg_dl_mac_cell_throughput_traffic_mbps', 
-    label: 'Normalized Average DL MAC Cell Throughput Considering Traffic (Mbps)', 
+    label: getKpiDisplayName('normalized_avg_dl_mac_cell_throughput_traffic_mbps'), 
     column: 'normalized_avg_dl_mac_cell_throughput_traffic_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps', 
-    label: 'Normalized DL MAC Cell Throughput Considering Actual PDSCH Slot Only (Mbps)', 
+    label: getKpiDisplayName('normalized_dl_mac_cell_throughput_actual_pdsch_mbps'), 
     column: 'normalized_dl_mac_cell_throughput_actual_pdsch_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'pdsch_slot_utilization_pct', 
-    label: 'PDSCH Slot Utilization (%)', 
+    label: getKpiDisplayName('pdsch_slot_utilization_pct'), 
     column: 'pdsch_slot_utilization_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'dl_rbsym_utilization_pct', 
-    label: 'DL RBSym Utilization (%)', 
+    label: getKpiDisplayName('dl_rbsym_utilization_pct'), 
     column: 'dl_rbsym_utilization_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'percentage_unrestricted_volume_dl_pct', 
-    label: 'Percentage Unrestricted Volume DL (%)', 
+    label: getKpiDisplayName('percentage_unrestricted_volume_dl_pct'), 
     column: 'percentage_unrestricted_volume_dl_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'user_data_traffic_volume_dl_gb', 
-    label: '5G User Data Traffic Volume on Downlink (GB)', 
+    label: getKpiDisplayName('user_data_traffic_volume_dl_gb'), 
     column: 'user_data_traffic_volume_dl_gb',
     yAxisLabel: 'GB',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'avg_ul_mac_ue_throughput_mbps', 
-    label: 'Average UL MAC UE Throughput (Mbps)', 
+    label: getKpiDisplayName('avg_ul_mac_ue_throughput_mbps'), 
     column: 'avg_ul_mac_ue_throughput_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps', 
-    label: 'Normalized Average UL MAC Cell Throughput Considering Successful PUSCH Slot Only (Mbps)', 
+    label: getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps'), 
     column: 'normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps', 
-    label: 'Normalized Average UL MAC Cell Throughput Considering Actual PUSCH Slot Only (Mbps)', 
+    label: getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps'), 
     column: 'normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps',
     yAxisLabel: 'Mbps',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'pusch_slot_utilization_pct', 
-    label: 'PUSCH Slot Utilization (%)', 
+    label: getKpiDisplayName('pusch_slot_utilization_pct'), 
     column: 'pusch_slot_utilization_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'ul_rbsym_utilization_pct', 
-    label: 'UL RBSym Utilization (%)', 
+    label: getKpiDisplayName('ul_rbsym_utilization_pct'), 
     column: 'ul_rbsym_utilization_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'percentage_unrestricted_volume_ul_pct', 
-    label: 'Percentage Unrestricted Volume UL (%)', 
+    label: getKpiDisplayName('percentage_unrestricted_volume_ul_pct'), 
     column: 'percentage_unrestricted_volume_ul_pct',
     yAxisLabel: '%',
     category: 'Traffic & Integrity'
   },
   { 
     id: 'user_data_traffic_volume_ul_gb', 
-    label: '5G User Data Traffic Volume on Uplink (GB)', 
+    label: getKpiDisplayName('user_data_traffic_volume_ul_gb'), 
     column: 'user_data_traffic_volume_ul_gb',
     yAxisLabel: 'GB',
     category: 'Traffic & Integrity'
@@ -191,7 +193,7 @@ export const NR_KPI_OPTIONS = [
   },
   { 
     id: 'endc_lte_traffic', 
-    label: 'Amount of Traffic (GB) generated by 5G Users on LTE RAN', 
+    label: getKpiDisplayName('endc_total_traffic_volume_gb'), 
     column: 'total_gb',
     yAxisLabel: 'GB',
     category: 'Traffic & Integrity'
