@@ -141,18 +141,18 @@ const NRRrcUsersStackedAreaChart = ({ data, height = 400, title = 'RRC Connected
               const datePart = parts[0];
               const timePart = parts[1];
               const date = new Date(`${datePart}T${timePart}`);
-              return date.toLocaleString('en-US', { 
-                month: 'short', 
-                day: 'numeric', 
-                hour: '2-digit' 
-              });
+              const month = date.toLocaleString('en-US', { month: 'short' });
+              const day = date.getDate();
+              const hours = String(date.getHours()).padStart(2, '0');
+              const minutes = String(date.getMinutes()).padStart(2, '0');
+              return `${month} ${day}, ${hours}:${minutes}`;
             }
             return name;
           }}
           interval="preserveStartEnd"
-          angle={-45}
-          textAnchor="end"
-          height={80}
+          angle={0}
+          textAnchor="middle"
+          height={60}
           tick={{ fontSize: 10, fill: '#6b7280' }}
         />
         <YAxis 

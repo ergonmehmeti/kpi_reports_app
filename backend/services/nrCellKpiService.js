@@ -265,7 +265,7 @@ export const processRawDataToKpis = (rawRecords) => {
     
     // KPI 8: Average UL MAC UE Throughput (Mbps)
     const avgUlMacUeThroughput = g.pmMacTimeUlResUe > 0
-      ? (64 * g.pmMacVolUlResUe) / (g.pmMacTimeUlResUe / 1000)
+      ? 64 * (g.pmMacVolUlResUe / g.pmMacTimeUlResUe) / 1000
       : null;
     
     // KPI 9: Normalized Average UL MAC Cell Throughput Considering Successful PUSCH Slot Only (Mbps)
