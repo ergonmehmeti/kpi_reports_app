@@ -61,10 +61,10 @@ export const processRawDataToTraffic = (rawRecords) => {
     group.pmFlexPdcpVolUlDrbEndc += parseFloat(record['PMFLEXPDCPVOLULDRB[Endc2To99]'] || 0);
   });
   
-  // Calculate EN-DC traffic using the formula: 8*(DL + UL)/(1000*1000)
+  // Calculate EN-DC traffic using the formula: (DL + UL)/(8*1000*1000)
   const trafficRecords = Object.values(groups).map(g => {
-    // Formula from document: 8*(PMFLEXPDCPVOLDLDRB[Endc2To99] + PMFLEXPDCPVOLULDRB[Endc2To99])/(1000*1000)
-    const endcTotalTrafficVolume = (8 * (g.pmFlexPdcpVolDlDrbEndc + g.pmFlexPdcpVolUlDrbEndc)) / (1000 * 1000);
+    // Formula: (PMFLEXPDCPVOLDLDRB[Endc2To99] + PMFLEXPDCPVOLULDRB[Endc2To99])/(8*1000*1000)
+    const endcTotalTrafficVolume = (g.pmFlexPdcpVolDlDrbEndc + g.pmFlexPdcpVolUlDrbEndc) / (8 * 1000 * 1000);
     
     return {
       date_id: g.dateId,

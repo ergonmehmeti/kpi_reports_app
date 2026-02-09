@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
  * Horizontal Stacked Bar Chart Component
  * For displaying DL/UL traffic per site
  */
-const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format }) => {
+const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format, xAxisFormat }) => {
   const chartHeight = Math.max(360, (data?.length || 0) * 28 + 120);
 
   // Custom tooltip
@@ -53,7 +53,7 @@ const HorizontalStackedBarChart = memo(({ data, dataKeys, colors, labels, format
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis 
             type="number"
-            tickFormatter={(value) => (format ? format(value) : value)}
+            tickFormatter={(value) => (xAxisFormat ? xAxisFormat(value) : (format ? format(value) : value))}
             label={{ value: '[GB]', position: 'insideBottom', offset: -10 }}
           />
           <YAxis 

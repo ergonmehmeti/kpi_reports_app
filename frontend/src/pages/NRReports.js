@@ -134,6 +134,11 @@ const NRReports = () => {
     }
   }, [comparisonMode]);
 
+  // Handle refresh data
+  const handleRefresh = useCallback(() => {
+    loadData();
+  }, [loadData]);
+
   // Prepare EN-DC Setup Success Rate chart data (hourly)
   const prepareSetupSuccessRateData = () => {
     if (!kpiData || kpiData.length === 0) {
@@ -719,9 +724,14 @@ const NRReports = () => {
   const topSitesTddData = prepareTopSitesTddData();
   const topSitesFddData = prepareTopSitesFddData();
 
-  // Format function for TOP Sites charts
+  // Format function for TOP Sites charts (data labels)
   const formatTrafficValue = (value) => {
-    return value >= 1000 ? `${(value / 1000).toFixed(1)}K` : value.toFixed(1);
+    return value.toFixed(1);
+  };
+
+  // Format function for TOP Sites X-axis (no decimals for whole numbers)
+  const formatTrafficAxisValue = (value) => {
+    return value % 1 === 0 ? value.toString() : value.toFixed(1);
   };
 
   // ============================================
@@ -777,6 +787,8 @@ const NRReports = () => {
   };
 
   // Pre-calculate nice Y-axis domains for Traffic KPIs (used in charts)
+  const avgDlMacDrbThroughputYMax = calculateNiceAxisMax(avgDlMacDrbThroughputData);
+  const normalizedAvgDlMacCellThroughputTrafficYMax = calculateNiceAxisMax(normalizedAvgDlMacCellThroughputTrafficData);
   const normalizedDlMacCellThroughputActualPdschYMax = calculateNiceAxisMax(normalizedDlMacCellThroughputActualPdschData);
   const avgUlMacUeThroughputYMax = calculateNiceAxisMax(avgUlMacUeThroughputData);
   const normalizedAvgUlMacCellThroughputSuccessfulPuschYMax = calculateNiceAxisMax(normalizedAvgUlMacCellThroughputSuccessfulPuschData);
@@ -909,6 +921,7 @@ const NRReports = () => {
         onWeekChange={handleWeekChange}
         onToggleMode={() => setShowWeekSelector(!showWeekSelector)}
         onToggleComparison={handleToggleComparison}
+        onRefresh={handleRefresh}
         hideCustomDatesButton={true}
       />
 
@@ -1308,8 +1321,7 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, 60000],
-                  yAxisTicks: [0, 20000, 40000, 60000]
+                  yAxisDomain: [0, avgDlMacDrbThroughputYMax]
                 }) : null}
               >
                 {hasChartData(avgDlMacDrbThroughputData, ['900MHz', '3500MHz']) ? (
@@ -1318,8 +1330,7 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="Mbps"
-                    yAxisDomain={[0, 60000]}
-                    yAxisTicks={[0, 20000, 40000, 60000]}
+                    yAxisDomain={[0, avgDlMacDrbThroughputYMax]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1375,7 +1386,7 @@ const NRReports = () => {
                   dataKeys: ['900MHz', '3500MHz'],
                   colors: ['#6b21a8', '#ec4899'],
                   yAxisLabel: 'Mbps',
-                  yAxisDomain: [0, 16000]
+                  yAxisDomain: [0, normalizedAvgDlMacCellThroughputTrafficYMax]
                 }) : null}
               >
                 {hasChartData(normalizedAvgDlMacCellThroughputTrafficData, ['900MHz', '3500MHz']) ? (
@@ -1384,7 +1395,7 @@ const NRReports = () => {
                     dataKeys={['900MHz', '3500MHz']}
                     colors={['#6b21a8', '#ec4899']}
                     yAxisLabel="Mbps"
-                    yAxisDomain={[0, 16000]}
+                    yAxisDomain={[0, normalizedAvgDlMacCellThroughputTrafficYMax]}
                   />
                 ) : (
                   <NoDataWarning />
@@ -1853,6 +1864,7 @@ const NRReports = () => {
                     colors={['#3b82f6', '#22c55e']}
                     labels={['DL', 'UL']}
                     format={formatTrafficValue}
+                    xAxisFormat={formatTrafficAxisValue}
                   />
                 ) : (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -1883,6 +1895,7 @@ const NRReports = () => {
                     colors={['#2563eb', '#16a34a']}
                     labels={['DL', 'UL']}
                     format={formatTrafficValue}
+                    xAxisFormat={formatTrafficAxisValue}
                   />
                 ) : (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -1913,6 +1926,7 @@ const NRReports = () => {
                     colors={['#3b82f6', '#22c55e']}
                     labels={['DL', 'UL']}
                     format={formatTrafficValue}
+                    xAxisFormat={formatTrafficAxisValue}
                   />
                 ) : (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
