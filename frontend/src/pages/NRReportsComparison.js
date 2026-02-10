@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ComparisonLineChart from '../components/charts/ComparisonLineChart';
+import ComparisonBarChart from '../components/charts/ComparisonBarChart';
+import PercentageStackedBarChart from '../components/charts/PercentageStackedBarChart';
 import ChartCard from '../components/charts/ChartCard';
 import ChartModal from '../components/charts/ChartModal';
 import { useWeekSelector } from '../hooks/useWeekSelector';
@@ -252,6 +254,16 @@ const NRReportsComparison = () => {
                 } else {
                   week1Missing = sitesData.every(item => !item[week1Label] || item[week1Label] === 0);
                   week2Missing = sitesData.every(item => !item[week2Label] || item[week2Label] === 0);
+                }
+              } else if (kpiConfig.id === 'endc_lte_traffic') {
+                // EN-DC LTE Traffic uses 'all' key (not split by frequency bands)
+                const allData = chartData['all'] || [];
+                if (allData.length === 0) {
+                  week1Missing = true;
+                  week2Missing = true;
+                } else {
+                  week1Missing = allData.every(item => item[week1Label] === null || item[week1Label] === undefined);
+                  week2Missing = allData.every(item => item[week2Label] === null || item[week2Label] === undefined);
                 }
               } else {
                 // Regular KPIs check both frequency bands
@@ -880,7 +892,8 @@ const NRReportsComparison = () => {
                       week1Color: '#6b21a8',
                       week2Color: '#be185d',
                       yAxisDomain: endcYAxis.domain,
-                      yAxisTicks: endcYAxis.ticks
+                      yAxisTicks: endcYAxis.ticks,
+                      chartType: 'bar'
                     })}
                   >
                     <h5 style={{ 
@@ -892,7 +905,7 @@ const NRReportsComparison = () => {
                     }}>
                       📊 EN-DC LTE Traffic
                     </h5>
-                    <ComparisonLineChart
+                    <ComparisonBarChart
                       data={allData}
                       week1Label={week1Label}
                       week2Label={week2Label}
@@ -901,7 +914,129 @@ const NRReportsComparison = () => {
                       week2Color="#be185d"
                       yAxisDomain={endcYAxis.domain}
                       yAxisTicks={endcYAxis.ticks}
+                      height={350}
+                      barSize={30}
                     />
+                  </div>
+                </div>
+              );
+            }
+
+            // Special handling for Share of 5G Traffic Volume (stacked percentage bar chart)
+            if (kpiId === 'share_5g_traffic_volume') {
+              // Prepare data for week1 and week2 stacked charts
+              const prepareStackedData = (weekLabel) => {
+                const data900 = chartData['900MHz'] || [];
+                const data3500 = chartData['3500MHz'] || [];
+                
+                // Merge the two frequency bands into one dataset
+                const merged = [];
+                const maxLength = Math.max(data900.length, data3500.length);
+                
+                for (let i = 0; i < maxLength; i++) {
+                  merged.push({
+                    name: data900[i]?.name || data3500[i]?.name || `Day${i + 1}`,
+                    '3500MHz': data3500[i]?.[weekLabel] ?? 0,
+                    '900MHz': data900[i]?.[weekLabel] ?? 0
+                  });
+                }
+                
+                return merged;
+              };
+
+              const week1Data = prepareStackedData(week1Label);
+              const week2Data = prepareStackedData(week2Label);
+
+              return (
+                <div key={kpiId} style={{ marginTop: '2rem' }}>
+                  <h4 style={{ 
+                    fontSize: '1.1rem', 
+                    color: '#374151', 
+                    marginBottom: '1rem',
+                    fontWeight: 600
+                  }}>
+                    {kpiConfig.label}
+                  </h4>
+                  
+                  {/* Two stacked charts side by side */}
+                  <div style={{ 
+                    display: 'grid', 
+                    gridTemplateColumns: '1fr 1fr', 
+                    gap: '1.5rem'
+                  }}>
+                    {/* Week 1 Chart */}
+                    <div 
+                      style={{
+                        backgroundColor: '#faf5ff',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        border: '1px solid #e9d5ff',
+                        cursor: 'pointer',
+                        transition: 'box-shadow 0.2s ease'
+                      }}
+                      onClick={() => handleChartClick({
+                        title: `${kpiConfig.label} - ${week1Label}`,
+                        data: week1Data,
+                        dataKeys: ['3500MHz', '900MHz'],
+                        colors: ['#2563eb', '#f97316'],
+                        yAxisLabel: kpiConfig.yAxisLabel,
+                        chartType: 'percentageStackedBar'
+                      })}
+                    >
+                      <h5 style={{ 
+                        fontSize: '0.95rem', 
+                        color: '#6b21a8', 
+                        marginBottom: '0.75rem',
+                        fontWeight: 600,
+                        textAlign: 'center'
+                      }}>
+                        📊 {week1Label}
+                      </h5>
+                      <PercentageStackedBarChart
+                        data={week1Data}
+                        dataKeys={['3500MHz', '900MHz']}
+                        colors={['#2563eb', '#f97316']}
+                        yAxisLabel={kpiConfig.yAxisLabel}
+                        height={350}
+                      />
+                    </div>
+
+                    {/* Week 2 Chart */}
+                    <div 
+                      style={{
+                        backgroundColor: '#fdf2f8',
+                        borderRadius: '8px',
+                        padding: '1rem',
+                        border: '1px solid #fbcfe8',
+                        cursor: 'pointer',
+                        transition: 'box-shadow 0.2s ease'
+                      }}
+                      onClick={() => handleChartClick({
+                        title: `${kpiConfig.label} - ${week2Label}`,
+                        data: week2Data,
+                        dataKeys: ['3500MHz', '900MHz'],
+                        colors: ['#2563eb', '#f97316'],
+                        yAxisLabel: kpiConfig.yAxisLabel,
+                        chartType: 'percentageStackedBar'
+                      })}
+                    >
+                      <h5 style={{ 
+                        fontSize: '0.95rem', 
+                        color: '#be185d', 
+                        marginBottom: '0.75rem',
+                        fontWeight: 600,
+                        textAlign: 'center'
+                      }}>
+                        📊 {week2Label}
+                      </h5>
+                      <PercentageStackedBarChart
+                        data={week2Data}
+                        dataKeys={['3500MHz', '900MHz']}
+                        colors={['#2563eb', '#f97316']}
+                        yAxisLabel={kpiConfig.yAxisLabel}
+                        height={350}
+                      />
+                    </div>
                   </div>
                 </div>
               );
@@ -1038,7 +1173,7 @@ const NRReportsComparison = () => {
           data={selectedChart.data}
           dataKeys={[selectedChart.week1Label, selectedChart.week2Label]}
           yAxisLabel={selectedChart.yAxisLabel}
-          chartType="comparison"
+          chartType={selectedChart.chartType || "comparison"}
           week1Label={selectedChart.week1Label}
           week2Label={selectedChart.week2Label}
           colors={[selectedChart.week1Color, selectedChart.week2Color]}
