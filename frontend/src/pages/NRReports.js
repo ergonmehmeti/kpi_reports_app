@@ -3,6 +3,7 @@ import DateFilters from '../components/filters/DateFilters';
 import ChartCard from '../components/charts/ChartCard';
 import KPILineChart from '../components/charts/KPILineChart';
 import StackedBarChart from '../components/charts/StackedBarChart';
+import PercentageStackedBarChart from '../components/charts/PercentageStackedBarChart';
 import HorizontalStackedBarChart from '../components/charts/HorizontalStackedBarChart';
 import NRRrcUsersStackedAreaChart from '../components/charts/NRRrcUsersStackedAreaChart';
 import ChartModal from '../components/charts/ChartModal';
@@ -734,56 +735,29 @@ const NRReports = () => {
     return value % 1 === 0 ? value.toString() : value.toFixed(1);
   };
 
-  // ============================================
-  // Utility function to calculate nice rounded Y-axis max
-  // ============================================
-  const calculateNiceAxisMax = (data, dataKeys = ['900MHz', '3500MHz']) => {
+  // Calculate nice rounded Y-axis max for throughput charts
+  const calculateNiceAxisMax = (data) => {
     if (!data || data.length === 0) return 100;
     
     let max = 0;
     data.forEach(item => {
-      dataKeys.forEach(key => {
-        const val = item[key];
-        if (val !== null && val !== undefined && !isNaN(val)) {
-          max = Math.max(max, val);
-        }
-      });
+      const val1 = parseFloat(item['900MHz']) || 0;
+      const val2 = parseFloat(item['3500MHz']) || 0;
+      max = Math.max(max, val1, val2);
     });
     
-    if (max === 0) return 100;
+    // Add 10% padding and round to nice number
+    const maxWithPadding = max * 1.1;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxWithPadding)));
+    const normalized = maxWithPadding / magnitude;
     
-    // Determine the order of magnitude and round up nicely
-    const magnitude = Math.pow(10, Math.floor(Math.log10(max)));
-    const normalized = max / magnitude;
+    let niceNumber;
+    if (normalized <= 1) niceNumber = 1;
+    else if (normalized <= 2) niceNumber = 2;
+    else if (normalized <= 5) niceNumber = 5;
+    else niceNumber = 10;
     
-    let niceMax;
-    if (normalized <= 1) {
-      niceMax = magnitude;
-    } else if (normalized <= 1.5) {
-      niceMax = 1.5 * magnitude;
-    } else if (normalized <= 2) {
-      niceMax = 2 * magnitude;
-    } else if (normalized <= 2.5) {
-      niceMax = 2.5 * magnitude;
-    } else if (normalized <= 3) {
-      niceMax = 3 * magnitude;
-    } else if (normalized <= 4) {
-      niceMax = 4 * magnitude;
-    } else if (normalized <= 5) {
-      niceMax = 5 * magnitude;
-    } else if (normalized <= 5.5) {
-      niceMax = 5.5 * magnitude;
-    } else if (normalized <= 6) {
-      niceMax = 6 * magnitude;
-    } else if (normalized <= 7) {
-      niceMax = 7 * magnitude;
-    } else if (normalized <= 8) {
-      niceMax = 8 * magnitude;
-    } else {
-      niceMax = 10 * magnitude;
-    }
-    
-    return niceMax;
+    return niceNumber * magnitude;
   };
 
   // Pre-calculate nice Y-axis domains for Traffic KPIs (used in charts)
@@ -1767,25 +1741,23 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title="Share of 5G Traffic Volume (GB) per Frequency Band" 
-                description="Total traffic volume (DL + UL) per frequency band aggregated by date"
+                description="Percentage distribution of traffic volume (DL + UL) per frequency band"
                 onClick={() => hasChartData(shareOf5gTrafficVolumeData, ['3500MHz', '900MHz']) ? handleChartClick({  
                   title: 'Share of 5G Traffic Volume (GB) per Frequency Band',
                   data: shareOf5gTrafficVolumeData,
                   dataKeys: ['3500MHz', '900MHz'],
                   colors: ['#2563eb', '#f97316'],
                   yAxisLabel: 'GB',
-                  chartType: 'stackedBar'
+                  chartType: 'percentageStackedBar'
                 }) : null}
               >
                 {hasChartData(shareOf5gTrafficVolumeData, ['3500MHz', '900MHz']) ? (
-                  <StackedBarChart 
+                  <PercentageStackedBarChart 
                     data={shareOf5gTrafficVolumeData}
                     dataKeys={['3500MHz', '900MHz']}
                     colors={['#2563eb', '#f97316']}
                     yAxisLabel="GB"
                     height={350}
-                    yAxisDomain={[0, 16000]}
-                    yAxisTicks={[0, 4000, 8000, 12000, 16000]}
                   />
                 ) : (
                   <NoDataWarning />

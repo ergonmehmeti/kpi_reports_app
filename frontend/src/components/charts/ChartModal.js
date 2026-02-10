@@ -59,6 +59,12 @@ const ChartModal = memo(({
       return customYAxisDomain;
     }
     
+    // For bar charts without custom domain, let Recharts auto-calculate
+    // This ensures consistent scaling between small chart and modal
+    if ((chartType === 'bar' || chartType === 'percentageStackedBar') && !customYAxisDomain) {
+      return undefined;
+    }
+    
     let min = Infinity;
     let max = -Infinity;
     dataKeys.forEach(key => {
@@ -86,7 +92,7 @@ const ChartModal = memo(({
       ];
     }
     
-    // Floor the minimum value and ceil the maximum value
+    // For line charts, floor the minimum value and ceil the maximum value
     const flooredMin = Math.floor(min);
     const ceiledMax = Math.ceil(max);
     return [flooredMin, ceiledMax];
@@ -94,6 +100,11 @@ const ChartModal = memo(({
 
   // Calculate Y-axis ticks for 5 evenly spaced values rounded to 0.5
   const calculateYTicks = () => {
+    // If custom ticks array is provided, use it directly (highest priority)
+    if (Array.isArray(yAxisTicks) && yAxisTicks.length > 0) {
+      return yAxisTicks;
+    }
+    
     if (yAxisTicks === 'auto5') {
       const domain = calculateYDomain();
       const [minVal, maxVal] = domain;
@@ -110,10 +121,12 @@ const ChartModal = memo(({
       if (maxVal === 100) ticks[4] = 100;
       return ticks;
     }
-    // If custom ticks array is provided, use it directly
-    if (Array.isArray(yAxisTicks)) {
-      return yAxisTicks;
+    
+    // For bar charts without custom ticks or domain, let Recharts auto-calculate
+    if ((chartType === 'bar' || chartType === 'percentageStackedBar') && !yAxisTicks && !customYAxisDomain) {
+      return undefined;
     }
+    
     return yAxisTicks;
   };
 
@@ -122,6 +135,43 @@ const ChartModal = memo(({
   const legendLabels = isComparison && week1Label && week2Label
     ? { [week1Label]: week1Label, [week2Label]: week2Label }
     : {};
+
+  // Custom tooltip that shows actual values for percentage stacked bars
+  const CustomTooltipPercentageStacked = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      // Calculate total
+      const total = payload.reduce((sum, entry) => sum + (parseFloat(entry.value) || 0), 0);
+      
+      // Calculate percentages for display
+      const dataWithPercentages = payload.map(entry => ({
+        ...entry,
+        percentage: total > 0 ? ((parseFloat(entry.value) / total) * 100).toFixed(1) : 0
+      }));
+      
+      return (
+        <div className="modal-chart-tooltip">
+          <p className="tooltip-label">{label}</p>
+          {dataWithPercentages.map((entry, index) => {
+            const displayName = legendLabels[entry.dataKey] || entry.name;
+            return (
+              <p key={index} style={{ color: entry.color }}>
+                {displayName}: {parseFloat(entry.value).toFixed(2)} {yAxisLabel || ''} ({entry.percentage}%)
+              </p>
+            );
+          })}
+          <p style={{ 
+            margin: '5px 0 0 0', 
+            paddingTop: '5px', 
+            borderTop: '1px solid #e0e0e0', 
+            fontWeight: 'bold' 
+          }}>
+            Total: {total.toFixed(2)} {yAxisLabel || ''}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
@@ -143,6 +193,41 @@ const ChartModal = memo(({
   };
 
   const renderChart = () => {
+    if (chartType === 'percentageStackedBar') {
+      // 100% stacked bar chart with percentage Y-axis but actual values in tooltip
+      return (
+        <BarChart data={data} stackOffset="expand">
+          <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+          <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 12 }} />
+          <YAxis 
+            stroke="#666" 
+            width={80}
+            tickFormatter={(value) => `${(value * 100).toFixed(0)}%`}
+            domain={[0, 1]}
+            ticks={[0, 0.25, 0.5, 0.75, 1]}
+            label={{ 
+              value: 'Percentage', 
+              angle: -90, 
+              position: 'insideLeft', 
+              style: { textAnchor: 'middle' } 
+            }}
+          />
+          <Tooltip content={<CustomTooltipPercentageStacked />} />
+          <Legend />
+          {dataKeys.map((key, index) => (
+            <Bar 
+              key={key}
+              dataKey={key} 
+              name={legendLabels[key] || key}
+              stackId="stack"
+              fill={chartColors[index % chartColors.length]} 
+              radius={index === dataKeys.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+            />
+          ))}
+        </BarChart>
+      );
+    }
+
     if (chartType === 'bar') {
       return (
         <BarChart data={data}>
