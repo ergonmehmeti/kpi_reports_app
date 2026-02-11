@@ -12,7 +12,7 @@ import { useWeekSelector } from '../hooks/useWeekSelector';
 import { useNRKPIData } from '../hooks/useNRKPIData';
 import { useNRWeeklyTrafficData } from '../hooks/useNRWeeklyTrafficData';
 import { useENDCLTETrafficData } from '../hooks/useENDCLTETrafficData';
-import { getKpiDisplayName } from '../config/nrKpiMetadata';
+import { getKpiDisplayName, getKpiDescription } from '../config/nrKpiMetadata';
 import './LTEReports.css';
 
 /**
@@ -952,7 +952,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('partial_cell_availability_pct')} 
-                description="Cell availability percentage by frequency band"
+                description={getKpiDescription('partial_cell_availability_pct')}
                 onClick={() => hasChartData(partialCellAvailabilityData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('partial_cell_availability_pct'),
                   data: partialCellAvailabilityData,
@@ -979,7 +979,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('random_access_success_rate_pct')} 
-                description="Random access success rate by frequency band"
+                description={getKpiDescription('random_access_success_rate_pct')}
                 onClick={() => hasChartData(randomAccessSuccessRateData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('random_access_success_rate_pct'),
                   data: randomAccessSuccessRateData,
@@ -1015,7 +1015,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('ue_context_setup_success_rate_pct')} 
-                description="UE context setup success rate by frequency band"
+                description={getKpiDescription('ue_context_setup_success_rate_pct')}
                 onClick={() => hasChartData(ueContextSetupSuccessRateData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('ue_context_setup_success_rate_pct'),
                   data: ueContextSetupSuccessRateData,
@@ -1042,7 +1042,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('endc_setup_success_rate')} 
-              description="5G connection establishment success rate by frequency band"
+              description={getKpiDescription('endc_setup_success_rate')}
               onClick={() => hasChartData(setupSuccessRateData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('endc_setup_success_rate'),
                 data: setupSuccessRateData,
@@ -1078,7 +1078,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('endc_inter_pscell_change_success_rate')} 
-              description="5G inter-gNodeB PSCell change success rate by frequency band"
+              description={getKpiDescription('endc_inter_pscell_change_success_rate')}
               onClick={() => hasChartData(interPsCellChangeData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('endc_inter_pscell_change_success_rate'),
                 data: interPsCellChangeData,
@@ -1107,7 +1107,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('scg_retainability_endc_connectivity')} 
-              description="SCG retainability considering EN-DC connectivity by frequency band"
+              description={getKpiDescription('scg_retainability_endc_connectivity')}
               onClick={() => hasChartData(scgRetainabilityEndcData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('scg_retainability_endc_connectivity'),
                 data: scgRetainabilityEndcData,
@@ -1147,7 +1147,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('scg_retainability_active')} 
-              description="SCG active radio resource retainability by frequency band"
+              description={getKpiDescription('scg_retainability_active')}
               onClick={() => hasChartData(scgRetainabilityActiveData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('scg_retainability_active'),
                 data: scgRetainabilityActiveData,
@@ -1176,7 +1176,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('scg_retainability_overall')} 
-              description="Overall SCG radio resource retainability by frequency band"
+              description={getKpiDescription('scg_retainability_overall')}
               onClick={() => hasChartData(scgRetainabilityOverallData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('scg_retainability_overall'),
                 data: scgRetainabilityOverallData,
@@ -1212,7 +1212,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('peak_rrc_connected_users')} 
-              description="Peak number of NR EN-DC RRC connected users by frequency band"
+              description={getKpiDescription('peak_rrc_connected_users')}
               onClick={() => hasChartData(peakRrcConnectedUsersData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('peak_rrc_connected_users'),
                 data: peakRrcConnectedUsersData,
@@ -1239,7 +1239,7 @@ const NRReports = () => {
             <div>
             <ChartCard 
               title={getKpiDisplayName('avg_rrc_connected_users')} 
-              description="Average NR EN-DC RRC connected users by frequency band"
+              description={getKpiDescription('avg_rrc_connected_users')}
               onClick={() => hasChartData(avgRrcConnectedUsersData, ['900MHz', '3500MHz']) ? handleChartClick({
                 title: getKpiDisplayName('avg_rrc_connected_users'),
                 data: avgRrcConnectedUsersData,
@@ -1288,7 +1288,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('avg_dl_mac_drb_throughput_mbps')} 
-                description="Average downlink MAC DRB throughput by frequency band"
+                description={getKpiDescription('avg_dl_mac_drb_throughput_mbps')}
                 onClick={() => hasChartData(avgDlMacDrbThroughputData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('avg_dl_mac_drb_throughput_mbps'),
                   data: avgDlMacDrbThroughputData,
@@ -1315,7 +1315,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('avg_ul_mac_ue_throughput_mbps')} 
-                description="Average uplink MAC UE throughput by frequency band"
+                description={getKpiDescription('avg_ul_mac_ue_throughput_mbps')}
                 onClick={() => hasChartData(avgUlMacUeThroughputData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('avg_ul_mac_ue_throughput_mbps'),
                   data: avgUlMacUeThroughputData,
@@ -1353,7 +1353,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('normalized_avg_dl_mac_cell_throughput_traffic_mbps')} 
-                description="Normalized average DL MAC cell throughput by frequency band"
+                description={getKpiDescription('normalized_avg_dl_mac_cell_throughput_traffic_mbps')}
                 onClick={() => hasChartData(normalizedAvgDlMacCellThroughputTrafficData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('normalized_avg_dl_mac_cell_throughput_traffic_mbps'),
                   data: normalizedAvgDlMacCellThroughputTrafficData,
@@ -1380,7 +1380,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps')} 
-                description="Normalized average UL MAC cell throughput for successful PUSCH slots"
+                description={getKpiDescription('normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps')}
                 onClick={() => hasChartData(normalizedAvgUlMacCellThroughputSuccessfulPuschData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_successful_pusch_mbps'),
                   data: normalizedAvgUlMacCellThroughputSuccessfulPuschData,
@@ -1417,7 +1417,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('normalized_dl_mac_cell_throughput_actual_pdsch_mbps')} 
-                description="Normalized DL MAC cell throughput for actual PDSCH slots"
+                description={getKpiDescription('normalized_dl_mac_cell_throughput_actual_pdsch_mbps')}
                 onClick={() => hasChartData(normalizedDlMacCellThroughputActualPdschData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('normalized_dl_mac_cell_throughput_actual_pdsch_mbps'),
                   data: normalizedDlMacCellThroughputActualPdschData,
@@ -1444,7 +1444,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps')} 
-                description="Normalized average UL MAC cell throughput for actual PUSCH slots"
+                description={getKpiDescription('normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps')}
                 onClick={() => hasChartData(normalizedAvgUlMacCellThroughputActualPuschData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('normalized_avg_ul_mac_cell_throughput_actual_pusch_mbps'),
                   data: normalizedAvgUlMacCellThroughputActualPuschData,
@@ -1481,7 +1481,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('pdsch_slot_utilization_pct')} 
-                description="PDSCH slot utilization percentage by frequency band"
+                description={getKpiDescription('pdsch_slot_utilization_pct')}
                 onClick={() => hasChartData(pdschSlotUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('pdsch_slot_utilization_pct'),
                   data: pdschSlotUtilizationData,
@@ -1508,7 +1508,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('pusch_slot_utilization_pct')} 
-                description="PUSCH slot utilization percentage by frequency band"
+                description={getKpiDescription('pusch_slot_utilization_pct')}
                 onClick={() => hasChartData(puschSlotUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('pusch_slot_utilization_pct'),
                   data: puschSlotUtilizationData,
@@ -1545,7 +1545,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('dl_rbsym_utilization_pct')} 
-                description="Downlink RBSym utilization percentage by frequency band"
+                description={getKpiDescription('dl_rbsym_utilization_pct')}
                 onClick={() => hasChartData(dlRbsymUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('dl_rbsym_utilization_pct'),
                   data: dlRbsymUtilizationData,
@@ -1572,7 +1572,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('ul_rbsym_utilization_pct')} 
-                description="Uplink RBSym utilization percentage by frequency band"
+                description={getKpiDescription('ul_rbsym_utilization_pct')}
                 onClick={() => hasChartData(ulRbsymUtilizationData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('ul_rbsym_utilization_pct'),
                   data: ulRbsymUtilizationData,
@@ -1609,7 +1609,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('percentage_unrestricted_volume_dl_pct')} 
-                description="Percentage of unrestricted volume on downlink by frequency band"
+                description={getKpiDescription('percentage_unrestricted_volume_dl_pct')}
                 onClick={() => hasChartData(percentageUnrestrictedVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('percentage_unrestricted_volume_dl_pct'),
                   data: percentageUnrestrictedVolumeDlData,
@@ -1636,7 +1636,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('percentage_unrestricted_volume_ul_pct')} 
-                description="Percentage of unrestricted volume on uplink by frequency band"
+                description={getKpiDescription('percentage_unrestricted_volume_ul_pct')}
                 onClick={() => hasChartData(percentageUnrestrictedVolumeUlData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('percentage_unrestricted_volume_ul_pct'),
                   data: percentageUnrestrictedVolumeUlData,
@@ -1673,7 +1673,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('user_data_traffic_volume_dl_gb')} 
-                description="User data traffic volume on downlink by frequency band"
+                description={getKpiDescription('user_data_traffic_volume_dl_gb')}
                 onClick={() => hasChartData(userDataTrafficVolumeDlData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('user_data_traffic_volume_dl_gb'),
                   data: userDataTrafficVolumeDlData,
@@ -1702,7 +1702,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('user_data_traffic_volume_ul_gb')} 
-                description="User data traffic volume on uplink by frequency band"
+                description={getKpiDescription('user_data_traffic_volume_ul_gb')}
                 onClick={() => hasChartData(userDataTrafficVolumeUlData, ['900MHz', '3500MHz']) ? handleChartClick({  
                   title: getKpiDisplayName('user_data_traffic_volume_ul_gb'),
                   data: userDataTrafficVolumeUlData,
@@ -1740,10 +1740,10 @@ const NRReports = () => {
           }}>
             <div>
               <ChartCard 
-                title="Share of 5G Traffic Volume (GB) per Frequency Band" 
-                description="Percentage distribution of traffic volume (DL + UL) per frequency band"
+                title={getKpiDisplayName('share_5g_traffic_volume_by_band')} 
+                description={getKpiDescription('share_5g_traffic_volume_by_band')}
                 onClick={() => hasChartData(shareOf5gTrafficVolumeData, ['3500MHz', '900MHz']) ? handleChartClick({  
-                  title: 'Share of 5G Traffic Volume (GB) per Frequency Band',
+                  title: getKpiDisplayName('share_5g_traffic_volume_by_band'),
                   data: shareOf5gTrafficVolumeData,
                   dataKeys: ['3500MHz', '900MHz'],
                   colors: ['#2563eb', '#f97316'],
@@ -1768,7 +1768,7 @@ const NRReports = () => {
             <div>
               <ChartCard 
                 title={getKpiDisplayName('endc_total_traffic_volume_gb')} 
-                description="Daily EN-DC traffic volume on LTE anchor cells"
+                description={getKpiDescription('endc_total_traffic_volume_gb')}
                 onClick={() => hasChartData(endcTrafficVolumeData, ['EN-DC Traffic']) ? handleChartClick({  
                   title: getKpiDisplayName('endc_total_traffic_volume_gb'),
                   data: endcTrafficVolumeData,
@@ -1817,8 +1817,8 @@ const NRReports = () => {
           }}>
             <div className="top-sites-chart">
               <ChartCard 
-                title="TOP Sites - Total (All Bands)" 
-                description="Top 20 sites by total traffic volume across all frequency bands"
+                title={getKpiDisplayName('top_sites_total')} 
+                description={getKpiDescription('top_sites_total')}
               >
                 {weeklyTrafficLoading ? (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -1848,8 +1848,8 @@ const NRReports = () => {
 
             <div className="top-sites-chart">
               <ChartCard 
-                title="TOP Sites - TDD (3500MHz)" 
-                description="Top 20 sites by traffic volume on 3500MHz (TDD) band"
+                title={getKpiDisplayName('top_sites_tdd')} 
+                description={getKpiDescription('top_sites_tdd')}
               >
                 {weeklyTrafficLoading ? (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
@@ -1879,8 +1879,8 @@ const NRReports = () => {
 
             <div className="top-sites-chart">
               <ChartCard 
-                title="TOP Sites - FDD (900MHz)" 
-                description="Top 20 sites by traffic volume on 900MHz (FDD) band"
+                title={getKpiDisplayName('top_sites_fdd')} 
+                description={getKpiDescription('top_sites_fdd')}
               >
                 {weeklyTrafficLoading ? (
                   <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
