@@ -255,6 +255,42 @@ export const nrKpiMetadata = {
     unit: 'users',
     category: 'users',
     visible: true
+  },
+  
+  // ===================================================
+  // Traffic Distribution & TOP Sites
+  // ===================================================
+  
+  'share_5g_traffic_volume_by_band': {
+    displayName: 'Share of 5G Traffic Volume (GB) per Frequency Band',
+    description: 'Percentage distribution of traffic volume (DL + UL) per frequency band',
+    unit: 'GB',
+    category: 'volume',
+    visible: true
+  },
+  
+  'top_sites_total': {
+    displayName: 'TOP Sites - Total (All Bands)',
+    description: 'Top 20 sites by total traffic volume across all frequency bands',
+    unit: 'GB',
+    category: 'top_sites',
+    visible: true
+  },
+  
+  'top_sites_tdd': {
+    displayName: 'TOP Sites - TDD (3500MHz)',
+    description: 'Top 20 sites by traffic volume on 3500MHz (TDD) band',
+    unit: 'GB',
+    category: 'top_sites',
+    visible: true
+  },
+  
+  'top_sites_fdd': {
+    displayName: 'TOP Sites - FDD (900MHz)',
+    description: 'Top 20 sites by traffic volume on 900MHz (FDD) band',
+    unit: 'GB',
+    category: 'top_sites',
+    visible: true
   }
 };
 
