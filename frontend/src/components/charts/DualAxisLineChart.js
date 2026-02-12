@@ -17,7 +17,8 @@ const DualAxisLineChart = memo(({
   leftAxisDomain,
   rightAxisDomain,
   leftAxisUnit = '%',
-  rightAxisUnit = '%'
+  rightAxisUnit = '%',
+  height = 350
 }) => {
   const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.danger, CHART_COLORS.warning];
 
@@ -164,7 +165,7 @@ const DualAxisLineChart = memo(({
   };
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data} margin={{ top: 5, right: 40, left: 20, bottom: 5 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis 
