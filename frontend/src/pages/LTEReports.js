@@ -14,6 +14,7 @@ import { useLTEFrequencyData } from '../hooks/useLTEFrequencyData';
 import { useLTEKPIData } from '../hooks/useLTEKPIData';
 import { useLTEComparisonData, LTE_KPI_OPTIONS } from '../hooks/useLTEComparisonData';
 import { getLTEChartConfigs } from '../utils/lteChartConfig';
+import { getLteKpiDisplayName, getLteKpiDescription } from '../config/lteKpiMetadata';
 import {
   prepareAvailabilityData,
   prepareAccessibilityData,
@@ -340,7 +341,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Availability Metrics">
+              <ChartCard 
+                title={getLteKpiDisplayName('availability_metrics')}
+                description={getLteKpiDescription('availability_metrics')}
+              >
                 <DualAxisLineChart
                   data={prepareAvailabilityData(kpiData)}
                   leftAxisKey="Cell Availability (%)"
@@ -350,12 +354,16 @@ const LTEReports = () => {
                   ]}
                   leftAxisLabel="Availability (%)"
                   rightAxisLabel="Unavailability (%)"
+                  height={300}
                 />
               </ChartCard>
             </div>
             
             <div>
-              <ChartCard title="Connection Establishment Success Rates">
+              <ChartCard 
+                title={getLteKpiDisplayName('connection_establishment_success_rates')}
+                description={getLteKpiDescription('connection_establishment_success_rates')}
+              >
                 <KPILineChart
                   data={prepareAccessibilityData(kpiData)}
                   dataKeys={[
@@ -366,6 +374,7 @@ const LTEReports = () => {
                   ]}
                   colors={['#3b82f6', '#f97316', '#10b981', '#ec4899']}
                   yAxisLabel="%"
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -399,7 +408,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Handover Success Metrics">
+              <ChartCard 
+                title={getLteKpiDisplayName('handover_success_metrics')}
+                description={getLteKpiDescription('handover_success_metrics')}
+              >
                 <KPILineChart
                   data={prepareMobilityData(kpiData)}
                   dataKeys={[
@@ -409,12 +421,16 @@ const LTEReports = () => {
                   ]}
                   colors={['#10b981', '#f59e0b', '#3b82f6']}
                   yAxisLabel="%"
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Proportions of Abnormal E-RAB Releases over Total E-RAB Releases">
+              <ChartCard 
+                title={getLteKpiDisplayName('erab_drop_ratio')}
+                description={getLteKpiDescription('erab_drop_ratio')}
+              >
                 <KPILineChart
                   data={prepareRetainabilityDropRatioData(kpiData)}
                   dataKeys={[
@@ -424,6 +440,7 @@ const LTEReports = () => {
                   ]}
                   colors={['#3b82f6', '#f97316', '#10b981']}
                   yAxisLabel="%"
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -457,7 +474,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Integrity KPIs - The speed at which packets can be transferred once the first packet has been scheduled on the air interface">
+              <ChartCard 
+                title={getLteKpiDisplayName('dl_pdcp_ue_throughput')}
+                description={getLteKpiDescription('dl_pdcp_ue_throughput')}
+              >
                 <KPILineChart
                   data={prepareIntegrityThroughputData(kpiData)}
                   dataKeys={[
@@ -467,12 +487,16 @@ const LTEReports = () => {
                   colors={['#3b82f6', '#60a5fa']}
                   yAxisLabel="Mbps"
                   yAxisDomain={[0, 100]}
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Utilization - LTE Data Traffic Volume transferred on DL direction with and without using Carrier Aggregation">
+              <ChartCard 
+                title={getLteKpiDisplayName('dl_pdcp_traffic_volume_ca')}
+                description={getLteKpiDescription('dl_pdcp_traffic_volume_ca')}
+              >
                 <StackedBarChart
                   data={prepareUtilizationVolumeData(kpiData)}
                   dataKeys={[
@@ -482,7 +506,7 @@ const LTEReports = () => {
                   colors={['#fbbf24', '#f97316']}
                   yAxisLabel="GB"
                   barSize={40}
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -495,7 +519,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Traffic and Throughput for UEs using LTE Carrier Aggregation on DL direction - UE DL Throughput is reduced with increase of traffic load on network">
+              <ChartCard 
+                title={getLteKpiDisplayName('traffic_throughput_ca_only')}
+                description={getLteKpiDescription('traffic_throughput_ca_only')}
+              >
                 <ComboBarLineChart
                   data={prepareTrafficThroughputCombinedData(kpiData)}
                   barKey="4G DL PDCP Traffic Volume with CA (GB)"
@@ -506,13 +533,16 @@ const LTEReports = () => {
                   rightAxisLabel="Throughput (Mbps)"
                   barColor="#f97316"
                   lineColor="#3b82f6"
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Traffic and Throughput for UEs with and without using LTE Carrier Aggregation on DL direction - UE DL Throughput is reduced with increase of traffic load on network">
+              <ChartCard 
+                title={getLteKpiDisplayName('traffic_throughput_overall')}
+                description={getLteKpiDescription('traffic_throughput_overall')}
+              >
                 <ComboBarLineChart
                   data={prepareTrafficThroughputOverallData(kpiData)}
                   barKey="4G DL PDCP Traffic Volume Overall (GB)"
@@ -523,7 +553,7 @@ const LTEReports = () => {
                   rightAxisLabel="Throughput (Mbps)"
                   barColor="#f97316"
                   lineColor="#60a5fa"
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -536,7 +566,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Utilization - LTE Data Traffic Volume transferred on UL direction used for UL PDCP UE throughput calculation - Overall traffic volume and amount of traffic using Carrier Aggregation (CA) on UL">
+              <ChartCard 
+                title={getLteKpiDisplayName('ul_pdcp_traffic_volume_ca')}
+                description={getLteKpiDescription('ul_pdcp_traffic_volume_ca')}
+              >
                 <StackedBarChart
                   data={prepareULUtilizationVolumeData(kpiData)}
                   dataKeys={[
@@ -546,13 +579,16 @@ const LTEReports = () => {
                   colors={['#60a5fa', '#f97316']}
                   yAxisLabel="GB"
                   barSize={40}
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Integrity KPIs - The speed at which packets can be transferred once the first packet has been scheduled on the air interface (UL direction)">
+              <ChartCard 
+                title={getLteKpiDisplayName('ul_pdcp_ue_throughput')}
+                description={getLteKpiDescription('ul_pdcp_ue_throughput')}
+              >
                 <KPILineChart
                   data={prepareULIntegrityThroughputData(kpiData)}
                   dataKeys={[
@@ -562,6 +598,7 @@ const LTEReports = () => {
                   colors={['#60a5fa', '#f97316']}
                   yAxisLabel="Mbps"
                   yAxisDomain={[0, 'auto']}
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -574,7 +611,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Utilization KPIs - Number of LTE UEs on 'Connected State' - Connected means there is signaling connection between UE and Network. Signaling Connection is made up of 2 parts: RRC Connection (UE<->eNB) and S1_MME (eNB<->MME) Connection">
+              <ChartCard 
+                title={getLteKpiDisplayName('connected_users')}
+                description={getLteKpiDescription('connected_users')}
+              >
                 <KPILineChart
                   data={prepareConnectedUsersData(kpiData)}
                   dataKeys={[
@@ -584,12 +624,16 @@ const LTEReports = () => {
                   colors={['#f97316', '#3b82f6']}
                   yAxisLabel="Users"
                   yAxisDomain={[0, 'autoRound30000']}
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Integrity KPIs - Downlink and Uplink Throughput for Cell Level measured at MAC layer">
+              <ChartCard 
+                title={getLteKpiDisplayName('mac_throughput_dl_ul')}
+                description={getLteKpiDescription('mac_throughput_dl_ul')}
+              >
                 <DualAxisLineChart
                   data={prepareMACThroughputData(kpiData)}
                   leftAxisKey="Average DL MAC Cell Throughput (Mbps)"
@@ -600,6 +644,7 @@ const LTEReports = () => {
                   leftAxisDomain={[0, 'autoRound10']}
                   leftAxisUnit="Mbps"
                   rightAxisUnit="Mbps"
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -612,7 +657,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Integrity KPIs - Throughput for cell and Traffic Volume measured at MAC layer on Downlink direction">
+              <ChartCard 
+                title={getLteKpiDisplayName('mac_throughput_traffic_dl')}
+                description={getLteKpiDescription('mac_throughput_traffic_dl')}
+              >
                 <ComboBarLineChart
                   data={prepareMACTrafficThroughputDLData(kpiData)}
                   barKey="4G DL MAC Traffic Volume (GB)"
@@ -623,13 +671,16 @@ const LTEReports = () => {
                   rightAxisLabel="Throughput (Mbps)"
                   barColor="#f97316"
                   lineColor="#3b82f6"
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Integrity KPIs - Throughput for cell and Traffic Volume measured at MAC layer on Uplink direction">
+              <ChartCard 
+                title={getLteKpiDisplayName('mac_throughput_traffic_ul')}
+                description={getLteKpiDescription('mac_throughput_traffic_ul')}
+              >
                 <ComboBarLineChart
                   data={prepareMACTrafficThroughputULData(kpiData)}
                   barKey="4G UL MAC Traffic Volume (GB)"
@@ -640,7 +691,7 @@ const LTEReports = () => {
                   rightAxisLabel="Throughput (Mbps)"
                   barColor="#f97316"
                   lineColor="#3b82f6"
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -653,7 +704,10 @@ const LTEReports = () => {
             marginTop: '1.5rem'
           }}>
             <div>
-              <ChartCard title="Integrity KPIs - DL Latency and UL Packet Loss - DL Latency indicates how long it takes to transmit the first packet on Air Interface from the time it was received on eNB. UL Packet Loss measures proportion of packets that have lost on Air interface in Uplink direction">
+              <ChartCard 
+                title={getLteKpiDisplayName('latency_packet_loss')}
+                description={getLteKpiDescription('latency_packet_loss')}
+              >
                 <DualAxisLineChart
                   data={prepareLatencyPacketLossData(kpiData)}
                   leftAxisKey="Downlink Latency (ms)"
@@ -665,12 +719,16 @@ const LTEReports = () => {
                   rightAxisDomain={[0, 'autoRound0.2']}
                   leftAxisUnit="ms"
                   rightAxisUnit="%"
+                  height={300}
                 />
               </ChartCard>
             </div>
 
             <div>
-              <ChartCard title="Utilization - LTE Total Data Traffic Volume transferred on DL and UL direction - The metric shows the total volume of PDCP SDUs on Data Radio Bearers that have been transferred in DL and UL">
+              <ChartCard 
+                title={getLteKpiDisplayName('total_traffic_volume')}
+                description={getLteKpiDescription('total_traffic_volume')}
+              >
                 <StackedBarChart
                   data={prepareTotalTrafficVolumeData(kpiData)}
                   dataKeys={[
@@ -680,7 +738,7 @@ const LTEReports = () => {
                   colors={['#3b82f6', '#f97316']}
                   yAxisLabel="GB"
                   barSize={40}
-                  height={400}
+                  height={300}
                 />
               </ChartCard>
             </div>
@@ -709,7 +767,10 @@ const LTEReports = () => {
           
           <div className="lte-charts-container" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginTop: '1.5rem' }}>
             {top20Sites.length > 0 && (
-              <ChartCard title={chartConfigs[0].title}>
+              <ChartCard 
+                title={getLteKpiDisplayName('top_20_sites')}
+                description={getLteKpiDescription('top_20_sites')}
+              >
                 <HorizontalStackedBarChart
                   data={top20Sites}
                   dataKeys={chartConfigs[0].dataKeys}
@@ -721,7 +782,10 @@ const LTEReports = () => {
             )}
 
             {bottom20Sites.length > 0 && (
-              <ChartCard title={chartConfigs[1].title}>
+              <ChartCard 
+                title={getLteKpiDisplayName('bottom_20_sites')}
+                description={getLteKpiDescription('bottom_20_sites')}
+              >
                 <HorizontalStackedBarChart
                   data={bottom20Sites}
                   dataKeys={chartConfigs[1].dataKeys}
@@ -766,8 +830,11 @@ const LTEReports = () => {
 
         {!frequencyLoading && !frequencyError && frequencyData?.data && frequencyData.data.length > 0 && (
           <div style={{ marginTop: '1.5rem' }}>
-            <ChartCard title="">
-              <FrequencyStackedAreaChart data={frequencyData.data} height={450} />
+            <ChartCard 
+              title={getLteKpiDisplayName('frequency_band_traffic')}
+              description={getLteKpiDescription('frequency_band_traffic')}
+            >
+              <FrequencyStackedAreaChart data={frequencyData.data} height={300} />
             </ChartCard>
           </div>
         )}

@@ -41,9 +41,7 @@ const StackedBarChart = memo(({ data, dataKeys, colors, yAxisLabel, barSize = 40
         <XAxis 
           dataKey="name" 
           stroke="#666" 
-          angle={-45}
-          textAnchor="end"
-          height={100}
+          height={80}
           tick={{ fontSize: 12 }}
         />
         <YAxis 

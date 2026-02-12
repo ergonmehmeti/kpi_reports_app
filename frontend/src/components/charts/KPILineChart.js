@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { CHART_COLORS } from '../../utils/constants';
 
-const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors, yAxisDomain, yAxisTicks }) => {
+const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colors: customColors, yAxisDomain, yAxisTicks, height = 300 }) => {
   const colors = customColors || [CHART_COLORS.primary, CHART_COLORS.secondary, CHART_COLORS.tertiary];
 
   // Calculate dynamic Y-axis domain based on data
@@ -102,8 +102,7 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
   };
 
   return (
-    <>
-    <ResponsiveContainer width="100%" height={300}>
+    <ResponsiveContainer width="100%" height={height}>
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
         <XAxis dataKey="name" stroke="#666" tick={{ fontSize: 10 }} />
@@ -116,7 +115,10 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
           label={yAxisLabel ? { value: yAxisLabel, angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } } : undefined}
         />
         <Tooltip content={<CustomTooltip />} />
-        <Legend content={() => null} />
+        <Legend 
+          wrapperStyle={{ fontSize: '0.875rem', paddingTop: '10px' }}
+          iconType="line"
+        />
         {dataKeys.map((key, index) => (
           <Line 
             key={key}
@@ -129,25 +131,6 @@ const KPILineChart = memo(({ data, dataKeys = ['KPI1', 'KPI2'], yAxisLabel, colo
         ))}
       </LineChart>
     </ResponsiveContainer>
-    {/* Custom Legend */}
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      flexWrap: 'wrap', 
-      marginTop: '10px',
-      gap: '20px'
-    }}>
-      {dataKeys.map((key, index) => (
-        <div key={key} style={{ display: 'flex', alignItems: 'center' }}>
-          <svg width="14" height="14" style={{ marginRight: '4px' }}>
-            <line x1="0" y1="7" x2="14" y2="7" stroke={colors[index % colors.length]} strokeWidth="2" />
-            <circle cx="7" cy="7" r="3" fill={colors[index % colors.length]} />
-          </svg>
-          <span style={{ fontSize: '14px', color: '#666' }}>{key}</span>
-        </div>
-      ))}
-    </div>
-    </>
   );
 });
 

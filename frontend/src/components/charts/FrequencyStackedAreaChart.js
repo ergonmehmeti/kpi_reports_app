@@ -179,13 +179,13 @@ const FrequencyStackedAreaChart = ({ data, height = 400 }) => {
             return date.toLocaleString('en-US', { 
               month: 'short', 
               day: 'numeric', 
-              hour: '2-digit' 
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
             });
           }}
           interval="preserveStartEnd"
-          angle={-45}
-          textAnchor="end"
-          height={80}
+          height={70}
           tick={{ fontSize: 10, fill: '#6b7280' }}
         />
         <YAxis 
