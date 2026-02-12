@@ -172,9 +172,7 @@ const DualAxisLineChart = memo(({
           dataKey="name" 
           stroke="#666"
           tick={{ fontSize: 11 }}
-          angle={-45}
-          textAnchor="end"
-          height={80}
+          height={60}
         />
         
         {/* Left Y-axis for Availability */}

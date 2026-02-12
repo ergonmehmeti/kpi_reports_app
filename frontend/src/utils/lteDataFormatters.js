@@ -6,13 +6,15 @@
 /**
  * Format datetime to readable string
  * @param {string} datetime - ISO datetime string
- * @returns {string} Formatted datetime (e.g., "Dec 10, 03 PM")
+ * @returns {string} Formatted datetime (e.g., "Dec 10, 15:00")
  */
 const formatDateTime = (datetime) => {
   return new Date(datetime).toLocaleString('en-US', { 
     month: 'short', 
     day: 'numeric', 
-    hour: '2-digit' 
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
   });
 };
 
